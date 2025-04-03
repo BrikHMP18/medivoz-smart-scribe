@@ -23,7 +23,7 @@ export function PatientCard({ id, name, age, lastVisit, diagnosis }: PatientCard
           <div className="space-y-1">
             <div className="font-medium text-lg">{name}</div>
             <div className="text-sm text-muted-foreground">
-              {age} años
+              {age > 0 ? `${age} años` : "Edad no especificada"}
             </div>
             {diagnosis && (
               <div className="mt-2 text-sm">
