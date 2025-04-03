@@ -21,13 +21,13 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <React.StrictMode>
-      <HelmetProvider>
-        <Helmet>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title>MediVoz</title>
-        </Helmet>
-        <BrowserRouter>
+    <BrowserRouter>
+      <React.StrictMode>
+        <HelmetProvider>
+          <Helmet>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <title>MediVoz</title>
+          </Helmet>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <TooltipProvider>
@@ -48,9 +48,9 @@ const App = () => {
               </TooltipProvider>
             </AuthProvider>
           </QueryClientProvider>
-        </BrowserRouter>
-      </HelmetProvider>
-    </React.StrictMode>
+        </HelmetProvider>
+      </React.StrictMode>
+    </BrowserRouter>
   );
 };
 
