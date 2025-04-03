@@ -4,27 +4,59 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, MicOff, Play, Square } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SessionRecorderProps {
   onTranscriptionReady: (transcription: string) => void;
+  patientId?: string | null;
+  isPatientSelected: boolean;
 }
 
-export function SessionRecorder({ onTranscriptionReady }: SessionRecorderProps) {
+export function SessionRecorder({ 
+  onTranscriptionReady, 
+  patientId, 
+  isPatientSelected 
+}: SessionRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [recordingTime, setRecordingTime] = useState(0);
   const [timerId, setTimerId] = useState<number | null>(null);
 
   const generateSessionId = () => {
+    if (!patientId) {
+      toast.error("Debe seleccionar un paciente primero");
+      return null;
+    }
+    
     const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
     setSessionId(randomId);
-    toast.success(`Sesión ${randomId} creada correctamente`);
+    
+    // Create session in Supabase
+    supabase.from('sesiones').insert({
+      codigo_sesion: randomId,
+      paciente_id: patientId,
+    }).then(({ error }) => {
+      if (error) {
+        console.error("Error creating session:", error);
+        toast.error("Error al crear la sesión");
+        setSessionId("");
+        return null;
+      }
+      toast.success(`Sesión ${randomId} creada correctamente`);
+    });
+    
     return randomId;
   };
 
   const handleStartRecording = () => {
+    if (!isPatientSelected) {
+      toast.error("Debe seleccionar un paciente primero");
+      return;
+    }
+    
     if (!sessionId) {
-      generateSessionId();
+      const newSessionId = generateSessionId();
+      if (!newSessionId) return;
     }
     
     setIsRecording(true);
@@ -39,7 +71,7 @@ export function SessionRecorder({ onTranscriptionReady }: SessionRecorderProps) 
     toast.success("Grabación iniciada");
   };
 
-  const handleStopRecording = () => {
+  const handleStopRecording = async () => {
     setIsRecording(false);
     
     // Clear timer
@@ -93,6 +125,23 @@ export function SessionRecorder({ onTranscriptionReady }: SessionRecorderProps) 
 
 👤 Paciente (02:30): Lo haré, gracias doctor.
       `;
+      
+      // Update session with transcription in Supabase
+      if (sessionId && patientId) {
+        supabase.from('sesiones').update({
+          transcripcion: mockTranscription,
+        }).eq('codigo_sesion', sessionId).then(({ error }) => {
+          if (error) {
+            console.error("Error updating session with transcription:", error);
+          } else {
+            // Update patient's last visit date
+            supabase.from('pacientes').update({
+              ultima_visita: new Date().toISOString(),
+            }).eq('id', patientId);
+          }
+        });
+      }
+      
       onTranscriptionReady(mockTranscription);
     }, 2000);
   };
@@ -116,13 +165,23 @@ export function SessionRecorder({ onTranscriptionReady }: SessionRecorderProps) 
         </div>
         
         <div className="flex gap-4 items-center">
-          {!sessionId && (
+          {!sessionId && isPatientSelected && (
             <Button 
               variant="outline" 
               size="lg"
               onClick={generateSessionId}
             >
               Generar Código de Sesión
+            </Button>
+          )}
+          
+          {!isPatientSelected && (
+            <Button
+              variant="outline"
+              size="lg"
+              disabled
+            >
+              Seleccione un paciente primero
             </Button>
           )}
           

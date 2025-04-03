@@ -27,6 +27,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { useDebounce } from "use-debounce";
+import { PatientDialog } from "@/components/PatientDialog";
 
 // Type definition based on Supabase schema
 interface Patient {
@@ -43,6 +44,7 @@ interface Patient {
 export default function Patients() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
+  const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   
   // Fetch patients from Supabase
@@ -82,6 +84,10 @@ export default function Patients() {
     }
   };
   
+  const handlePatientCreated = () => {
+    refetch();
+  };
+  
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />
@@ -92,12 +98,13 @@ export default function Patients() {
               <h1 className="text-2xl md:text-3xl font-bold">Pacientes</h1>
               <p className="text-muted-foreground">Gestiona la información de los pacientes</p>
             </div>
-            <Link to="/session">
-              <Button className="bg-medivoz-500 hover:bg-medivoz-600 w-full md:w-auto">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Nuevo Paciente
-              </Button>
-            </Link>
+            <Button 
+              className="bg-medivoz-500 hover:bg-medivoz-600 w-full md:w-auto"
+              onClick={() => setIsPatientDialogOpen(true)}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Nuevo Paciente
+            </Button>
           </header>
           
           <Card className="mb-8">
@@ -182,6 +189,13 @@ export default function Patients() {
               )}
             </CardContent>
           </Card>
+          
+          {/* Patient Dialog */}
+          <PatientDialog 
+            open={isPatientDialogOpen} 
+            onOpenChange={setIsPatientDialogOpen}
+            onSuccess={handlePatientCreated}
+          />
         </div>
       </div>
     </div>

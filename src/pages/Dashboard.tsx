@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { 
   Card, 
@@ -7,19 +7,44 @@ import {
   CardTitle,
   CardContent 
 } from "@/components/ui/card";
-import { Mic, Users } from "lucide-react";
+import { Mic, Users, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   
-  // Mock doctor data
-  const doctor = {
-    name: "Dr. Alejandro Sánchez",
-    specialty: "Neurología",
-    hospital: "Hospital Central Universitario"
-  };
+  const { data: doctorProfile, isLoading, error } = useQuery({
+    queryKey: ['doctorProfile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        throw new Error(`Error fetching doctor profile: ${error.message}`);
+      }
+      
+      return data;
+    },
+    enabled: !!user?.id
+  });
+  
+  useEffect(() => {
+    if (error) {
+      toast.error("Error al cargar el perfil del doctor");
+      console.error(error);
+    }
+  }, [error]);
   
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -28,31 +53,47 @@ export default function Dashboard() {
         <div className="container mx-auto py-6 px-4 md:px-6">
           <header className="mb-8">
             <h1 className="text-2xl md:text-3xl font-bold">Panel Principal</h1>
-            <p className="text-muted-foreground">Bienvenido, {doctor.name}</p>
+            <p className="text-muted-foreground">
+              Bienvenido, {doctorProfile?.full_name || "Doctor"}
+            </p>
           </header>
           
           <div className="mb-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Información Personal</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="space-y-3">
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Nombre</dt>
-                    <dd className="font-medium">{doctor.name}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Especialidad</dt>
-                    <dd className="font-medium">{doctor.specialty}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Hospital</dt>
-                    <dd className="font-medium">{doctor.hospital}</dd>
-                  </div>
-                </dl>
-              </CardContent>
-            </Card>
+            {isLoading ? (
+              <Card className="p-6">
+                <div className="flex justify-center items-center p-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-medivoz-500" />
+                </div>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xl">Información Personal</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <dl className="space-y-3">
+                    <div>
+                      <dt className="text-sm text-muted-foreground">Nombre</dt>
+                      <dd className="font-medium">{doctorProfile?.full_name || "No especificado"}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm text-muted-foreground">Especialidad</dt>
+                      <dd className="font-medium">{doctorProfile?.specialty || "No especificada"}</dd>
+                    </div>
+                    {doctorProfile?.avatar_url && (
+                      <div className="mt-3">
+                        <dt className="text-sm text-muted-foreground mb-1">Foto de perfil</dt>
+                        <img 
+                          src={doctorProfile.avatar_url} 
+                          alt="Avatar" 
+                          className="h-16 w-16 rounded-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </dl>
+                </CardContent>
+              </Card>
+            )}
           </div>
           
           <div className="mb-8">
