@@ -18,31 +18,31 @@ export default function Index() {
   const features = [
     {
       title: "Transcripción en Vivo",
-      description: "Convierte automáticamente las conversaciones entre médico y paciente en texto estructurado en tiempo real mediante inteligencia artificial.",
+      description: "Conversión automática de consultas médicas a texto estructurado en tiempo real.",
       icon: Mic
     },
     {
       title: "Formato de Conversación",
-      description: "Distingue entre la voz del médico y del paciente con marcas de tiempo, facilitando la navegación por el contenido clínico.",
+      description: "Distingue entre voces con marcas de tiempo para mejor navegación clínica.",
       icon: FileText
     },
     {
       title: "Prellenado de Fichas",
-      description: "Genera fichas médicas digitales prellenadas con la información relevante capturada durante la consulta.",
+      description: "Genera fichas médicas digitales con la información relevante de la consulta.",
       icon: ClipboardEdit
     },
     {
       title: "Consultas Eficientes",
-      description: "Reduce el tiempo administrativo, permitiendo más consultas y una atención médica más enfocada.",
+      description: "Reduce tiempo administrativo para una atención médica más enfocada.",
       icon: HeartPulse
     }
   ];
 
   const steps = [
-    "Iniciar una sesión con código único",
-    "Grabar la consulta médica",
-    "Revisión de la transcripción",
-    "Ficha médica prellenada automáticamente"
+    "Iniciar sesión con código único",
+    "Grabar consulta médica",
+    "Revisar transcripción",
+    "Ficha médica prellenada"
   ];
 
   return (
@@ -59,7 +59,7 @@ export default function Index() {
           </h1>
           
           <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
-            Transcripción inteligente de consultas médicas y generación automática de fichas clínicas mediante inteligencia artificial, desarrollada para aliviar la carga documental en sistemas de salud altamente demandados como EsSalud.
+            Transcripción inteligente de consultas médicas y generación automática de fichas clínicas con IA para sistemas de salud altamente demandados.
           </p>
           
           <div className="mt-10 flex flex-wrap gap-4 justify-center">
@@ -140,7 +140,7 @@ export default function Index() {
               
               <div className="mt-10">
                 <Link to="/signup">
-                  <Button>Ver Demostración Completa</Button>
+                  <Button>Ver Demostración</Button>
                 </Link>
               </div>
             </div>
@@ -176,13 +176,12 @@ export default function Index() {
               
               <div className="space-y-4">
                 {[
-                  "Reducción del 70% en tiempo de documentación",
-                  "Mejora en precisión clínica (reducción de errores en historiales de 12% a 3%)",
-                  "Incremento en consultas diarias por médico (de 18 a 25)",
-                  "Reducción del tiempo promedio de consulta (de 22 a 13 minutos)",
+                  "70% menos tiempo en documentación",
+                  "Reducción de errores en historiales de 12% a 3%",
+                  "Aumento de consultas diarias de 18 a 25",
+                  "Reducción de tiempo por consulta de 22 a 13 minutos",
                   "Documentación estandarizada y completa",
-                  "Mejora en la recuperación de historiales clínicos (37% más rápida)",
-                  "Aumento de la satisfacción usuaria proyectada al 85%"
+                  "Recuperación de historiales 37% más rápida"
                 ].map((benefit, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
@@ -211,7 +210,7 @@ export default function Index() {
                   </div>
                   <div className="text-center p-4">
                     <p className="text-4xl font-bold text-medivoz-500">99%</p>
-                    <p className="text-sm text-muted-foreground mt-2">Precisión en transcripción con IA</p>
+                    <p className="text-sm text-muted-foreground mt-2">Precisión en transcripción</p>
                   </div>
                   <div className="text-center p-4">
                     <p className="text-4xl font-bold text-medivoz-500">30%</p>
@@ -219,15 +218,7 @@ export default function Index() {
                   </div>
                   <div className="text-center p-4">
                     <p className="text-4xl font-bold text-medivoz-500">1.2M+</p>
-                    <p className="text-sm text-muted-foreground mt-2">Horas médicas recuperables anualmente en EsSalud</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <p className="text-4xl font-bold text-medivoz-500">315,927</p>
-                    <p className="text-sm text-muted-foreground mt-2">Sesiones de telemonitoreo documentables automáticamente</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <p className="text-4xl font-bold text-medivoz-500">92%</p>
-                    <p className="text-sm text-muted-foreground mt-2">Interoperabilidad alcanzada en el sistema HCD de EsSalud</p>
+                    <p className="text-sm text-muted-foreground mt-2">Horas recuperables al año</p>
                   </div>
                 </div>
               </div>
@@ -241,8 +232,7 @@ export default function Index() {
         <div className="container text-center">
           <h2 className="text-3xl font-bold mb-4">¿Listo para transformar tus consultas médicas?</h2>
           <p className="text-xl opacity-90 max-w-2xl mx-auto mb-8">
-            El sistema de salud peruano enfrenta un incremento del 10.5% en población afiliada, con aumentos en consultas médicas (+19.4%), hospitalizaciones (+15.4%) y hemodiálisis (+31.8%).
-            MEDIVOZ, con inteligencia artificial, permite a los médicos reducir la carga documental, optimizar tiempos y responder mejor ante la saturación asistencial en redes como Arequipa o Lambayeque.
+            MEDIVOZ permite a los médicos reducir la carga documental, optimizar tiempos y mejorar la atención en sistemas de salud saturados.
           </p>
           <Link to="/signup">
             <Button size="lg" variant="secondary" className="font-medium">
