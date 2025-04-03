@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      pacientes: {
+        Row: {
+          created_at: string
+          diagnostico: string | null
+          dni: string
+          edad: number | null
+          id: string
+          nombre: string
+          ocupacion: string | null
+          procedencia: string | null
+          ultima_visita: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          diagnostico?: string | null
+          dni: string
+          edad?: number | null
+          id?: string
+          nombre: string
+          ocupacion?: string | null
+          procedencia?: string | null
+          ultima_visita?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          diagnostico?: string | null
+          dni?: string
+          edad?: number | null
+          id?: string
+          nombre?: string
+          ocupacion?: string | null
+          procedencia?: string | null
+          ultima_visita?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -32,6 +71,56 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      sesiones: {
+        Row: {
+          codigo_sesion: string
+          created_at: string
+          diagnostico: string | null
+          fecha_consulta: string
+          id: string
+          motivo_consulta: string | null
+          notas_adicionales: string | null
+          paciente_id: string
+          transcripcion: string | null
+          tratamiento: string | null
+          updated_at: string
+        }
+        Insert: {
+          codigo_sesion: string
+          created_at?: string
+          diagnostico?: string | null
+          fecha_consulta?: string
+          id?: string
+          motivo_consulta?: string | null
+          notas_adicionales?: string | null
+          paciente_id: string
+          transcripcion?: string | null
+          tratamiento?: string | null
+          updated_at?: string
+        }
+        Update: {
+          codigo_sesion?: string
+          created_at?: string
+          diagnostico?: string | null
+          fecha_consulta?: string
+          id?: string
+          motivo_consulta?: string | null
+          notas_adicionales?: string | null
+          paciente_id?: string
+          transcripcion?: string | null
+          tratamiento?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sesiones_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
