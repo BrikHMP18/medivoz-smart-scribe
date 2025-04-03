@@ -104,7 +104,14 @@ export default function Patients() {
               {/* Mobile view: Cards */}
               <div className="grid grid-cols-1 gap-4 md:hidden">
                 {filteredPatients.map((patient) => (
-                  <PatientCard key={patient.id} patient={patient} />
+                  <PatientCard 
+                    key={patient.id}
+                    id={patient.id}
+                    name={patient.name}
+                    age={patient.age}
+                    lastVisit={patient.lastVisit}
+                    diagnosis={patient.diagnosis}
+                  />
                 ))}
                 {filteredPatients.length === 0 && (
                   <p className="text-center py-4 text-muted-foreground">No se encontraron pacientes</p>
