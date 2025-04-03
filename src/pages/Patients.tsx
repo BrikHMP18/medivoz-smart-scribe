@@ -16,11 +16,14 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { PatientCard } from "@/components/PatientCard";
 
 export default function Patients() {
   const [searchQuery, setSearchQuery] = useState("");
+  const isMobile = useIsMobile();
   
   // Mock patient data
   const patients = [
@@ -68,26 +71,26 @@ export default function Patients() {
   );
   
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />
       <div className="flex-1 overflow-auto pl-16 lg:pl-64">
-        <div className="container py-6">
-          <header className="mb-6 flex justify-between items-center">
+        <div className="container mx-auto py-6 px-4 md:px-6">
+          <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold">Pacientes</h1>
+              <h1 className="text-2xl md:text-3xl font-bold">Pacientes</h1>
               <p className="text-muted-foreground">Gestiona la información de los pacientes</p>
             </div>
-            <Button className="bg-medivoz-500 hover:bg-medivoz-600">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button className="bg-medivoz-500 hover:bg-medivoz-600 w-full md:w-auto">
+              <UserPlus className="h-4 w-4 mr-2" />
               Nuevo Paciente
             </Button>
           </header>
           
           <Card className="mb-8">
             <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <CardTitle>Lista de Pacientes</CardTitle>
-                <div className="flex items-center w-64">
+                <div className="flex items-center w-full sm:w-64">
                   <Search className="h-4 w-4 text-muted-foreground mr-2" />
                   <Input
                     placeholder="Buscar paciente..."
@@ -98,26 +101,46 @@ export default function Patients() {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Edad</TableHead>
-                    <TableHead>Última Visita</TableHead>
-                    <TableHead>Diagnóstico</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPatients.map((patient) => (
-                    <TableRow key={patient.id} className="cursor-pointer hover:bg-muted">
-                      <TableCell className="font-medium">{patient.name}</TableCell>
-                      <TableCell>{patient.age}</TableCell>
-                      <TableCell>{patient.lastVisit}</TableCell>
-                      <TableCell>{patient.diagnosis}</TableCell>
+              {/* Mobile view: Cards */}
+              <div className="grid grid-cols-1 gap-4 md:hidden">
+                {filteredPatients.map((patient) => (
+                  <PatientCard key={patient.id} patient={patient} />
+                ))}
+                {filteredPatients.length === 0 && (
+                  <p className="text-center py-4 text-muted-foreground">No se encontraron pacientes</p>
+                )}
+              </div>
+              
+              {/* Desktop view: Table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Edad</TableHead>
+                      <TableHead>Última Visita</TableHead>
+                      <TableHead>Diagnóstico</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPatients.map((patient) => (
+                      <TableRow key={patient.id} className="cursor-pointer hover:bg-muted">
+                        <TableCell className="font-medium">{patient.name}</TableCell>
+                        <TableCell>{patient.age}</TableCell>
+                        <TableCell>{patient.lastVisit}</TableCell>
+                        <TableCell>{patient.diagnosis}</TableCell>
+                      </TableRow>
+                    ))}
+                    {filteredPatients.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                          No se encontraron pacientes
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </div>

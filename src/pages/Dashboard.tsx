@@ -1,17 +1,19 @@
 
 import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Button } from "@/components/ui/button";
 import { 
   Card, 
   CardHeader,
   CardTitle,
   CardContent 
 } from "@/components/ui/card";
-import { Mic } from "lucide-react";
+import { Mic, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Dashboard() {
+  const isMobile = useIsMobile();
+  
   // Mock doctor data
   const doctor = {
     name: "Dr. Alejandro Sánchez",
@@ -20,19 +22,19 @@ export default function Dashboard() {
   };
   
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />
       <div className="flex-1 overflow-auto pl-16 lg:pl-64">
-        <div className="container py-6">
+        <div className="container mx-auto py-6 px-4 md:px-6">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold">Panel Principal</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Panel Principal</h1>
             <p className="text-muted-foreground">Bienvenido, {doctor.name}</p>
           </header>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="mb-6">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle>Información Personal</CardTitle>
+                <CardTitle className="text-xl">Información Personal</CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
@@ -54,10 +56,10 @@ export default function Dashboard() {
           </div>
           
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Acciones Rápidas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-lg md:text-xl font-bold mb-4">Acciones Rápidas</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link to="/session" className="block">
-                <Card className="hover:shadow-md transition-all">
+                <Card className="hover:shadow-md transition-all h-full">
                   <CardContent className="p-6 flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-medivoz-100 flex items-center justify-center text-medivoz-600">
                       <Mic className="h-5 w-5" />
@@ -71,10 +73,10 @@ export default function Dashboard() {
               </Link>
               
               <Link to="/patients" className="block">
-                <Card className="hover:shadow-md transition-all cursor-pointer">
+                <Card className="hover:shadow-md transition-all cursor-pointer h-full">
                   <CardContent className="p-6 flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      <Users className="h-5 w-5" />
                     </div>
                     <div>
                       <h3 className="font-medium">Pacientes</h3>
