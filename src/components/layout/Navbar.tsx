@@ -25,6 +25,12 @@ export function Navbar() {
               <Link to="/" className="transition-colors hover:text-foreground/80">
                 Inicio
               </Link>
+              <Link to="#features" className="transition-colors hover:text-foreground/80">
+                Características
+              </Link>
+              <Link to="#about" className="transition-colors hover:text-foreground/80">
+                Acerca de
+              </Link>
             </nav>
             
             {isSignedIn ? (
@@ -54,6 +60,12 @@ export function Navbar() {
                 <nav className="flex flex-col gap-4 mt-8">
                   <Link to="/" className="text-base">
                     Inicio
+                  </Link>
+                  <Link to="#features" className="text-base">
+                    Características
+                  </Link>
+                  <Link to="#about" className="text-base">
+                    Acerca de
                   </Link>
                   {isSignedIn ? (
                     <Link to="/dashboard">
