@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input";
 const patientFormSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
   dni: z.string().min(1, { message: "El DNI es obligatorio" }),
-  edad: z.string().optional().transform(val => val ? parseInt(val, 10) : null),
+  edad: z.coerce.number().optional().nullable(),
   ocupacion: z.string().optional(),
   procedencia: z.string().optional(),
 });
@@ -52,7 +52,7 @@ export function PatientDialog({ open, onOpenChange, onSuccess }: PatientDialogPr
     defaultValues: {
       nombre: "",
       dni: "",
-      edad: "",
+      edad: null,
       ocupacion: "",
       procedencia: ""
     },
@@ -137,7 +137,8 @@ export function PatientDialog({ open, onOpenChange, onSuccess }: PatientDialogPr
                     <Input 
                       placeholder="30" 
                       type="number" 
-                      {...field} 
+                      onChange={(e) => field.onChange(e.target.value === "" ? null : parseInt(e.target.value, 10))}
+                      value={field.value === null ? "" : field.value}
                     />
                   </FormControl>
                   <FormDescription>Opcional</FormDescription>
