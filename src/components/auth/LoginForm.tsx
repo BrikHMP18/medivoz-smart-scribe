@@ -1,28 +1,44 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulating login
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // For demo purposes, allow login with any credentials
+    try {
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast.error(error.message);
+        console.error("Error during login:", error);
+        setIsLoading(false);
+        return;
+      }
+
       toast.success("Inicio de sesión exitoso");
-      window.location.href = "/dashboard";
-    }, 1500);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Unexpected error during login:", err);
+      toast.error("Error al iniciar sesión. Por favor intente de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

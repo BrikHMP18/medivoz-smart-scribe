@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export function SignupForm() {
   const [name, setName] = useState("");
@@ -12,17 +13,40 @@ export function SignupForm() {
   const [password, setPassword] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulating signup
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+            specialty: specialty,
+          },
+        },
+      });
+
+      if (error) {
+        toast.error(error.message);
+        console.error("Error during signup:", error);
+        setIsLoading(false);
+        return;
+      }
+
       toast.success("Registro exitoso");
-      window.location.href = "/dashboard";
-    }, 1500);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Unexpected error during signup:", err);
+      toast.error("Error al registrarse. Por favor intente de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

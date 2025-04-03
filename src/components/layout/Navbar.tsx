@@ -7,10 +7,21 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export function Navbar() {
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const { user, signOut } = useAuth();
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Sesión cerrada exitosamente");
+    } catch (error) {
+      toast.error("Error al cerrar sesión");
+    }
+  };
   
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
@@ -27,10 +38,16 @@ export function Navbar() {
               </Link>
             </nav>
             
-            {isSignedIn ? (
-              <Link to="/dashboard">
-                <Button>Panel de Control</Button>
-              </Link>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Link to="/dashboard">
+                  <Button variant="outline">Panel de Control</Button>
+                </Link>
+                <Button variant="ghost" onClick={handleSignOut} className="gap-2">
+                  <LogOut size={16} />
+                  Cerrar Sesión
+                </Button>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Link to="/login">
@@ -55,10 +72,16 @@ export function Navbar() {
                   <Link to="/" className="text-base">
                     Inicio
                   </Link>
-                  {isSignedIn ? (
-                    <Link to="/dashboard">
-                      <Button className="w-full">Panel de Control</Button>
-                    </Link>
+                  {user ? (
+                    <div className="space-y-4 mt-4">
+                      <Link to="/dashboard">
+                        <Button className="w-full">Panel de Control</Button>
+                      </Link>
+                      <Button variant="outline" onClick={handleSignOut} className="w-full gap-2">
+                        <LogOut size={16} />
+                        Cerrar Sesión
+                      </Button>
+                    </div>
                   ) : (
                     <div className="flex flex-col gap-2 mt-4">
                       <Link to="/login">
