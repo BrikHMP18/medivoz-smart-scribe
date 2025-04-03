@@ -4,10 +4,13 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Home, Users, Mic, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { signOut } = useAuth();
   
   const navItems = [
     {
@@ -26,6 +29,15 @@ export function Sidebar() {
       icon: Mic
     }
   ];
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Sesión cerrada exitosamente");
+    } catch (error) {
+      toast.error("Error al cerrar sesión");
+    }
+  };
   
   return (
     <div
@@ -82,6 +94,7 @@ export function Sidebar() {
           variant="ghost"
           size="sm"
           className="w-full justify-start mt-2 text-red-500 hover:text-red-600 hover:bg-red-100/10"
+          onClick={handleSignOut}
         >
           <LogOut className="h-4 w-4 mr-2" />
           {!collapsed && "Cerrar Sesión"}
