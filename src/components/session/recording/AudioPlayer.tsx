@@ -57,7 +57,8 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
           // Configure audio element events
           audioRef.current.addEventListener("timeupdate", handleTimeUpdate);
           audioRef.current.addEventListener("ended", handleEnded);
-          audioRef.current.addEventListener("error", handleError);
+          // Fix the error handler to accept the correct event type
+          audioRef.current.addEventListener("error", (ev: Event) => handleError(ev));
           audioRef.current.addEventListener("canplay", handleCanPlay);
           audioRef.current.addEventListener("loadedmetadata", handleLoadedMetadata);
           
@@ -116,7 +117,8 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
           // Clean up event listeners
           audioRef.current.removeEventListener("timeupdate", handleTimeUpdate);
           audioRef.current.removeEventListener("ended", handleEnded);
-          audioRef.current.removeEventListener("error", handleError);
+          // Fix the error handler to match the addEventListener signature
+          audioRef.current.removeEventListener("error", (ev: Event) => handleError(ev));
           audioRef.current.removeEventListener("canplay", handleCanPlay);
           audioRef.current.removeEventListener("loadedmetadata", handleLoadedMetadata);
           
@@ -193,8 +195,10 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
     }
   };
 
-  const handleError = (e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
-    const error = (e.target as HTMLAudioElement).error;
+  // Updated to accept the native DOM event
+  const handleError = (event: Event) => {
+    const audioElement = event.target as HTMLAudioElement;
+    const error = audioElement.error;
     console.error("Audio error:", error);
     console.error("Audio error code:", error?.code);
     console.error("Audio error message:", error?.message);

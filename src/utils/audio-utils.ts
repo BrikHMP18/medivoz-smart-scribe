@@ -205,3 +205,53 @@ export const forceLoadMetadata = (audioElement: HTMLAudioElement): Promise<void>
     }, 3000);
   });
 };
+
+/**
+ * Creates a safe listener for audio elements that can be properly removed
+ * @param handler - The event handler function
+ * @returns A function that can be used as an event listener
+ */
+export const createSafeAudioErrorListener = (handler: (error: MediaError | null) => void) => {
+  return (event: Event) => {
+    const audioElement = event.target as HTMLAudioElement;
+    handler(audioElement.error);
+  };
+};
+
+/**
+ * Safely loads an audio file with proper error handling
+ * @param url - The URL of the audio file
+ * @param onSuccess - Callback for successful loading
+ * @param onError - Callback for error
+ * @returns The created audio element
+ */
+export const safeLoadAudio = (
+  url: string, 
+  onSuccess?: (audio: HTMLAudioElement) => void,
+  onError?: (error: Error) => void
+): HTMLAudioElement => {
+  const audio = new Audio();
+  
+  audio.addEventListener('canplay', () => {
+    if (onSuccess) onSuccess(audio);
+  });
+  
+  audio.addEventListener('error', (event) => {
+    const errorMsg = audio.error ? 
+      `Error loading audio: ${audio.error.code} - ${audio.error.message}` : 
+      'Unknown audio loading error';
+    console.error(errorMsg);
+    if (onError) onError(new Error(errorMsg));
+  });
+  
+  // Add source with error handling
+  try {
+    audio.src = url;
+    audio.load();
+  } catch (error) {
+    console.error('Exception setting audio source:', error);
+    if (onError) onError(error instanceof Error ? error : new Error(String(error)));
+  }
+  
+  return audio;
+};
