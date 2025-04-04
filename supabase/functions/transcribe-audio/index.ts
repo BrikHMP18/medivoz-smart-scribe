@@ -114,7 +114,7 @@ serve(async (req) => {
     const result = await response.json();
     console.log("Transcription successful");
 
-    // Return the raw transcription
+    // Return the raw transcription without any formatting
     return new Response(
       JSON.stringify({ 
         rawTranscription: result,

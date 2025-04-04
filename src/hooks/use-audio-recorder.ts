@@ -1,7 +1,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { useAudioWaveform } from "./use-audio-waveform";
+import { useAudioTranscription } from "./use-audio-transcription";
 
 interface AudioRecorderOptions {
   onTranscriptionComplete?: (transcription: string) => void;
@@ -11,23 +12,33 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
-  const [audioWaveform, setAudioWaveform] = useState<number[]>([]);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
   const audioBlobRef = useRef<Blob | null>(null);
+
+  // Use our custom hooks
+  const { 
+    audioWaveform,
+    setupAnalyser,
+    startWaveformAnimation,
+    stopWaveformAnimation 
+  } = useAudioWaveform();
+  
+  const { 
+    isTranscribing, 
+    transcribeAudio: transcribe 
+  } = useAudioTranscription({
+    onTranscriptionComplete: options?.onTranscriptionComplete
+  });
 
   // Request microphone permission
   const requestPermission = async (): Promise<boolean> => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setupAudioContext(stream);
+      setupAnalyser(stream);
       // Close this stream as we're just checking permissions
       stream.getTracks().forEach(track => track.stop());
       setPermissionDenied(false);
@@ -38,20 +49,6 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       toast.error("No se pudo acceder al micrófono. Por favor, conceda permiso para continuar.");
       return false;
     }
-  };
-
-  // Set up audio context for waveform visualization
-  const setupAudioContext = (stream: MediaStream) => {
-    if (!audioContextRef.current) {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      audioContextRef.current = new AudioContext();
-    }
-    
-    analyserRef.current = audioContextRef.current.createAnalyser();
-    analyserRef.current.fftSize = 256;
-    
-    const source = audioContextRef.current.createMediaStreamSource(stream);
-    source.connect(analyserRef.current);
   };
 
   // Start recording from microphone
@@ -71,7 +68,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       });
       
       streamRef.current = stream;
-      setupAudioContext(stream);
+      setupAnalyser(stream);
       
       // Reset audio chunks and blob
       audioChunksRef.current = [];
@@ -228,49 +225,8 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
     }
   };
 
-  // Handle waveform animation
-  const startWaveformAnimation = () => {
-    if (!analyserRef.current) return;
-    
-    const bufferLength = analyserRef.current.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    
-    const updateWaveform = () => {
-      if (!isRecording || !analyserRef.current) return;
-      
-      analyserRef.current.getByteFrequencyData(dataArray);
-      
-      // Sample some points from the frequency data for the waveform
-      const sampleSize = 40; // Number of points to show in waveform
-      const sampledData = [];
-      
-      for (let i = 0; i < sampleSize; i++) {
-        const index = Math.floor(i * (bufferLength / sampleSize));
-        sampledData.push(dataArray[index]);
-      }
-      
-      setAudioWaveform(sampledData);
-      animationFrameRef.current = requestAnimationFrame(updateWaveform);
-    };
-    
-    updateWaveform();
-  };
-
-  // Stop animation frame
-  const stopWaveformAnimation = () => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  };
-
-  // Transcribe the recorded audio
+  // Transcribe audio using the hook
   const transcribeAudio = async (): Promise<string> => {
-    // Add debugging information
-    console.log("Attempting to transcribe audio");
-    console.log("Audio chunks length:", audioChunksRef.current.length);
-    console.log("Audio blob exists:", !!audioBlobRef.current);
-    
     if (!audioBlobRef.current) {
       console.error("No audio blob available for transcription");
       
@@ -293,76 +249,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       }
     }
     
-    if (audioBlobRef.current.size === 0) {
-      console.error("Audio blob is empty (size: 0)");
-      toast.error("La grabación de audio está vacía");
-      return "";
-    }
-    
-    setIsTranscribing(true);
-    
-    try {
-      // Convert Blob to base64
-      console.log("Starting base64 conversion for blob size:", audioBlobRef.current.size);
-      const base64Audio = await blobToBase64(audioBlobRef.current);
-      
-      if (!base64Audio) {
-        throw new Error("Failed to convert audio to base64");
-      }
-      
-      console.log("Audio converted to base64, length:", base64Audio.length);
-      
-      // Call our edge function
-      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
-        body: { audio: base64Audio }
-      });
-      
-      if (error) {
-        console.error("Supabase function error:", error);
-        throw error;
-      }
-      
-      // Handle the transcription result
-      console.log("Transcription data received:", data ? "yes" : "no");
-      
-      // Extract the transcription from the response
-      const transcription = data?.formattedTranscription || data?.rawTranscription?.text || "";
-      console.log("Final transcription length:", transcription.length);
-      
-      if (options?.onTranscriptionComplete && transcription) {
-        options.onTranscriptionComplete(transcription);
-      }
-      
-      return transcription;
-      
-    } catch (error) {
-      console.error('Transcription error:', error);
-      toast.error('Error al transcribir el audio');
-      return "";
-    } finally {
-      setIsTranscribing(false);
-    }
-  };
-  
-  // Helper function to convert blob to base64
-  const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          // Remove data URL prefix
-          const base64 = reader.result.split(',')[1];
-          resolve(base64);
-        } else {
-          reject(new Error("FileReader result is not a string"));
-        }
-      };
-      reader.onerror = (event) => {
-        console.error("FileReader error:", reader.error);
-        reject(new Error("FileReader error: " + (reader.error?.message || "Unknown error")));
-      };
-      reader.readAsDataURL(blob);
-    });
+    return await transcribe(audioBlobRef.current);
   };
 
   // Clean up resources on unmount
