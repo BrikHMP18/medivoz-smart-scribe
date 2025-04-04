@@ -21,6 +21,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const audioBlobRef = useRef<Blob | null>(null);
 
   // Request microphone permission
   const requestPermission = async (): Promise<boolean> => {
@@ -60,11 +61,23 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       const hasPermission = await requestPermission();
       if (!hasPermission) return;
       
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      
       streamRef.current = stream;
       setupAudioContext(stream);
       
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      // Use a more compatible MIME type
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+        ? 'audio/webm;codecs=opus' 
+        : 'audio/webm';
+        
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       audioChunksRef.current = [];
       
       mediaRecorderRef.current.ondataavailable = (event) => {
@@ -74,12 +87,13 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       };
       
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        audioBlobRef.current = audioBlob;
         const url = URL.createObjectURL(audioBlob);
         setAudioURL(url);
       };
       
-      mediaRecorderRef.current.start();
+      mediaRecorderRef.current.start(1000); // Collect data every second
       setIsRecording(true);
       setIsPaused(false);
       startWaveformAnimation();
@@ -165,7 +179,8 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
 
   // Transcribe the recorded audio
   const transcribeAudio = async (): Promise<string> => {
-    if (!audioURL) {
+    if (!audioURL || !audioBlobRef.current) {
+      console.error("No audio available for transcription");
       toast.error("No hay audio para transcribir");
       return "";
     }
@@ -173,19 +188,31 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
     setIsTranscribing(true);
     
     try {
-      // Convert Blob URL to base64
-      const response = await fetch(audioURL);
-      const blob = await response.blob();
-      
+      // Convert Blob to base64
       const base64Audio = await new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          const base64 = reader.result as string;
-          const base64Data = base64.split(',')[1]; // Remove data URL prefix
-          resolve(base64Data);
+          if (typeof reader.result === 'string') {
+            const base64 = reader.result;
+            const base64Data = base64.split(',')[1]; // Remove data URL prefix
+            resolve(base64Data);
+          } else {
+            console.error("FileReader result is not a string");
+            resolve("");
+          }
         };
-        reader.readAsDataURL(blob);
+        reader.onerror = () => {
+          console.error("FileReader error:", reader.error);
+          resolve("");
+        };
+        reader.readAsDataURL(audioBlobRef.current!);
       });
+      
+      if (!base64Audio) {
+        throw new Error("Failed to convert audio to base64");
+      }
+      
+      console.log("Audio converted to base64, length:", base64Audio.length);
       
       // Call our edge function
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
@@ -194,15 +221,15 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       
       if (error) {
         console.error("Supabase function error:", error);
-        throw new Error(error.message);
+        throw error;
       }
       
       // Handle the transcription result
-      console.log("Transcription data received:", data);
+      console.log("Transcription data received:", data ? "yes" : "no");
       
       // Extract the transcription from the response
       const transcription = data?.formattedTranscription || data?.rawTranscription?.text || "";
-      console.log("Final transcription:", transcription);
+      console.log("Final transcription length:", transcription.length);
       
       if (options?.onTranscriptionComplete && transcription) {
         options.onTranscriptionComplete(transcription);

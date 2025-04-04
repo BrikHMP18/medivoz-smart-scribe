@@ -1,8 +1,9 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Volume2 } from "lucide-react";
+import { Volume2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 interface AudioPlayerProps {
   audioURL: string | null;
@@ -13,6 +14,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [hasError, setHasError] = useState(false);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const progressIntervalRef = useRef<number | null>(null);
 
@@ -45,29 +47,44 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
 
   // Handle audio playback
   const handlePlayAudio = () => {
-    if (!audioURL) return;
+    if (!audioURL || hasError) return;
     
     if (!audioElementRef.current) {
       const audio = new Audio(audioURL);
+      
       audio.onloadedmetadata = () => {
         setAudioDuration(audio.duration);
       };
+      
       audio.onplay = () => {
         setIsPlaying(true);
         startProgressTracking(audio);
       };
+      
       audio.onpause = () => {
         setIsPlaying(false);
         stopProgressTracking();
       };
+      
       audio.onended = () => {
         setIsPlaying(false);
         setAudioProgress(100);
         stopProgressTracking();
       };
+      
+      audio.onerror = (e) => {
+        console.error("Audio error:", e);
+        setHasError(true);
+        toast.error("Error al cargar el audio");
+      };
+      
       audioElementRef.current = audio;
+      
+      audio.load();
       audio.play().catch(err => {
         console.error("Error playing audio:", err);
+        setHasError(true);
+        toast.error("No se pudo reproducir el audio");
       });
     } else {
       if (isPlaying) {
@@ -75,6 +92,8 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
       } else {
         audioElementRef.current.play().catch(err => {
           console.error("Error playing audio:", err);
+          setHasError(true);
+          toast.error("No se pudo reproducir el audio");
         });
       }
     }
@@ -82,13 +101,35 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
 
   // Reset audio player when audio URL changes
   useEffect(() => {
-    if (audioURL && !audioElementRef.current) {
+    setHasError(false);
+    
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current = null;
+    }
+    
+    if (audioURL) {
       const audio = new Audio(audioURL);
+      
       audio.onloadedmetadata = () => {
         setAudioDuration(audio.duration || 0);
       };
+      
+      audio.onerror = () => {
+        setHasError(true);
+        console.error("Error loading audio from URL:", audioURL);
+      };
+      
       audioElementRef.current = audio;
+      audio.load();
     }
+    
+    return () => {
+      if (audioElementRef.current) {
+        audioElementRef.current.pause();
+        audioElementRef.current = null;
+      }
+    };
   }, [audioURL]);
 
   // Clean up audio element and interval on unmount
@@ -108,21 +149,31 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
 
   return (
     <div className="w-full">
-      <Button
-        variant="secondary"
-        size="lg"
-        onClick={handlePlayAudio}
-        className="mb-4"
-      >
-        <Volume2 className="mr-2 h-5 w-5" />
-        {isPlaying ? "Pausar Audio" : "Reproducir Audio"}
-      </Button>
-      
-      <div className="flex items-center justify-between mb-2 text-sm text-muted-foreground">
-        <span>{formatTime(audioDuration * (audioProgress / 100))}</span>
-        <span>{formatTime(audioDuration)}</span>
-      </div>
-      <Progress value={audioProgress} className="h-2" />
+      {hasError ? (
+        <div className="flex items-center justify-center p-4 mb-4 bg-red-50 border border-red-200 rounded-md">
+          <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
+          <span className="text-sm text-red-600">Error al cargar el audio. Por favor, intente grabar nuevamente.</span>
+        </div>
+      ) : (
+        <>
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={handlePlayAudio}
+            className="mb-4"
+            disabled={hasError}
+          >
+            <Volume2 className="mr-2 h-5 w-5" />
+            {isPlaying ? "Pausar Audio" : "Reproducir Audio"}
+          </Button>
+          
+          <div className="flex items-center justify-between mb-2 text-sm text-muted-foreground">
+            <span>{formatTime(audioDuration * (audioProgress / 100))}</span>
+            <span>{formatTime(audioDuration)}</span>
+          </div>
+          <Progress value={audioProgress} className="h-2" />
+        </>
+      )}
     </div>
   );
 }

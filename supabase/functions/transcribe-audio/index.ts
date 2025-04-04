@@ -9,32 +9,42 @@ const corsHeaders = {
 
 // Process base64 in chunks to prevent memory issues
 function processBase64Chunks(base64String: string, chunkSize = 32768) {
-  const chunks: Uint8Array[] = [];
-  let position = 0;
-  
-  while (position < base64String.length) {
-    const chunk = base64String.slice(position, position + chunkSize);
-    const binaryChunk = atob(chunk);
-    const bytes = new Uint8Array(binaryChunk.length);
+  if (!base64String) {
+    console.error("No base64 string provided to processBase64Chunks");
+    return new Uint8Array(0);
+  }
+
+  try {
+    const chunks: Uint8Array[] = [];
+    let position = 0;
     
-    for (let i = 0; i < binaryChunk.length; i++) {
-      bytes[i] = binaryChunk.charCodeAt(i);
+    while (position < base64String.length) {
+      const chunk = base64String.slice(position, position + chunkSize);
+      const binaryChunk = atob(chunk);
+      const bytes = new Uint8Array(binaryChunk.length);
+      
+      for (let i = 0; i < binaryChunk.length; i++) {
+        bytes[i] = binaryChunk.charCodeAt(i);
+      }
+      
+      chunks.push(bytes);
+      position += chunkSize;
     }
-    
-    chunks.push(bytes);
-    position += chunkSize;
+
+    const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+    const result = new Uint8Array(totalLength);
+    let offset = 0;
+
+    for (const chunk of chunks) {
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error processing base64 chunks:", error);
+    throw new Error(`Error processing audio data: ${error.message}`);
   }
-
-  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  return result;
 }
 
 serve(async (req) => {
@@ -44,29 +54,41 @@ serve(async (req) => {
   }
 
   try {
-    const { audio } = await req.json();
+    const requestData = await req.json().catch(err => {
+      console.error("Error parsing request JSON:", err);
+      throw new Error("Invalid JSON in request body");
+    });
+    
+    const { audio } = requestData;
     
     if (!audio) {
+      console.error("No audio data provided in request");
       throw new Error("No audio data provided");
     }
 
     console.log("Received audio data, processing...");
+    console.log("Audio data length:", audio.length);
     
     // Process audio in chunks
     const binaryAudio = processBase64Chunks(audio);
-    console.log("Audio processed, sending to OpenAI...");
+    if (binaryAudio.length === 0) {
+      throw new Error("Failed to process audio data");
+    }
+    
+    console.log("Audio processed, size:", binaryAudio.length, "bytes");
     
     // Prepare form data
     const formData = new FormData();
     const blob = new Blob([binaryAudio], { type: "audio/webm" });
     formData.append("file", blob, "audio.webm");
-    formData.append("model", "gpt-4o-transcribe");
+    formData.append("model", "whisper-1");
     formData.append("response_format", "verbose_json");
     formData.append("timestamp_granularities", "segment");
     
     // Get OpenAI API key from environment
     const apiKey = Deno.env.get("OPENAI_API_KEY");
     if (!apiKey) {
+      console.error("OpenAI API key not found");
       throw new Error("OpenAI API key not found");
     }
 
@@ -88,7 +110,7 @@ serve(async (req) => {
     }
 
     const result = await response.json();
-    console.log("Transcription successful, formatting response");
+    console.log("Transcription successful, processing response");
 
     // Format the transcript with speaker detection and timestamps
     let formattedTranscript = "";
@@ -100,7 +122,7 @@ serve(async (req) => {
       formattedTranscript = result.text || "";
     }
 
-    console.log("Final formatted transcript:", formattedTranscript.substring(0, 100) + "...");
+    console.log("Final formatted transcript length:", formattedTranscript.length);
 
     return new Response(
       JSON.stringify({ 
