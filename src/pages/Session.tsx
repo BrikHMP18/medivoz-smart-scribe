@@ -20,6 +20,7 @@ interface Patient {
 export default function Session() {
   const [transcription, setTranscription] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
 
@@ -51,6 +52,10 @@ export default function Session() {
     }
   };
 
+  const handleSessionCreated = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+  };
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />
@@ -76,11 +81,16 @@ export default function Session() {
               onTranscriptionReady={setTranscription} 
               patientId={selectedPatient?.id || null}
               isPatientSelected={!!selectedPatient}
+              onSessionCreated={handleSessionCreated}
             />
           </div>
           
           <div className="min-h-[300px] md:min-h-[500px] mb-6">
-            <Transcription transcription={transcription} />
+            <Transcription 
+              transcription={transcription}
+              patientId={selectedPatient?.id}
+              sessionId={currentSessionId}
+            />
           </div>
         </div>
       </div>

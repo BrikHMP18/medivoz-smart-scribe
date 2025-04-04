@@ -12,15 +12,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Save, Download, X } from "lucide-react";
+import { Save, Download, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MedicalRecordModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  patientId?: string | null;
+  sessionId?: string | null;
 }
 
-export function MedicalRecordModal({ open, onOpenChange }: MedicalRecordModalProps) {
+export function MedicalRecordModal({ 
+  open, 
+  onOpenChange, 
+  patientId, 
+  sessionId 
+}: MedicalRecordModalProps) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  
   // Auto-filled data based on transcription
   const [formData, setFormData] = useState({
     // Datos del Paciente
@@ -64,16 +75,65 @@ export function MedicalRecordModal({ open, onOpenChange }: MedicalRecordModalPro
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    toast.success("Ficha médica guardada exitosamente");
-    onOpenChange(false);
+  const handleSave = async () => {
+    if (!patientId || !sessionId) {
+      toast.error("No hay un paciente o sesión seleccionada");
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      const { error } = await supabase
+        .from('fichas_medicas')
+        .insert({
+          paciente_id: patientId,
+          sesion_id: sessionId,
+          diagnostico_principal: formData.diagnostico_principal,
+          etiologia_probable: formData.etiologia_probable,
+          severidad: formData.severidad,
+          medicacion_principal: formData.medicacion_principal,
+          estudios_recomendados: formData.estudios_recomendados,
+          medidas_no_farmacologicas: formData.medidas_no_farmacologicas,
+          proximo_control: formData.proximo_control,
+          motivo_consulta: formData.motivo_consulta,
+          tiempo_enfermedad: formData.tiempo_enfermedad,
+          curso_enfermedad: formData.curso_enfermedad,
+          sintomas_principales: formData.sintomas_principales,
+          antecedentes_personales: formData.antecedentes_personales,
+          antecedentes_familiares: formData.antecedentes_familiares,
+          examen_neurologico_resumen: formData.examen_neurologico_resumen,
+          examen_cognitivo_resumen: formData.examen_cognitivo_resumen,
+          notas_libres: formData.notas_libres
+        });
+      
+      if (error) throw error;
+      
+      // Update the patient's diagnostico in the pacientes table
+      await supabase
+        .from('pacientes')
+        .update({
+          diagnostico: formData.diagnostico_principal
+        })
+        .eq('id', patientId);
+      
+      toast.success("Ficha médica guardada exitosamente");
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error saving medical record:", error);
+      toast.error("Error al guardar la ficha médica");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleExportPDF = () => {
+    setIsExporting(true);
     toast.success("Exportando PDF...");
     // Simulated PDF export
     setTimeout(() => {
       toast.success("PDF exportado exitosamente");
+      setIsExporting(false);
     }, 1500);
   };
 
@@ -339,13 +399,31 @@ export function MedicalRecordModal({ open, onOpenChange }: MedicalRecordModalPro
             Cerrar sin guardar
           </Button>
           <div className="space-x-2">
-            <Button onClick={handleExportPDF} variant="secondary">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar PDF
+            <Button onClick={handleExportPDF} variant="secondary" disabled={isExporting}>
+              {isExporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Exportando...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar PDF
+                </>
+              )}
             </Button>
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Guardar
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Guardar
+                </>
+              )}
             </Button>
           </div>
         </DialogFooter>

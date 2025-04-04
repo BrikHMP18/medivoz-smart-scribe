@@ -9,6 +9,93 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      fichas_medicas: {
+        Row: {
+          antecedentes_familiares: string | null
+          antecedentes_personales: string | null
+          created_at: string
+          curso_enfermedad: string | null
+          diagnostico_principal: string | null
+          estudios_recomendados: string | null
+          etiologia_probable: string | null
+          examen_cognitivo_resumen: string | null
+          examen_neurologico_resumen: string | null
+          id: string
+          medicacion_principal: string | null
+          medidas_no_farmacologicas: string | null
+          motivo_consulta: string | null
+          notas_libres: string | null
+          paciente_id: string
+          proximo_control: string | null
+          sesion_id: string
+          severidad: string | null
+          sintomas_principales: string | null
+          tiempo_enfermedad: string | null
+          updated_at: string
+        }
+        Insert: {
+          antecedentes_familiares?: string | null
+          antecedentes_personales?: string | null
+          created_at?: string
+          curso_enfermedad?: string | null
+          diagnostico_principal?: string | null
+          estudios_recomendados?: string | null
+          etiologia_probable?: string | null
+          examen_cognitivo_resumen?: string | null
+          examen_neurologico_resumen?: string | null
+          id?: string
+          medicacion_principal?: string | null
+          medidas_no_farmacologicas?: string | null
+          motivo_consulta?: string | null
+          notas_libres?: string | null
+          paciente_id: string
+          proximo_control?: string | null
+          sesion_id: string
+          severidad?: string | null
+          sintomas_principales?: string | null
+          tiempo_enfermedad?: string | null
+          updated_at?: string
+        }
+        Update: {
+          antecedentes_familiares?: string | null
+          antecedentes_personales?: string | null
+          created_at?: string
+          curso_enfermedad?: string | null
+          diagnostico_principal?: string | null
+          estudios_recomendados?: string | null
+          etiologia_probable?: string | null
+          examen_cognitivo_resumen?: string | null
+          examen_neurologico_resumen?: string | null
+          id?: string
+          medicacion_principal?: string | null
+          medidas_no_farmacologicas?: string | null
+          motivo_consulta?: string | null
+          notas_libres?: string | null
+          paciente_id?: string
+          proximo_control?: string | null
+          sesion_id?: string
+          severidad?: string | null
+          sintomas_principales?: string | null
+          tiempo_enfermedad?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fichas_medicas_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fichas_medicas_sesion_id_fkey"
+            columns: ["sesion_id"]
+            isOneToOne: false
+            referencedRelation: "sesiones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pacientes: {
         Row: {
           created_at: string
@@ -76,40 +163,28 @@ export type Database = {
         Row: {
           codigo_sesion: string
           created_at: string
-          diagnostico: string | null
           fecha_consulta: string
           id: string
-          motivo_consulta: string | null
-          notas_adicionales: string | null
           paciente_id: string
           transcripcion: string | null
-          tratamiento: string | null
           updated_at: string
         }
         Insert: {
           codigo_sesion: string
           created_at?: string
-          diagnostico?: string | null
           fecha_consulta?: string
           id?: string
-          motivo_consulta?: string | null
-          notas_adicionales?: string | null
           paciente_id: string
           transcripcion?: string | null
-          tratamiento?: string | null
           updated_at?: string
         }
         Update: {
           codigo_sesion?: string
           created_at?: string
-          diagnostico?: string | null
           fecha_consulta?: string
           id?: string
-          motivo_consulta?: string | null
-          notas_adicionales?: string | null
           paciente_id?: string
           transcripcion?: string | null
-          tratamiento?: string | null
           updated_at?: string
         }
         Relationships: [

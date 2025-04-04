@@ -10,12 +10,14 @@ interface SessionRecorderProps {
   onTranscriptionReady: (transcription: string) => void;
   patientId?: string | null;
   isPatientSelected: boolean;
+  onSessionCreated?: (sessionId: string) => void;
 }
 
 export function SessionRecorder({ 
   onTranscriptionReady, 
   patientId, 
-  isPatientSelected 
+  isPatientSelected,
+  onSessionCreated
 }: SessionRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [sessionId, setSessionId] = useState("");
@@ -35,14 +37,20 @@ export function SessionRecorder({
     supabase.from('sesiones').insert({
       codigo_sesion: randomId,
       paciente_id: patientId,
-    }).then(({ error }) => {
+    }).then(({ data, error }) => {
       if (error) {
         console.error("Error creating session:", error);
         toast.error("Error al crear la sesión");
         setSessionId("");
         return null;
       }
+      
       toast.success(`Sesión ${randomId} creada correctamente`);
+      
+      // If onSessionCreated callback is provided, call it with the session ID
+      if (onSessionCreated && data && data[0]) {
+        onSessionCreated(data[0].id);
+      }
     });
     
     return randomId;

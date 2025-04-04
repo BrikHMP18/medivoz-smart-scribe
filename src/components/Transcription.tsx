@@ -7,9 +7,11 @@ import { MedicalRecordModal } from "./MedicalRecordModal";
 
 interface TranscriptionProps {
   transcription: string;
+  patientId?: string | null;
+  sessionId?: string | null;
 }
 
-export function Transcription({ transcription }: TranscriptionProps) {
+export function Transcription({ transcription, patientId, sessionId }: TranscriptionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   if (!transcription) {
@@ -31,7 +33,10 @@ export function Transcription({ transcription }: TranscriptionProps) {
       <Card className="h-full flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Transcripción</CardTitle>
-          <Button onClick={() => setIsModalOpen(true)}>
+          <Button 
+            onClick={() => setIsModalOpen(true)}
+            disabled={!sessionId || !patientId}
+          >
             Llenar Ficha Médica
           </Button>
         </CardHeader>
@@ -44,7 +49,9 @@ export function Transcription({ transcription }: TranscriptionProps) {
       
       <MedicalRecordModal 
         open={isModalOpen} 
-        onOpenChange={setIsModalOpen} 
+        onOpenChange={setIsModalOpen}
+        patientId={patientId}
+        sessionId={sessionId}
       />
     </>
   );
