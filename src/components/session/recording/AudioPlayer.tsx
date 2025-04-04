@@ -1,9 +1,8 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Volume2, Play, Pause, VolumeX } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { toast } from "sonner";
 import { forceLoadMetadata, preloadAudio } from "@/utils/audio-utils";
-import { Progress } from "@/components/ui/progress";
 
 interface AudioPlayerProps {
   audioURL: string | null;
@@ -14,10 +13,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.8); // Default volume at 80%
-  const [isMuted, setIsMuted] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const prevVolumeRef = useRef(volume);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
@@ -51,7 +47,6 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
           }
           
           audioRef.current = new Audio(audioURL);
-          audioRef.current.volume = isMuted ? 0 : volume;
           audioRef.current.preload = "auto";
           
           // Configure audio element events
@@ -149,14 +144,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
         }
       }
     };
-  }, [audioURL, volume, isMuted]);
-
-  // Apply volume changes
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
-  }, [volume, isMuted]);
+  }, [audioURL]);
 
   // Event handlers
   const handleTimeUpdate = () => {
@@ -260,25 +248,6 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
     }
   };
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (isMuted && newVolume > 0) {
-      setIsMuted(false);
-    }
-    prevVolumeRef.current = newVolume;
-  };
-  
-  const toggleMute = () => {
-    setIsMuted(prev => {
-      // If unmuting, restore previous volume
-      if (prev && volume === 0) {
-        setVolume(prevVolumeRef.current > 0 ? prevVolumeRef.current : 0.8);
-      }
-      return !prev;
-    });
-  };
-
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
     if (audioRef.current && !isNaN(newTime)) {
@@ -331,35 +300,6 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
             onChange={handleSeek}
             className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
             step="0.01"
-            disabled={!isLoaded}
-          />
-          
-          <Progress 
-            value={(currentTime / (duration || 1)) * 100} 
-            className="h-1 w-full" 
-          />
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={toggleMute}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            disabled={!isLoaded}
-          >
-            {isMuted || volume === 0 ? (
-              <VolumeX className="h-5 w-5" />
-            ) : (
-              <Volume2 className="h-5 w-5" />
-            )}
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={handleVolumeChange}
-            className="w-16 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
             disabled={!isLoaded}
           />
         </div>
