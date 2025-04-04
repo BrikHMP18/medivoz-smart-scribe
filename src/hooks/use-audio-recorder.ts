@@ -43,6 +43,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
   // Set up audio context for waveform visualization
   const setupAudioContext = (stream: MediaStream) => {
     if (!audioContextRef.current) {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       audioContextRef.current = new AudioContext();
     }
     
@@ -72,12 +73,34 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       streamRef.current = stream;
       setupAudioContext(stream);
       
-      // Use a more compatible MIME type
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
-        ? 'audio/webm;codecs=opus' 
-        : 'audio/webm';
+      // Determine supported MIME types
+      const mimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/mp4'
+      ];
+      
+      let mimeType = '';
+      for (const type of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          mimeType = type;
+          break;
+        }
+      }
+      
+      if (!mimeType) {
+        console.warn("No supported MIME types found, using default");
+        mimeType = '';  // Let browser choose default
+      }
+      
+      console.log("Using MIME type:", mimeType);
+      
+      // Create the MediaRecorder with the determined MIME type
+      mediaRecorderRef.current = mimeType ? 
+        new MediaRecorder(stream, { mimeType }) : 
+        new MediaRecorder(stream);
         
-      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       audioChunksRef.current = [];
       
       mediaRecorderRef.current.ondataavailable = (event) => {
@@ -87,13 +110,22 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       };
       
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        // Create blob with all chunks
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType || 'audio/webm' });
         audioBlobRef.current = audioBlob;
+        
+        // Revoke previous URL if it exists
+        if (audioURL) {
+          URL.revokeObjectURL(audioURL);
+        }
+        
+        // Create new URL
         const url = URL.createObjectURL(audioBlob);
+        console.log("Created audio URL:", url);
         setAudioURL(url);
       };
       
-      mediaRecorderRef.current.start(1000); // Collect data every second
+      mediaRecorderRef.current.start(100); // Collect data more frequently
       setIsRecording(true);
       setIsPaused(false);
       startWaveformAnimation();
@@ -106,39 +138,84 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
 
   // Pause recording
   const pauseRecording = () => {
-    if (!isRecording || !mediaRecorderRef.current || isPaused) return;
+    console.log("Attempting to pause recording. State:", mediaRecorderRef.current?.state);
     
-    if (mediaRecorderRef.current.state === "recording") {
-      mediaRecorderRef.current.pause();
-      setIsPaused(true);
-      stopWaveformAnimation();
+    if (!isRecording || !mediaRecorderRef.current) {
+      console.log("Cannot pause - not recording or no media recorder");
+      return;
+    }
+    
+    try {
+      if (mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.pause();
+        setIsPaused(true);
+        stopWaveformAnimation();
+        console.log("Recording paused successfully");
+      } else {
+        console.log("Cannot pause - current state:", mediaRecorderRef.current.state);
+      }
+    } catch (error) {
+      console.error("Error pausing recording:", error);
+      toast.error("Error al pausar la grabación");
     }
   };
 
   // Resume recording
   const resumeRecording = () => {
-    if (!isRecording || !mediaRecorderRef.current || !isPaused) return;
+    console.log("Attempting to resume recording. State:", mediaRecorderRef.current?.state);
     
-    if (mediaRecorderRef.current.state === "paused") {
-      mediaRecorderRef.current.resume();
-      setIsPaused(false);
-      startWaveformAnimation();
+    if (!isRecording || !mediaRecorderRef.current || !isPaused) {
+      console.log("Cannot resume - not recording, no media recorder, or not paused");
+      return;
+    }
+    
+    try {
+      if (mediaRecorderRef.current.state === "paused") {
+        mediaRecorderRef.current.resume();
+        setIsPaused(false);
+        startWaveformAnimation();
+        console.log("Recording resumed successfully");
+      } else {
+        console.log("Cannot resume - current state:", mediaRecorderRef.current.state);
+      }
+    } catch (error) {
+      console.error("Error resuming recording:", error);
+      toast.error("Error al reanudar la grabación");
     }
   };
 
   // Stop recording
   const stopRecording = () => {
-    if (!isRecording || !mediaRecorderRef.current) return;
+    console.log("Attempting to stop recording. State:", mediaRecorderRef.current?.state);
     
-    mediaRecorderRef.current.stop();
-    // Stop all tracks to turn off microphone
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+    if (!isRecording || !mediaRecorderRef.current) {
+      console.log("Cannot stop - not recording or no media recorder");
+      return;
     }
-    setIsRecording(false);
-    setIsPaused(false);
-    stopWaveformAnimation();
+    
+    try {
+      // Only call stop() if we're recording or paused
+      if (mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+        console.log("Recording stopped successfully");
+      }
+      
+      // Stop all tracks to turn off microphone
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+          console.log("Track stopped:", track.kind);
+        });
+        streamRef.current = null;
+      }
+      
+      setIsRecording(false);
+      setIsPaused(false);
+      stopWaveformAnimation();
+    } catch (error) {
+      console.error("Error stopping recording:", error);
+      toast.error("Error al detener la grabación");
+    }
   };
 
   // Handle waveform animation
@@ -179,8 +256,8 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
 
   // Transcribe the recorded audio
   const transcribeAudio = async (): Promise<string> => {
-    if (!audioURL || !audioBlobRef.current) {
-      console.error("No audio available for transcription");
+    if (!audioBlobRef.current) {
+      console.error("No audio blob available for transcription");
       toast.error("No hay audio para transcribir");
       return "";
     }
@@ -189,24 +266,8 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
     
     try {
       // Convert Blob to base64
-      const base64Audio = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          if (typeof reader.result === 'string') {
-            const base64 = reader.result;
-            const base64Data = base64.split(',')[1]; // Remove data URL prefix
-            resolve(base64Data);
-          } else {
-            console.error("FileReader result is not a string");
-            resolve("");
-          }
-        };
-        reader.onerror = () => {
-          console.error("FileReader error:", reader.error);
-          resolve("");
-        };
-        reader.readAsDataURL(audioBlobRef.current!);
-      });
+      console.log("Starting base64 conversion for blob size:", audioBlobRef.current.size);
+      const base64Audio = await blobToBase64(audioBlobRef.current);
       
       if (!base64Audio) {
         throw new Error("Failed to convert audio to base64");
@@ -245,6 +306,26 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       setIsTranscribing(false);
     }
   };
+  
+  // Helper function to convert blob to base64
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          // Remove data URL prefix
+          const base64 = reader.result.split(',')[1];
+          resolve(base64);
+        } else {
+          reject(new Error("FileReader result is not a string"));
+        }
+      };
+      reader.onerror = () => {
+        reject(new Error("FileReader error: " + reader.error));
+      };
+      reader.readAsDataURL(blob);
+    });
+  };
 
   // Clean up resources on unmount
   useEffect(() => {
@@ -258,7 +339,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
         streamRef.current = null;
       }
     };
-  }, [audioURL, isRecording]);
+  }, []);
 
   return {
     isRecording,

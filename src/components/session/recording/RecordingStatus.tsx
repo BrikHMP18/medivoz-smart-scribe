@@ -19,24 +19,33 @@ export function RecordingStatus({
   audioURL
 }: RecordingStatusProps) {
   const formatTime = (seconds: number) => {
-    if (seconds === undefined || seconds === null || isNaN(seconds)) return "00:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
+    if (seconds === undefined || seconds === null || isNaN(seconds)) {
+      console.log("Invalid time value:", seconds);
+      return "00:00";
+    }
+    const mins = Math.floor(Math.max(0, seconds) / 60);
+    const secs = Math.floor(Math.max(0, seconds) % 60);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (isRecording) {
     return (
-      <div className="flex items-center gap-2 text-red-500 mb-2">
+      <div className="flex items-center gap-2 mb-2">
         {isPaused ? (
-          <Pause className="h-5 w-5 text-amber-500" />
+          <>
+            <Pause className="h-5 w-5 text-amber-500" />
+            <span className="font-medium text-amber-500">
+              Grabación pausada: {formatTime(recordingTime)}
+            </span>
+          </>
         ) : (
-          <Mic className="h-5 w-5 animate-pulse" />
+          <>
+            <Mic className="h-5 w-5 text-red-500 animate-pulse" />
+            <span className="font-medium text-red-500">
+              Grabando: {formatTime(recordingTime)}
+            </span>
+          </>
         )}
-        <span className="font-medium">
-          {isPaused ? "Grabación pausada: " : "Grabando: "}
-          {formatTime(recordingTime)}
-        </span>
       </div>
     );
   }

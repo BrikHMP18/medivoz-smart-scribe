@@ -72,20 +72,25 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
         stopProgressTracking();
       };
       
-      audio.onerror = (e) => {
-        console.error("Audio error:", e);
+      audio.onerror = () => {
+        console.error("Audio error loading from URL:", audioURL);
         setHasError(true);
         toast.error("Error al cargar el audio");
       };
       
       audioElementRef.current = audio;
       
+      // Preload the audio before attempting to play
       audio.load();
-      audio.play().catch(err => {
-        console.error("Error playing audio:", err);
-        setHasError(true);
-        toast.error("No se pudo reproducir el audio");
-      });
+      
+      // Add a small delay before playing to ensure the audio is loaded
+      setTimeout(() => {
+        audio.play().catch(err => {
+          console.error("Error playing audio:", err);
+          setHasError(true);
+          toast.error("No se pudo reproducir el audio");
+        });
+      }, 300);
     } else {
       if (isPlaying) {
         audioElementRef.current.pause();
@@ -102,24 +107,30 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
   // Reset audio player when audio URL changes
   useEffect(() => {
     setHasError(false);
+    setAudioProgress(0);
     
     if (audioElementRef.current) {
       audioElementRef.current.pause();
+      stopProgressTracking();
       audioElementRef.current = null;
     }
     
     if (audioURL) {
-      const audio = new Audio(audioURL);
+      console.log("New audio URL:", audioURL);
+      const audio = new Audio();
       
       audio.onloadedmetadata = () => {
+        console.log("Audio metadata loaded, duration:", audio.duration);
         setAudioDuration(audio.duration || 0);
       };
       
-      audio.onerror = () => {
+      audio.onerror = (e) => {
+        console.error("Error loading audio:", e);
         setHasError(true);
-        console.error("Error loading audio from URL:", audioURL);
+        toast.error("Error al cargar el audio. Por favor, intente grabar nuevamente.");
       };
       
+      audio.src = audioURL;
       audioElementRef.current = audio;
       audio.load();
     }
@@ -129,6 +140,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
         audioElementRef.current.pause();
         audioElementRef.current = null;
       }
+      stopProgressTracking();
     };
   }, [audioURL]);
 
@@ -160,7 +172,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
             variant="secondary"
             size="lg"
             onClick={handlePlayAudio}
-            className="mb-4"
+            className="mb-4 w-full sm:w-auto"
             disabled={hasError}
           >
             <Volume2 className="mr-2 h-5 w-5" />
