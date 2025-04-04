@@ -2,6 +2,8 @@
 import { Card } from "@/components/ui/card";
 import { RecordingControls } from "./session/RecordingControls";
 import { useSessionRecorder } from "@/hooks/use-session-recorder";
+import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import { useEffect } from "react";
 
 interface SessionRecorderProps {
   onTranscriptionReady: (transcription: string) => void;
@@ -17,18 +19,49 @@ export function SessionRecorder({
   onSessionCreated
 }: SessionRecorderProps) {
   const {
-    isRecording,
+    isRecording: isSessionRecording,
     sessionId,
     recordingTime,
     generateSessionId,
-    handleStartRecording,
-    handleStopRecording
+    handleStartRecording: startSessionRecording,
+    handleStopRecording: stopSessionRecording
   } = useSessionRecorder({
     patientId,
     isPatientSelected,
     onTranscriptionReady,
     onSessionCreated
   });
+
+  const {
+    isRecording: isAudioRecording,
+    isTranscribing,
+    audioURL,
+    audioWaveform,
+    permissionDenied,
+    requestPermission,
+    startRecording: startAudioRecording,
+    stopRecording: stopAudioRecording,
+    transcribeAudio
+  } = useAudioRecorder({
+    onTranscriptionComplete: onTranscriptionReady
+  });
+
+  // Synchronize session recording with audio recording
+  const handleStartRecording = () => {
+    startSessionRecording();
+    startAudioRecording();
+  };
+
+  const handleStopRecording = async () => {
+    stopAudioRecording();
+    stopSessionRecording();
+    
+    // Transcribe the recorded audio
+    const transcription = await transcribeAudio();
+    
+    // We don't need to call onTranscriptionReady here as it's
+    // already being called in useAudioRecorder
+  };
 
   return (
     <Card className="p-6 relative overflow-hidden">
@@ -43,10 +76,15 @@ export function SessionRecorder({
         </div>
         
         <RecordingControls
-          isRecording={isRecording}
+          isRecording={isAudioRecording}
           isPatientSelected={isPatientSelected}
+          isTranscribing={isTranscribing}
+          audioURL={audioURL}
+          audioWaveform={audioWaveform}
           sessionId={sessionId}
           recordingTime={recordingTime}
+          permissionDenied={permissionDenied}
+          onRequestPermission={requestPermission}
           onGenerateSessionId={generateSessionId}
           onStartRecording={handleStartRecording}
           onStopRecording={handleStopRecording}
