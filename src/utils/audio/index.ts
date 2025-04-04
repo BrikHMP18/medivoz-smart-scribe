@@ -8,3 +8,4 @@
 export * from './blob-utils';
 export * from './format-utils';
 export * from './playback-utils';
+export * from './recording-utils';
