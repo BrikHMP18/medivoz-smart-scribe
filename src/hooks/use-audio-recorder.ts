@@ -73,6 +73,10 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       streamRef.current = stream;
       setupAudioContext(stream);
       
+      // Reset audio chunks and blob
+      audioChunksRef.current = [];
+      audioBlobRef.current = null;
+      
       // Determine supported MIME types
       const mimeTypes = [
         'audio/webm;codecs=opus',
@@ -101,17 +105,20 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
         new MediaRecorder(stream, { mimeType }) : 
         new MediaRecorder(stream);
         
-      audioChunksRef.current = [];
-      
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
+          console.log(`Audio chunk received: ${event.data.size} bytes`);
         }
       };
       
       mediaRecorderRef.current.onstop = () => {
         // Create blob with all chunks
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType || 'audio/webm' });
+        
+        console.log(`Audio recording stopped, creating blob of size: ${audioBlob.size} bytes`);
+        
+        // Store the blob for later use
         audioBlobRef.current = audioBlob;
         
         // Revoke previous URL if it exists
@@ -194,6 +201,9 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
     }
     
     try {
+      // Request a final chunk of data
+      mediaRecorderRef.current.requestData();
+      
       // Only call stop() if we're recording or paused
       if (mediaRecorderRef.current.state !== "inactive") {
         mediaRecorderRef.current.stop();
@@ -256,9 +266,20 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
 
   // Transcribe the recorded audio
   const transcribeAudio = async (): Promise<string> => {
+    // Add debugging information
+    console.log("Attempting to transcribe audio");
+    console.log("Audio chunks length:", audioChunksRef.current.length);
+    console.log("Audio blob exists:", !!audioBlobRef.current);
+    
     if (!audioBlobRef.current) {
       console.error("No audio blob available for transcription");
       toast.error("No hay audio para transcribir");
+      return "";
+    }
+    
+    if (audioBlobRef.current.size === 0) {
+      console.error("Audio blob is empty (size: 0)");
+      toast.error("La grabación de audio está vacía");
       return "";
     }
     
@@ -320,8 +341,9 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
           reject(new Error("FileReader result is not a string"));
         }
       };
-      reader.onerror = () => {
-        reject(new Error("FileReader error: " + reader.error));
+      reader.onerror = (event) => {
+        console.error("FileReader error:", reader.error);
+        reject(new Error("FileReader error: " + (reader.error?.message || "Unknown error")));
       };
       reader.readAsDataURL(blob);
     });

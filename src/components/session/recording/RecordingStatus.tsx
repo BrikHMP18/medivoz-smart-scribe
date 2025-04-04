@@ -19,8 +19,7 @@ export function RecordingStatus({
   audioURL
 }: RecordingStatusProps) {
   const formatTime = (seconds: number) => {
-    if (seconds === undefined || seconds === null || isNaN(seconds)) {
-      console.log("Invalid time value:", seconds);
+    if (seconds === undefined || seconds === null || isNaN(seconds) || !isFinite(seconds)) {
       return "00:00";
     }
     const mins = Math.floor(Math.max(0, seconds) / 60);

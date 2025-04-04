@@ -69,6 +69,10 @@ serve(async (req) => {
     console.log("Received audio data, processing...");
     console.log("Audio data length:", audio.length);
     
+    if (audio.length === 0) {
+      throw new Error("Audio data is empty");
+    }
+    
     // Process audio in chunks
     const binaryAudio = processBase64Chunks(audio);
     if (binaryAudio.length === 0) {
@@ -77,6 +81,13 @@ serve(async (req) => {
     
     console.log("Audio processed, size:", binaryAudio.length, "bytes");
     
+    // Get OpenAI API key from environment
+    const apiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!apiKey) {
+      console.error("OpenAI API key not found");
+      throw new Error("OpenAI API key not found");
+    }
+
     // Prepare form data
     const formData = new FormData();
     const blob = new Blob([binaryAudio], { type: "audio/webm" });
@@ -85,13 +96,6 @@ serve(async (req) => {
     formData.append("response_format", "verbose_json");
     formData.append("timestamp_granularities", "segment");
     
-    // Get OpenAI API key from environment
-    const apiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!apiKey) {
-      console.error("OpenAI API key not found");
-      throw new Error("OpenAI API key not found");
-    }
-
     console.log("Sending audio to OpenAI for transcription...");
     
     // Send to OpenAI
