@@ -47,6 +47,7 @@ export function RecordingControls({
   const progressIntervalRef = useRef<number | null>(null);
 
   const formatTime = (seconds: number) => {
+    if (!seconds || isNaN(seconds)) return "00:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -75,14 +76,16 @@ export function RecordingControls({
         stopProgressTracking();
       };
       audioElementRef.current = audio;
-      audio.play();
+      audio.play().catch(err => {
+        console.error("Error playing audio:", err);
+      });
     } else {
       if (isPlaying) {
         audioElementRef.current.pause();
-        stopProgressTracking();
       } else {
-        audioElementRef.current.play();
-        startProgressTracking(audioElementRef.current);
+        audioElementRef.current.play().catch(err => {
+          console.error("Error playing audio:", err);
+        });
       }
     }
   };
@@ -93,8 +96,10 @@ export function RecordingControls({
     }
     
     progressIntervalRef.current = window.setInterval(() => {
-      const progress = (audio.currentTime / audio.duration) * 100;
-      setAudioProgress(progress);
+      if (audio.duration) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        setAudioProgress(progress);
+      }
     }, 100);
   };
 
@@ -122,6 +127,17 @@ export function RecordingControls({
       stopProgressTracking();
     };
   }, []);
+
+  // Reset audio player when audio URL changes
+  useEffect(() => {
+    if (audioURL && !audioElementRef.current) {
+      const audio = new Audio(audioURL);
+      audio.onloadedmetadata = () => {
+        setAudioDuration(audio.duration || 0);
+      };
+      audioElementRef.current = audio;
+    }
+  }, [audioURL]);
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-md mx-auto">

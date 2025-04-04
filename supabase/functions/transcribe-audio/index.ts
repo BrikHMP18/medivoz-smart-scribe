@@ -50,8 +50,11 @@ serve(async (req) => {
       throw new Error("No audio data provided");
     }
 
+    console.log("Received audio data, processing...");
+    
     // Process audio in chunks
     const binaryAudio = processBase64Chunks(audio);
+    console.log("Audio processed, sending to OpenAI...");
     
     // Prepare form data
     const formData = new FormData();
@@ -85,17 +88,19 @@ serve(async (req) => {
     }
 
     const result = await response.json();
-    console.log("Transcription successful");
+    console.log("Transcription successful, formatting response");
 
     // Format the transcript with speaker detection and timestamps
     let formattedTranscript = "";
-    if (result.segments) {
+    if (result.segments && result.segments.length > 0) {
       // Process segments to identify speakers and add timestamps
       formattedTranscript = formatTranscriptionWithSpeakers(result.segments);
     } else {
       // Fallback if segments are not available
-      formattedTranscript = result.text;
+      formattedTranscript = result.text || "";
     }
+
+    console.log("Final formatted transcript:", formattedTranscript.substring(0, 100) + "...");
 
     return new Response(
       JSON.stringify({ 

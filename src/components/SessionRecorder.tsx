@@ -1,8 +1,10 @@
+
 import { Card } from "@/components/ui/card";
 import { RecordingControls } from "./session/RecordingControls";
 import { useSessionRecorder } from "@/hooks/use-session-recorder";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 interface SessionRecorderProps {
   onTranscriptionReady: (transcription: string) => void;
@@ -23,7 +25,8 @@ export function SessionRecorder({
     recordingTime,
     generateSessionId,
     handleStartRecording: startSessionRecording,
-    handleStopRecording: stopSessionRecording
+    handleStopRecording: stopSessionRecording,
+    updateSessionWithTranscription
   } = useSessionRecorder({
     patientId,
     isPatientSelected,
@@ -45,7 +48,18 @@ export function SessionRecorder({
     stopRecording: stopAudioRecording,
     transcribeAudio
   } = useAudioRecorder({
-    onTranscriptionComplete: onTranscriptionReady
+    onTranscriptionComplete: (transcription) => {
+      console.log("Transcription received in callback:", transcription.substring(0, 100) + "...");
+      if (transcription) {
+        // Update session with transcription
+        updateSessionWithTranscription(transcription);
+        
+        // Call the parent callback
+        onTranscriptionReady(transcription);
+      } else {
+        toast.error("No se pudo obtener la transcripción");
+      }
+    }
   });
 
   // Synchronize session recording with audio recording
@@ -69,10 +83,12 @@ export function SessionRecorder({
     stopSessionRecording();
     
     // Transcribe the recorded audio
+    console.log("Stopping recording and starting transcription...");
     const transcription = await transcribeAudio();
+    console.log("Transcription result:", transcription ? "Received" : "Empty");
     
     // We don't need to call onTranscriptionReady here as it's
-    // already being called in useAudioRecorder
+    // already being called in the callback in useAudioRecorder
   };
 
   return (

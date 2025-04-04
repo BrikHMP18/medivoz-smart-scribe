@@ -193,12 +193,18 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       });
       
       if (error) {
+        console.error("Supabase function error:", error);
         throw new Error(error.message);
       }
       
-      const transcription = data.formattedTranscription || data.rawTranscription?.text || "";
+      // Handle the transcription result
+      console.log("Transcription data received:", data);
       
-      if (options?.onTranscriptionComplete) {
+      // Extract the transcription from the response
+      const transcription = data?.formattedTranscription || data?.rawTranscription?.text || "";
+      console.log("Final transcription:", transcription);
+      
+      if (options?.onTranscriptionComplete && transcription) {
         options.onTranscriptionComplete(transcription);
       }
       
