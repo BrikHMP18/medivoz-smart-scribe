@@ -13,6 +13,14 @@ export const ProcessSection = () => {
     "Ficha médica prellenada"
   ];
 
+  // Use reliable image sources instead of placeholder.com
+  const slideImages = [
+    "/placeholder.svg", // Using the local placeholder.svg in public folder
+    "/placeholder.svg",
+    "/placeholder.svg",
+    "/placeholder.svg"
+  ];
+
   return (
     <section className="py-20 bg-muted/30">
       <div className="container">
@@ -20,35 +28,22 @@ export const ProcessSection = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="rounded-2xl overflow-hidden border shadow-lg">
-              {currentSlide === 0 && (
-                <img 
-                  src="https://via.placeholder.com/600x400/0099e6/ffffff?text=Generando+Código+de+Sesión" 
-                  alt="Generando código de sesión" 
-                  className="w-full h-full object-cover"
-                />
-              )}
-              {currentSlide === 1 && (
-                <img 
-                  src="https://via.placeholder.com/600x400/0099e6/ffffff?text=Grabando+Consulta" 
-                  alt="Grabando consulta" 
-                  className="w-full h-full object-cover"
-                />
-              )}
-              {currentSlide === 2 && (
-                <img 
-                  src="https://via.placeholder.com/600x400/0099e6/ffffff?text=Transcripción+Completa" 
-                  alt="Transcripción completa" 
-                  className="w-full h-full object-cover"
-                />
-              )}
-              {currentSlide === 3 && (
-                <img 
-                  src="https://via.placeholder.com/600x400/0099e6/ffffff?text=Ficha+Médica+Prellenada" 
-                  alt="Ficha médica prellenada" 
-                  className="w-full h-full object-cover"
-                />
-              )}
+            <div className="rounded-2xl overflow-hidden border shadow-lg bg-medivoz-100 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center p-4">
+                  <h3 className="text-xl font-bold text-medivoz-700 mb-2">
+                    {currentSlide === 0 && "Generando Código de Sesión"}
+                    {currentSlide === 1 && "Grabando Consulta"}
+                    {currentSlide === 2 && "Transcripción Completa"}
+                    {currentSlide === 3 && "Ficha Médica Prellenada"}
+                  </h3>
+                </div>
+              </div>
+              <img 
+                src={slideImages[currentSlide]} 
+                alt={steps[currentSlide]} 
+                className="w-full h-64 object-contain opacity-30"
+              />
             </div>
           </div>
           
