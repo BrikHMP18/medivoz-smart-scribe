@@ -13,6 +13,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playPromiseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     // Reset player state when the audio URL changes
@@ -43,22 +44,37 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
     if (!audioRef.current) return;
     
     if (isPlaying) {
-      audioRef.current.pause();
+      // Make sure any ongoing play promise is resolved before pausing
+      if (playPromiseRef.current) {
+        playPromiseRef.current
+          .then(() => {
+            audioRef.current?.pause();
+          })
+          .catch((error) => {
+            console.error("Error resolving play promise:", error);
+          });
+      } else {
+        audioRef.current.pause();
+      }
     } else {
-      // Check if the audio can be played
+      // Store the play promise so we can handle it properly
       const playPromise = audioRef.current.play();
       
       if (playPromise !== undefined) {
+        playPromiseRef.current = playPromise;
+        
         playPromise
           .then(() => {
             // Playback started successfully
             console.log("Audio playback started successfully");
+            playPromiseRef.current = null;
           })
           .catch(error => {
             // Playback failed
             console.error("Error playing audio:", error);
             toast.error("Error al reproducir el audio. Por favor, intente de nuevo.");
             setIsPlaying(false);
+            playPromiseRef.current = null;
           });
       }
     }
@@ -112,7 +128,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
       <div className="flex items-center justify-between gap-4">
         <button
           onClick={handlePlayPause}
-          className="p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="p-2 rounded-full bg-primary/90 text-primary-foreground hover:bg-primary transition-colors"
           aria-label={isPlaying ? "Pausar audio" : "Reproducir audio"}
         >
           {isPlaying ? (
@@ -134,7 +150,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
             max={duration || 0}
             value={currentTime}
             onChange={handleSeek}
-            className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
+            className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
             step="0.01"
           />
         </div>
@@ -143,12 +159,9 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
       </div>
       
       <div className="text-center mt-2">
-        <button
-          onClick={handlePlayPause}
-          className="text-sm text-primary hover:underline font-medium"
-        >
-          {isPlaying ? "Pausar Audio" : "Reproducir Audio"}
-        </button>
+        <span className="text-sm text-primary font-medium">
+          {isPlaying ? "Reproduciendo..." : "Listo para reproducir"}
+        </span>
       </div>
     </div>
   );

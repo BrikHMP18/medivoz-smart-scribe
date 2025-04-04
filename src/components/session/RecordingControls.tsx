@@ -67,7 +67,9 @@ export function RecordingControls({
             recordingTime={recordingTime}
             audioURL={audioURL}
           />
-          <Waveform data={audioWaveform} height={40} isActive={!isPaused} />
+          <div className="p-2 bg-muted/30 rounded-md">
+            <Waveform data={audioWaveform} height={40} isActive={!isPaused} />
+          </div>
         </div>
       )}
       

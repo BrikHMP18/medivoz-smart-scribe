@@ -29,21 +29,21 @@ export function RecordingStatus({
 
   if (isRecording) {
     return (
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-2 py-2 px-3 rounded-md bg-opacity-10">
         {isPaused ? (
-          <>
-            <Pause className="h-5 w-5 text-amber-500" />
-            <span className="font-medium text-amber-500">
+          <div className="flex items-center gap-2 text-amber-500 bg-amber-100/50 w-full justify-center py-1 rounded-md">
+            <Pause className="h-5 w-5" />
+            <span className="font-medium">
               Grabación pausada: {formatTime(recordingTime)}
             </span>
-          </>
+          </div>
         ) : (
-          <>
-            <Mic className="h-5 w-5 text-red-500 animate-pulse" />
-            <span className="font-medium text-red-500">
+          <div className="flex items-center gap-2 text-red-500 bg-red-100/50 w-full justify-center py-1 rounded-md">
+            <Mic className="h-5 w-5 animate-pulse" />
+            <span className="font-medium">
               Grabando: {formatTime(recordingTime)}
             </span>
-          </>
+          </div>
         )}
       </div>
     );
@@ -51,7 +51,7 @@ export function RecordingStatus({
 
   if (isTranscribing) {
     return (
-      <div className="flex items-center gap-2 text-amber-500">
+      <div className="flex items-center gap-2 text-amber-500 bg-amber-100/50 w-full justify-center py-2 px-3 rounded-md">
         <Loader2 className="h-5 w-5 animate-spin" />
         <span className="font-medium">Transcribiendo audio...</span>
       </div>
@@ -60,7 +60,7 @@ export function RecordingStatus({
 
   if (sessionId && !isRecording && !isTranscribing && audioURL) {
     return (
-      <div className="flex items-center gap-2 text-green-500">
+      <div className="flex items-center gap-2 text-green-500 bg-green-100/50 w-full justify-center py-2 px-3 rounded-md">
         <CheckCircle className="h-5 w-5" />
         <span className="font-medium">Audio grabado correctamente</span>
       </div>
@@ -69,7 +69,7 @@ export function RecordingStatus({
 
   if (sessionId && !isRecording && !isTranscribing) {
     return (
-      <div className="flex items-center gap-2 text-green-500">
+      <div className="flex items-center gap-2 text-primary bg-primary/10 w-full justify-center py-2 px-3 rounded-md">
         <MicOff className="h-5 w-5" />
         <span className="font-medium">Listo para grabar</span>
       </div>
