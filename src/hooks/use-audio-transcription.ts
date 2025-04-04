@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { blobToBase64 } from "@/utils/audio-utils";
+import { blobToBase64 } from "@/utils/audio";
 
 interface UseAudioTranscriptionProps {
   onTranscriptionComplete?: (transcription: string) => void;
@@ -86,4 +85,3 @@ export function useAudioTranscription({
     transcribeAudio
   };
 }
-

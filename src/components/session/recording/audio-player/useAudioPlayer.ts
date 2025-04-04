@@ -1,7 +1,6 @@
-
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { forceLoadMetadata, preloadAudio } from "@/utils/audio-utils";
+import { forceLoadMetadata, preloadAudio } from "@/utils/audio";
 
 export function useAudioPlayer(audioURL: string | null) {
   const [isPlaying, setIsPlaying] = useState(false);
