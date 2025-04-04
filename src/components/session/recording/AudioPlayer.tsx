@@ -13,7 +13,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playPromiseRef = useRef<Promise<void> | null>(null);
+  const playPromiseRef = useRef<Promise<void> | undefined>(undefined);
 
   useEffect(() => {
     // Reset player state when the audio URL changes
@@ -44,38 +44,29 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
     if (!audioRef.current) return;
     
     if (isPlaying) {
-      // Make sure any ongoing play promise is resolved before pausing
-      if (playPromiseRef.current) {
-        playPromiseRef.current
-          .then(() => {
-            audioRef.current?.pause();
-          })
-          .catch((error) => {
-            console.error("Error resolving play promise:", error);
-          });
-      } else {
-        audioRef.current.pause();
-      }
+      audioRef.current.pause();
+      setIsPlaying(false);
     } else {
-      // Store the play promise so we can handle it properly
-      const playPromise = audioRef.current.play();
-      
-      if (playPromise !== undefined) {
-        playPromiseRef.current = playPromise;
+      try {
+        // Store the play promise
+        playPromiseRef.current = audioRef.current.play();
         
-        playPromise
-          .then(() => {
-            // Playback started successfully
-            console.log("Audio playback started successfully");
-            playPromiseRef.current = null;
-          })
-          .catch(error => {
-            // Playback failed
-            console.error("Error playing audio:", error);
-            toast.error("Error al reproducir el audio. Por favor, intente de nuevo.");
-            setIsPlaying(false);
-            playPromiseRef.current = null;
-          });
+        // Only set the state to playing after the promise resolves
+        if (playPromiseRef.current !== undefined) {
+          playPromiseRef.current
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch(error => {
+              console.error("Error playing audio:", error);
+              toast.error("Error al reproducir el audio. Por favor, intente de nuevo.");
+              setIsPlaying(false);
+            });
+        }
+      } catch (error) {
+        console.error("Exception during play:", error);
+        toast.error("Error al reproducir el audio. Por favor, intente de nuevo.");
+        setIsPlaying(false);
       }
     }
   };
