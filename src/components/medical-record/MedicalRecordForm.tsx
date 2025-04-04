@@ -23,26 +23,28 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
       <div className="space-y-4">
         <h3 className="text-lg font-semibold border-b pb-1">Datos Clínicos</h3>
         
-        <div className="space-y-2">
-          <Label htmlFor="motivo_consulta">Motivo de Consulta</Label>
-          <Input
-            id="motivo_consulta"
-            name="motivo_consulta"
-            value={formData.motivo_consulta}
-            onChange={onChange}
-            placeholder="Describa el motivo principal de la consulta"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="diagnostico_principal">Diagnóstico Principal</Label>
-          <Input
-            id="diagnostico_principal"
-            name="diagnostico_principal"
-            value={formData.diagnostico_principal}
-            onChange={onChange}
-            placeholder="Ingrese el diagnóstico principal"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="motivo_consulta">Motivo de Consulta</Label>
+            <Input
+              id="motivo_consulta"
+              name="motivo_consulta"
+              value={formData.motivo_consulta}
+              onChange={onChange}
+              placeholder="Describa el motivo principal de la consulta"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="diagnostico_principal">Diagnóstico Principal</Label>
+            <Input
+              id="diagnostico_principal"
+              name="diagnostico_principal"
+              value={formData.diagnostico_principal}
+              onChange={onChange}
+              placeholder="Ingrese el diagnóstico principal"
+            />
+          </div>
         </div>
         
         <div className="space-y-2">
@@ -54,6 +56,7 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
             onChange={onChange}
             rows={3}
             placeholder="Describa los síntomas principales del paciente"
+            className="resize-none"
           />
         </div>
         
@@ -66,6 +69,7 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
             onChange={onChange}
             rows={3}
             placeholder="Mencione los antecedentes relevantes del paciente"
+            className="resize-none"
           />
         </div>
         
@@ -78,6 +82,7 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
             onChange={onChange}
             rows={4}
             placeholder="Describa el plan de tratamiento, incluyendo medicación y recomendaciones"
+            className="resize-none"
           />
         </div>
         
@@ -90,6 +95,7 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
             onChange={onChange}
             rows={3}
             placeholder="Ingrese observaciones adicionales relevantes"
+            className="resize-none"
           />
         </div>
       </div>

@@ -18,8 +18,8 @@ export function TranscriptionSnippet({
   if (!transcriptionSnippet) return null;
   
   return (
-    <div className="bg-muted rounded-md mb-4 overflow-hidden">
-      <div className="p-3">
+    <div className="bg-muted rounded-md mb-4 overflow-hidden border border-muted-foreground/10">
+      <div className="p-3 md:p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <FilePen className="h-4 w-4 text-muted-foreground" />
@@ -31,7 +31,7 @@ export function TranscriptionSnippet({
               variant="ghost" 
               size="sm" 
               onClick={onToggleTranscription}
-              className="h-6 px-2"
+              className="h-6 px-2 hover:bg-muted-foreground/10"
             >
               {showFullTranscription ? (
                 <>
@@ -49,11 +49,11 @@ export function TranscriptionSnippet({
         </div>
         
         {showFullTranscription && fullTranscription ? (
-          <div className="text-sm text-muted-foreground whitespace-pre-line max-h-[400px] overflow-y-auto">
+          <div className="text-sm text-muted-foreground whitespace-pre-line max-h-[400px] overflow-y-auto p-2 bg-background/50 rounded">
             {fullTranscription}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">{transcriptionSnippet}</p>
+          <p className="text-sm text-muted-foreground p-2 bg-background/50 rounded">{transcriptionSnippet}</p>
         )}
       </div>
     </div>
