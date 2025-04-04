@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Save, Download, X, Loader2 } from "lucide-react";
+import { Save, Download, X, Loader2, FilePen } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -31,14 +31,53 @@ export function MedicalRecordModal({
 }: MedicalRecordModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [transcriptionSnippet, setTranscriptionSnippet] = useState<string>("");
   
   // Simplified form data to match our new database structure
   const [formData, setFormData] = useState({
-    motivo_consulta: "Cefalea intensa",
-    diagnostico_principal: "Migraña",
-    plan_tratamiento: "Sumatriptán 50mg PRN para episodios agudos. Identificar desencadenantes y técnicas de manejo del estrés. Próximo control en 3 semanas.",
-    notas_adicionales: "Paciente debe llevar un diario de cefaleas para próxima consulta"
+    motivo_consulta: "",
+    diagnostico_principal: "",
+    plan_tratamiento: "",
+    notas_adicionales: ""
   });
+
+  // Fetch transcription snippet when modal opens
+  useEffect(() => {
+    if (open && sessionId) {
+      fetchTranscriptionSnippet();
+    }
+  }, [open, sessionId]);
+
+  const fetchTranscriptionSnippet = async () => {
+    if (!sessionId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('sesiones')
+        .select('transcripcion')
+        .eq('id', sessionId)
+        .single();
+        
+      if (error) throw error;
+      
+      if (data && data.transcripcion) {
+        // Get the first 200 characters as snippet
+        const snippet = data.transcripcion.substring(0, 200) + (data.transcripcion.length > 200 ? '...' : '');
+        setTranscriptionSnippet(snippet);
+        
+        // Auto-fill some fields based on the transcription content
+        // This is a simple implementation - in a real app you might want
+        // to use AI to extract info from the transcription
+        setFormData(prev => ({
+          ...prev,
+          motivo_consulta: prev.motivo_consulta || "Extraer del texto de la consulta",
+          diagnostico_principal: prev.diagnostico_principal || "Basado en evaluación clínica"
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching transcription:", error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -106,6 +145,16 @@ export function MedicalRecordModal({
           </DialogDescription>
         </DialogHeader>
 
+        {transcriptionSnippet && (
+          <div className="bg-muted p-3 rounded-md mb-4 text-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <FilePen className="h-4 w-4 text-muted-foreground" />
+              <h4 className="font-medium">Fragmento de la transcripción:</h4>
+            </div>
+            <p className="text-muted-foreground">{transcriptionSnippet}</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-6 py-4">
           <div className="space-y-4">
             <h3 className="text-lg font-semibold border-b pb-1">Datos Clínicos</h3>
@@ -117,6 +166,7 @@ export function MedicalRecordModal({
                 name="motivo_consulta"
                 value={formData.motivo_consulta}
                 onChange={handleChange}
+                placeholder="Describa el motivo principal de la consulta"
               />
             </div>
             
@@ -127,6 +177,7 @@ export function MedicalRecordModal({
                 name="diagnostico_principal"
                 value={formData.diagnostico_principal}
                 onChange={handleChange}
+                placeholder="Ingrese el diagnóstico principal"
               />
             </div>
             
@@ -138,6 +189,7 @@ export function MedicalRecordModal({
                 value={formData.plan_tratamiento}
                 onChange={handleChange}
                 rows={4}
+                placeholder="Describa el plan de tratamiento, incluyendo medicación y recomendaciones"
               />
             </div>
             
@@ -149,17 +201,18 @@ export function MedicalRecordModal({
                 value={formData.notas_adicionales}
                 onChange={handleChange}
                 rows={3}
+                placeholder="Ingrese observaciones adicionales relevantes"
               />
             </div>
           </div>
         </div>
 
-        <DialogFooter className="flex justify-between">
+        <DialogFooter className="flex flex-col sm:flex-row justify-between gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             <X className="h-4 w-4 mr-2" />
             Cerrar sin guardar
           </Button>
-          <div className="space-x-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button onClick={handleExportPDF} variant="secondary" disabled={isExporting}>
               {isExporting ? (
                 <>
