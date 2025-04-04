@@ -3,8 +3,9 @@ import { Card } from "@/components/ui/card";
 import { RecordingControls } from "./session/RecordingControls";
 import { useSessionRecorder } from "@/hooks/use-session-recorder";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SessionRecorderProps {
   onTranscriptionReady: (transcription: string) => void;
@@ -20,6 +21,8 @@ export function SessionRecorder({
   onSessionCreated
 }: SessionRecorderProps) {
   const [audioTranscription, setAudioTranscription] = useState<string>("");
+  const isMobile = useIsMobile();
+  const audioProcessingRef = useRef(false);
   
   const {
     isRecording: isSessionRecording,
@@ -51,7 +54,7 @@ export function SessionRecorder({
     transcribeAudio
   } = useAudioRecorder({
     onTranscriptionComplete: (transcription) => {
-      console.log("Transcription received in callback:", transcription.substring(0, 100) + "...");
+      console.log("Transcription received in callback:", transcription ? (transcription.substring(0, 100) + "...") : "Empty");
       if (transcription) {
         setAudioTranscription(transcription);
         
@@ -60,8 +63,10 @@ export function SessionRecorder({
         
         // Call the parent callback
         onTranscriptionReady(transcription);
+        audioProcessingRef.current = false;
       } else {
         toast.error("No se pudo obtener la transcripción");
+        audioProcessingRef.current = false;
       }
     }
   });
@@ -75,6 +80,7 @@ export function SessionRecorder({
 
   // Synchronize session recording with audio recording
   const handleStartRecording = () => {
+    audioProcessingRef.current = false;
     startSessionRecording();
     startAudioRecording();
   };
@@ -92,9 +98,17 @@ export function SessionRecorder({
   };
 
   const handleStopRecording = async () => {
+    // Prevent multiple processing attempts
+    if (audioProcessingRef.current) {
+      console.log("Audio is already being processed");
+      return;
+    }
+    
+    audioProcessingRef.current = true;
+    
     // First stop the audio recording - this will create the blob
     if (isAudioRecording) {
-      stopAudioRecording();
+      await stopAudioRecording();
     }
     
     // Then stop the session recording
@@ -103,25 +117,31 @@ export function SessionRecorder({
     // Wait a moment for the blob to be created before transcribing
     setTimeout(async () => {
       // Transcribe the recorded audio
-      console.log("Stopping recording and starting transcription...");
+      console.log("Starting transcription...");
       try {
         const transcription = await transcribeAudio();
         console.log("Transcription result:", transcription ? "Received" : "Empty");
+        
+        if (!transcription) {
+          audioProcessingRef.current = false;
+          toast.error("No se pudo obtener la transcripción. Intente grabar nuevamente.");
+        }
       } catch (error) {
         console.error("Error during transcription:", error);
         toast.error("Error al transcribir el audio");
+        audioProcessingRef.current = false;
       }
-    }, 500);
+    }, 1000); // Increased timeout to ensure audio blob is ready
   };
 
   return (
-    <Card className="p-6 relative overflow-hidden">
+    <Card className={`p-4 md:p-6 relative overflow-hidden ${isMobile ? 'w-full' : ''}`}>
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-medivoz-400 to-medivoz-600"></div>
       
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-4 md:gap-6">
         <div className="text-center">
-          <h3 className="text-2xl font-bold mb-2">Grabación de Sesión</h3>
-          <p className="text-muted-foreground">
+          <h3 className="text-xl md:text-2xl font-bold mb-2">Grabación de Sesión</h3>
+          <p className="text-muted-foreground text-sm md:text-base">
             {sessionId ? `Sesión activa: ${sessionId}` : "Sin sesión activa"}
           </p>
         </div>
@@ -130,7 +150,7 @@ export function SessionRecorder({
           isRecording={isAudioRecording}
           isPaused={isAudioPaused}
           isPatientSelected={isPatientSelected}
-          isTranscribing={isTranscribing}
+          isTranscribing={isTranscribing || audioProcessingRef.current}
           audioURL={audioURL}
           audioWaveform={audioWaveform}
           sessionId={sessionId}
