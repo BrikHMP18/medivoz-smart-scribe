@@ -13,6 +13,17 @@ interface SessionRecorderProps {
   onSessionCreated?: (sessionId: string) => void;
 }
 
+// Define the session type to match our database
+interface Session {
+  id: string;
+  codigo_sesion: string;
+  paciente_id: string;
+  created_at?: string;
+  updated_at?: string;
+  fecha_consulta?: string;
+  transcripcion?: string | null;
+}
+
 export function SessionRecorder({ 
   onTranscriptionReady, 
   patientId, 
@@ -48,10 +59,10 @@ export function SessionRecorder({
       toast.success(`Sesión ${randomId} creada correctamente`);
       
       // If onSessionCreated callback is provided, call it with the session ID
-      if (onSessionCreated && data && data.length > 0) {
-        const createdSessionId = data[0].id;
-        if (createdSessionId) {
-          onSessionCreated(createdSessionId);
+      if (onSessionCreated && data && Array.isArray(data) && data.length > 0) {
+        const createdSession = data[0] as Session;
+        if (createdSession && createdSession.id) {
+          onSessionCreated(createdSession.id);
         }
       }
     });
