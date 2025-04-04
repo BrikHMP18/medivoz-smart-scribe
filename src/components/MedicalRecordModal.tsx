@@ -42,10 +42,10 @@ export function MedicalRecordModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Ficha Médica</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-xl md:text-2xl">Ficha Médica</DialogTitle>
+          <DialogDescription className="text-sm md:text-base">
             Información extraída automáticamente de la transcripción
           </DialogDescription>
         </DialogHeader>
@@ -70,7 +70,7 @@ export function MedicalRecordModal({
           <MedicalRecordForm formData={formData} onChange={handleChange} />
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row justify-between gap-2">
+        <DialogFooter className="flex flex-col sm:flex-row justify-between gap-2 mt-4">
           <MedicalRecordActions
             isSaving={isSaving}
             isExporting={isExporting}

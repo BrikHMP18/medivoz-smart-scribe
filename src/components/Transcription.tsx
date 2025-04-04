@@ -17,10 +17,10 @@ export function Transcription({ transcription, patientId, sessionId }: Transcrip
   if (!transcription) {
     return (
       <Card className="h-full flex items-center justify-center bg-muted/30">
-        <div className="text-center p-12">
-          <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+        <div className="text-center p-6 md:p-12">
+          <FileText className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 text-muted-foreground/50" />
           <h3 className="text-lg font-medium text-muted-foreground">Sin transcripción</h3>
-          <p className="text-sm text-muted-foreground/70 mt-2 max-w-md">
+          <p className="text-sm text-muted-foreground/70 mt-2 max-w-md mx-auto">
             Inicia una grabación para generar la transcripción de la consulta médica.
           </p>
         </div>
@@ -32,16 +32,18 @@ export function Transcription({ transcription, patientId, sessionId }: Transcrip
     <>
       <Card className="h-full flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Transcripción</CardTitle>
+          <CardTitle className="text-lg md:text-xl">Transcripción</CardTitle>
           <Button 
             onClick={() => setIsModalOpen(true)}
             disabled={!sessionId || !patientId}
+            size="sm"
+            className="text-sm"
           >
             Llenar Ficha Médica
           </Button>
         </CardHeader>
-        <CardContent className="overflow-auto flex-grow">
-          <div className="space-y-4 whitespace-pre-line font-medium">
+        <CardContent className="overflow-auto flex-grow p-4">
+          <div className="space-y-4 whitespace-pre-line text-sm md:text-base">
             {transcription}
           </div>
         </CardContent>

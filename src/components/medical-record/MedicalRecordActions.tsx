@@ -18,13 +18,19 @@ export function MedicalRecordActions({
   onExport 
 }: MedicalRecordActionsProps) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between gap-2 w-full">
-      <Button variant="outline" onClick={onClose} className="flex-shrink-0">
+    <div className="flex flex-col w-full gap-2 sm:flex-row sm:justify-between">
+      <Button variant="outline" onClick={onClose} className="flex-shrink-0 text-sm">
         <X className="h-4 w-4 mr-2" />
         Cerrar sin guardar
       </Button>
       <div className="flex flex-col sm:flex-row gap-2">
-        <Button onClick={onExport} variant="secondary" disabled={isExporting} className="flex-1">
+        <Button 
+          onClick={onExport} 
+          variant="secondary" 
+          disabled={isExporting} 
+          className="flex-1 text-sm"
+          size="sm"
+        >
           {isExporting ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -37,7 +43,12 @@ export function MedicalRecordActions({
             </>
           )}
         </Button>
-        <Button onClick={onSave} disabled={isSaving} className="flex-1 bg-primary hover:bg-primary/90">
+        <Button 
+          onClick={onSave} 
+          disabled={isSaving} 
+          className="flex-1 bg-primary hover:bg-primary/90 text-sm"
+          size="sm"
+        >
           {isSaving ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

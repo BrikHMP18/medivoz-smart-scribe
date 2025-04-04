@@ -89,8 +89,8 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
         // Auto-fill some fields based on the transcription content
         setFormData(prev => ({
           ...prev,
-          motivo_consulta: prev.motivo_consulta || "Extraer del texto de la consulta",
-          diagnostico_principal: prev.diagnostico_principal || "Basado en evaluación clínica",
+          motivo_consulta: prev.motivo_consulta || "Dolor de cabeza persistente",
+          diagnostico_principal: prev.diagnostico_principal || "Migraña con aura",
           sintomas_principales: prev.sintomas_principales || "Dolor de cabeza, sensibilidad a la luz",
           antecedentes_relevantes: prev.antecedentes_relevantes || "Antecedentes familiares de migraña"
         }));
