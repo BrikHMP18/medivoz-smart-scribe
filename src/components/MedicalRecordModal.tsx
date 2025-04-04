@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { TranscriptionSnippet } from "./medical-record/TranscriptionSnippet";
 import { MedicalRecordForm } from "./medical-record/MedicalRecordForm";
 import { MedicalRecordActions } from "./medical-record/MedicalRecordActions";
+import { PatientInfoCard } from "./medical-record/PatientInfoCard";
 import { useMedicalRecord } from "@/hooks/use-medical-record";
 
 interface MedicalRecordModalProps {
@@ -20,10 +21,14 @@ export function MedicalRecordModal({
 }: MedicalRecordModalProps) {
   const { 
     formData, 
+    patientData,
     transcriptionSnippet, 
+    fullTranscription,
+    showFullTranscription,
     isSaving, 
     isExporting, 
     handleChange, 
+    toggleTranscriptionView,
     handleSave, 
     handleExportPDF 
   } = useMedicalRecord(sessionId || null, patientId || null);
@@ -45,7 +50,21 @@ export function MedicalRecordModal({
           </DialogDescription>
         </DialogHeader>
 
-        <TranscriptionSnippet transcriptionSnippet={transcriptionSnippet} />
+        {patientData && (
+          <PatientInfoCard 
+            name={patientData.nombre} 
+            age={patientData.edad} 
+            occupation={patientData.ocupacion} 
+            location={patientData.procedencia} 
+          />
+        )}
+
+        <TranscriptionSnippet 
+          transcriptionSnippet={transcriptionSnippet}
+          fullTranscription={fullTranscription}
+          showFullTranscription={showFullTranscription}
+          onToggleTranscription={toggleTranscriptionView}
+        />
 
         <div className="grid grid-cols-1 gap-6 py-4">
           <MedicalRecordForm formData={formData} onChange={handleChange} />

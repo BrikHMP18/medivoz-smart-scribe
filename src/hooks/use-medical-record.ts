@@ -8,27 +8,65 @@ interface MedicalRecordFormData {
   diagnostico_principal: string;
   plan_tratamiento: string;
   notas_adicionales: string;
+  sintomas_principales: string;
+  antecedentes_relevantes: string;
+}
+
+interface PatientData {
+  nombre: string;
+  edad: number | null;
+  ocupacion: string | null;
+  procedencia: string | null;
 }
 
 export function useMedicalRecord(sessionId: string | null, patientId: string | null) {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [transcriptionSnippet, setTranscriptionSnippet] = useState<string>("");
+  const [fullTranscription, setFullTranscription] = useState<string>("");
+  const [showFullTranscription, setShowFullTranscription] = useState(false);
+  const [patientData, setPatientData] = useState<PatientData | null>(null);
   
   const [formData, setFormData] = useState<MedicalRecordFormData>({
     motivo_consulta: "",
     diagnostico_principal: "",
     plan_tratamiento: "",
-    notas_adicionales: ""
+    notas_adicionales: "",
+    sintomas_principales: "",
+    antecedentes_relevantes: ""
   });
 
   useEffect(() => {
     if (sessionId) {
-      fetchTranscriptionSnippet();
+      fetchTranscriptionData();
     }
-  }, [sessionId]);
+    
+    if (patientId) {
+      fetchPatientData();
+    }
+  }, [sessionId, patientId]);
 
-  const fetchTranscriptionSnippet = async () => {
+  const fetchPatientData = async () => {
+    if (!patientId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('pacientes')
+        .select('nombre, edad, ocupacion, procedencia')
+        .eq('id', patientId)
+        .single();
+        
+      if (error) throw error;
+      
+      if (data) {
+        setPatientData(data);
+      }
+    } catch (error) {
+      console.error("Error fetching patient data:", error);
+    }
+  };
+
+  const fetchTranscriptionData = async () => {
     if (!sessionId) return;
     
     try {
@@ -41,6 +79,9 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
       if (error) throw error;
       
       if (data && data.transcripcion) {
+        // Save full transcription
+        setFullTranscription(data.transcripcion);
+        
         // Get the first 200 characters as snippet
         const snippet = data.transcripcion.substring(0, 200) + (data.transcripcion.length > 200 ? '...' : '');
         setTranscriptionSnippet(snippet);
@@ -49,7 +90,9 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
         setFormData(prev => ({
           ...prev,
           motivo_consulta: prev.motivo_consulta || "Extraer del texto de la consulta",
-          diagnostico_principal: prev.diagnostico_principal || "Basado en evaluación clínica"
+          diagnostico_principal: prev.diagnostico_principal || "Basado en evaluación clínica",
+          sintomas_principales: prev.sintomas_principales || "Dolor de cabeza, sensibilidad a la luz",
+          antecedentes_relevantes: prev.antecedentes_relevantes || "Antecedentes familiares de migraña"
         }));
       }
     } catch (error) {
@@ -62,10 +105,14 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const toggleTranscriptionView = () => {
+    setShowFullTranscription(prev => !prev);
+  };
+
   const handleSave = async () => {
     if (!patientId || !sessionId) {
       toast.error("No hay un paciente o sesión seleccionada");
-      return;
+      return false;
     }
     
     setIsSaving(true);
@@ -79,7 +126,9 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
           motivo_consulta: formData.motivo_consulta,
           diagnostico_principal: formData.diagnostico_principal,
           plan_tratamiento: formData.plan_tratamiento,
-          notas_adicionales: formData.notas_adicionales
+          notas_adicionales: formData.notas_adicionales,
+          sintomas_principales: formData.sintomas_principales,
+          antecedentes_relevantes: formData.antecedentes_relevantes
         });
       
       if (error) throw error;
@@ -115,10 +164,14 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
 
   return {
     formData,
+    patientData,
     transcriptionSnippet,
+    fullTranscription,
+    showFullTranscription,
     isSaving,
     isExporting,
     handleChange,
+    toggleTranscriptionView,
     handleSave,
     handleExportPDF
   };
