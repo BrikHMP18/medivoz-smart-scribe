@@ -59,10 +59,14 @@ export function SessionRecorder({
       toast.success(`Sesión ${randomId} creada correctamente`);
       
       // If onSessionCreated callback is provided, call it with the session ID
-      if (onSessionCreated && data && Array.isArray(data) && data.length > 0) {
-        const createdSession = data[0] as Session;
-        if (createdSession && createdSession.id) {
-          onSessionCreated(createdSession.id);
+      if (onSessionCreated && data) {
+        // Type assertion to help TypeScript understand the structure
+        const sessionData = data as unknown as Session[];
+        if (sessionData && sessionData.length > 0) {
+          const createdSession = sessionData[0];
+          if (createdSession && createdSession.id) {
+            onSessionCreated(createdSession.id);
+          }
         }
       }
     });
