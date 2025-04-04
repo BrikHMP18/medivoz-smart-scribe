@@ -5,6 +5,10 @@ import { MedicalRecordForm } from "./medical-record/MedicalRecordForm";
 import { MedicalRecordActions } from "./medical-record/MedicalRecordActions";
 import { PatientInfoCard } from "./medical-record/PatientInfoCard";
 import { useMedicalRecord } from "@/hooks/use-medical-record";
+import { useMedicalRecordAutoFill } from "@/hooks/use-medical-record-auto-fill";
+import { Button } from "@/components/ui/button";
+import { LoaderCircle, Sparkles } from "lucide-react";
+import { useEffect } from "react";
 
 interface MedicalRecordModalProps {
   open: boolean;
@@ -30,8 +34,14 @@ export function MedicalRecordModal({
     handleChange, 
     toggleTranscriptionView,
     handleSave, 
-    handleExportPDF 
+    handleExportPDF,
+    setFormData
   } = useMedicalRecord(sessionId || null, patientId || null);
+
+  const {
+    isAutoFilling,
+    autoFillMedicalRecord
+  } = useMedicalRecordAutoFill();
 
   const handleSaveAndClose = async () => {
     const success = await handleSave();
@@ -39,6 +49,25 @@ export function MedicalRecordModal({
       onOpenChange(false);
     }
   };
+
+  const handleAutoFill = async () => {
+    if (!fullTranscription) {
+      return;
+    }
+    
+    const medicalRecordData = await autoFillMedicalRecord(fullTranscription);
+    
+    if (medicalRecordData) {
+      setFormData(medicalRecordData);
+    }
+  };
+
+  // Auto-trigger the auto-fill when the modal opens and there's transcription available
+  useEffect(() => {
+    if (open && fullTranscription && !formData.motivo_consulta) {
+      handleAutoFill();
+    }
+  }, [open, fullTranscription]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,6 +87,30 @@ export function MedicalRecordModal({
             location={patientData.procedencia} 
           />
         )}
+
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Transcripción de la consulta</h3>
+          
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleAutoFill}
+            disabled={isAutoFilling || !fullTranscription}
+            className="flex items-center gap-1 text-xs h-8"
+          >
+            {isAutoFilling ? (
+              <>
+                <LoaderCircle className="h-3.5 w-3.5 animate-spin mr-1" />
+                Procesando...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-3.5 w-3.5 mr-1" />
+                Auto-rellenar con IA
+              </>
+            )}
+          </Button>
+        </div>
 
         <TranscriptionSnippet 
           transcriptionSnippet={transcriptionSnippet}

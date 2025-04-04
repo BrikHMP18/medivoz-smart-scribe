@@ -4,29 +4,34 @@ project_id = "ncmgxsrlzbqyqkowomkr"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage"]
+schemas = ["public", "storage", "graphql_public"]
 
 [db]
 port = 54322
-
-[realtime]
-enabled = true
+shadow_port = 54320
+major_version = 15
 
 [studio]
 enabled = true
 port = 54323
+api_url = "http://localhost"
 
 [inbucket]
 enabled = true
 port = 54324
 
+[storage]
+enabled = true
+
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
 
-[storage]
+[realtime]
 enabled = true
 
-[functions]
-[functions.transcribe-audio]
-verify_jwt = false
+[analytics]
+enabled = false
+
+[functions.auto-fill-medical-record]
+verify_jwt = true

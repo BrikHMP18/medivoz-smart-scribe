@@ -85,15 +85,6 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
         // Get the first 200 characters as snippet
         const snippet = data.transcripcion.substring(0, 200) + (data.transcripcion.length > 200 ? '...' : '');
         setTranscriptionSnippet(snippet);
-        
-        // Auto-fill some fields based on the transcription content
-        setFormData(prev => ({
-          ...prev,
-          motivo_consulta: prev.motivo_consulta || "Dolor de cabeza persistente",
-          diagnostico_principal: prev.diagnostico_principal || "Migraña con aura",
-          sintomas_principales: prev.sintomas_principales || "Dolor de cabeza, sensibilidad a la luz",
-          antecedentes_relevantes: prev.antecedentes_relevantes || "Antecedentes familiares de migraña"
-        }));
       }
     } catch (error) {
       console.error("Error fetching transcription:", error);
@@ -173,6 +164,7 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     handleChange,
     toggleTranscriptionView,
     handleSave,
-    handleExportPDF
+    handleExportPDF,
+    setFormData
   };
 }
