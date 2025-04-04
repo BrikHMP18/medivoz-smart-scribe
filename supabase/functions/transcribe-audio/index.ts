@@ -81,7 +81,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("OpenAI API error:", errorText);
-      throw new Error(`OpenAI API error: ${errorText}`);
+      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
     }
 
     const result = await response.json();
@@ -117,63 +117,104 @@ serve(async (req) => {
   }
 });
 
-// Function to format transcription with speaker detection and timestamps
+// Advanced speaker detection and formatting for medical consultation
 function formatTranscriptionWithSpeakers(segments: any[]) {
-  // Simple speaker detection based on patterns
-  // In a real implementation, you might use a more sophisticated algorithm
   let formattedText = "";
   let currentSpeaker = "";
+  let currentTimestamp = "";
+  let buffer = "";
   
+  // First pass to detect speaker changes with context
   segments.forEach((segment, index) => {
-    // Try to detect speaker based on content patterns
-    let detectedSpeaker = determineSpeekerFromText(segment.text);
-    
     // Format timestamp from start value (in seconds)
     const timestamp = formatTimestamp(segment.start);
     
-    // If this is a new speaker or the first segment, add the speaker label
-    if (detectedSpeaker !== currentSpeaker || index === 0) {
-      formattedText += `\n${detectedSpeaker} (${timestamp}): ${segment.text}\n`;
+    // Try to detect speaker based on content and context
+    let detectedSpeaker = determineSpeakerFromText(segment.text, index > 0 ? segments[index-1].text : "");
+    
+    // If this is a new speaker, new timestamp, or the first segment
+    if (detectedSpeaker !== currentSpeaker || timestamp !== currentTimestamp || index === 0) {
+      // If we have a buffer, add it to formatted text before starting new speaker
+      if (buffer.length > 0) {
+        formattedText += buffer + "\n\n";
+        buffer = "";
+      }
+      
+      // Start a new speaker section
+      buffer = `${detectedSpeaker} (${timestamp}): ${segment.text}`;
       currentSpeaker = detectedSpeaker;
+      currentTimestamp = timestamp;
     } else {
       // Continue with the same speaker
-      formattedText += `${segment.text} `;
+      buffer += " " + segment.text;
     }
   });
+  
+  // Add any remaining buffer
+  if (buffer.length > 0) {
+    formattedText += buffer;
+  }
   
   return formattedText.trim();
 }
 
-// Helper function to determine speaker from text patterns
-function determineSpeekerFromText(text: string): string {
+// Advanced speaker detection for medical consultation
+function determineSpeakerFromText(text: string, previousText: string = ""): string {
   const lowerText = text.toLowerCase();
+  const lowerPrevText = previousText.toLowerCase();
   
-  // Simple heuristic - in a medical context:
-  // - Questions often come from the doctor
-  // - Descriptions of symptoms often come from the patient
+  // Stronger patterns for doctor
   if (
+    // Questions are often from the doctor
     lowerText.includes("?") || 
-    lowerText.includes("tell me") || 
-    lowerText.includes("describe") ||
-    lowerText.includes("how are you") ||
-    lowerText.includes("what brings you") ||
-    lowerText.startsWith("have you") ||
-    lowerText.startsWith("are you")
+    // Medical instructions/advice
+    lowerText.includes("recomiendo") ||
+    lowerText.includes("debe tomar") ||
+    lowerText.includes("le voy a recetar") ||
+    lowerText.includes("tiene que") ||
+    lowerText.includes("diagnóstico") ||
+    // Introductory phrases
+    lowerText.startsWith("dígame") ||
+    lowerText.startsWith("cuénteme") ||
+    lowerText.startsWith("explíqueme") ||
+    // Professional terminology
+    lowerText.includes("evaluación") ||
+    lowerText.includes("tratamiento") ||
+    // Previous text was clearly patient and this is a response
+    (lowerPrevText.includes("me duele") && !lowerText.includes("me duele"))
   ) {
     return "🩺 Doctor";
-  } else if (
-    lowerText.includes("pain") || 
-    lowerText.includes("feel") || 
-    lowerText.includes("hurt") ||
-    lowerText.includes("symptom") ||
-    lowerText.includes("i've been") ||
-    lowerText.includes("i have") ||
-    lowerText.includes("i am")
+  } 
+  // Stronger patterns for patient
+  else if (
+    // Descriptions of personal symptoms
+    lowerText.includes("me duele") || 
+    lowerText.includes("tengo dolor") ||
+    lowerText.includes("siento") ||
+    lowerText.includes("he notado") ||
+    lowerText.includes("me preocupa") ||
+    // Personal health history
+    lowerText.includes("mi historia") ||
+    lowerText.includes("mi familia") ||
+    lowerText.includes("he estado") ||
+    // Previous text was clearly doctor asking a question
+    (lowerPrevText.includes("?") && !lowerText.includes("?"))
   ) {
     return "👤 Paciente";
   }
   
-  // Default if we can't determine
+  // Contextual detection based on content length and other factors
+  // More detailed responses are likely from the patient explaining symptoms
+  if (text.length > 100 && !lowerText.includes("?")) {
+    return "👤 Paciente";
+  }
+  
+  // Short, directed questions are typically from the doctor
+  if (text.length < 50 && lowerText.includes("?")) {
+    return "🩺 Doctor";
+  }
+  
+  // If we can't determine with confidence, use generic speaker
   return "👥 Hablante";
 }
 

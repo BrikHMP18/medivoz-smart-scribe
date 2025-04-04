@@ -9,6 +9,7 @@ interface AudioRecorderOptions {
 
 export function useAudioRecorder(options?: AudioRecorderOptions) {
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
@@ -18,6 +19,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
   const audioChunksRef = useRef<Blob[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
   // Request microphone permission
@@ -59,6 +61,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       if (!hasPermission) return;
       
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       setupAudioContext(stream);
       
       mediaRecorderRef.current = new MediaRecorder(stream);
@@ -78,11 +81,34 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      setIsPaused(false);
       startWaveformAnimation();
       
     } catch (error) {
       console.error("Error starting recording:", error);
       toast.error("Error al iniciar la grabación");
+    }
+  };
+
+  // Pause recording
+  const pauseRecording = () => {
+    if (!isRecording || !mediaRecorderRef.current || isPaused) return;
+    
+    if (mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.pause();
+      setIsPaused(true);
+      stopWaveformAnimation();
+    }
+  };
+
+  // Resume recording
+  const resumeRecording = () => {
+    if (!isRecording || !mediaRecorderRef.current || !isPaused) return;
+    
+    if (mediaRecorderRef.current.state === "paused") {
+      mediaRecorderRef.current.resume();
+      setIsPaused(false);
+      startWaveformAnimation();
     }
   };
 
@@ -92,8 +118,12 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
     
     mediaRecorderRef.current.stop();
     // Stop all tracks to turn off microphone
-    mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
     setIsRecording(false);
+    setIsPaused(false);
     stopWaveformAnimation();
   };
 
@@ -110,7 +140,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       analyserRef.current.getByteFrequencyData(dataArray);
       
       // Sample some points from the frequency data for the waveform
-      const sampleSize = 20; // Number of points to show in waveform
+      const sampleSize = 40; // Number of points to show in waveform
       const sampledData = [];
       
       for (let i = 0; i < sampleSize; i++) {
@@ -190,20 +220,24 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
         URL.revokeObjectURL(audioURL);
       }
       stopWaveformAnimation();
-      if (mediaRecorderRef.current && isRecording) {
-        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       }
     };
   }, [audioURL, isRecording]);
 
   return {
     isRecording,
+    isPaused,
     isTranscribing,
     audioURL,
     audioWaveform,
     permissionDenied,
     requestPermission,
     startRecording,
+    pauseRecording,
+    resumeRecording,
     stopRecording,
     transcribeAudio
   };

@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { RecordingControls } from "./session/RecordingControls";
 import { useSessionRecorder } from "@/hooks/use-session-recorder";
@@ -34,12 +33,15 @@ export function SessionRecorder({
 
   const {
     isRecording: isAudioRecording,
+    isPaused: isAudioPaused,
     isTranscribing,
     audioURL,
     audioWaveform,
     permissionDenied,
     requestPermission,
     startRecording: startAudioRecording,
+    pauseRecording: pauseAudioRecording,
+    resumeRecording: resumeAudioRecording,
     stopRecording: stopAudioRecording,
     transcribeAudio
   } = useAudioRecorder({
@@ -50,6 +52,16 @@ export function SessionRecorder({
   const handleStartRecording = () => {
     startSessionRecording();
     startAudioRecording();
+  };
+
+  const handlePauseRecording = () => {
+    pauseAudioRecording();
+    // We don't pause the session timer
+  };
+
+  const handleResumeRecording = () => {
+    resumeAudioRecording();
+    // We don't need to resume the session timer as it keeps running
   };
 
   const handleStopRecording = async () => {
@@ -77,6 +89,7 @@ export function SessionRecorder({
         
         <RecordingControls
           isRecording={isAudioRecording}
+          isPaused={isAudioPaused}
           isPatientSelected={isPatientSelected}
           isTranscribing={isTranscribing}
           audioURL={audioURL}
@@ -87,6 +100,8 @@ export function SessionRecorder({
           onRequestPermission={requestPermission}
           onGenerateSessionId={generateSessionId}
           onStartRecording={handleStartRecording}
+          onPauseRecording={handlePauseRecording}
+          onResumeRecording={handleResumeRecording}
           onStopRecording={handleStopRecording}
         />
       </div>
