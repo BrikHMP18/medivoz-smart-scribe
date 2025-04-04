@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       fichas_medicas: {
         Row: {
+          antecedentes_relevantes: string | null
           created_at: string
           diagnostico_principal: string
           id: string
@@ -19,9 +20,11 @@ export type Database = {
           paciente_id: string
           plan_tratamiento: string
           sesion_id: string
+          sintomas_principales: string | null
           updated_at: string
         }
         Insert: {
+          antecedentes_relevantes?: string | null
           created_at?: string
           diagnostico_principal: string
           id?: string
@@ -30,9 +33,11 @@ export type Database = {
           paciente_id: string
           plan_tratamiento: string
           sesion_id: string
+          sintomas_principales?: string | null
           updated_at?: string
         }
         Update: {
+          antecedentes_relevantes?: string | null
           created_at?: string
           diagnostico_principal?: string
           id?: string
@@ -41,6 +46,7 @@ export type Database = {
           paciente_id?: string
           plan_tratamiento?: string
           sesion_id?: string
+          sintomas_principales?: string | null
           updated_at?: string
         }
         Relationships: [
