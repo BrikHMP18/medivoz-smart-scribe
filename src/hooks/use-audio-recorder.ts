@@ -273,8 +273,24 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
     
     if (!audioBlobRef.current) {
       console.error("No audio blob available for transcription");
-      toast.error("No hay audio para transcribir");
-      return "";
+      
+      // Check if we have audio chunks but no blob
+      if (audioChunksRef.current.length > 0) {
+        // Try to create the blob from chunks
+        console.log("Attempting to create blob from chunks");
+        try {
+          const mimeType = 'audio/webm';
+          audioBlobRef.current = new Blob(audioChunksRef.current, { type: mimeType });
+          console.log("Created blob from chunks, size:", audioBlobRef.current.size);
+        } catch (error) {
+          console.error("Failed to create blob from chunks:", error);
+          toast.error("Error al procesar el audio grabado");
+          return "";
+        }
+      } else {
+        toast.error("No hay audio para transcribir");
+        return "";
+      }
     }
     
     if (audioBlobRef.current.size === 0) {

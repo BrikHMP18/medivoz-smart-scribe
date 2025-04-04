@@ -1,8 +1,9 @@
+
 import { Card } from "@/components/ui/card";
 import { RecordingControls } from "./session/RecordingControls";
 import { useSessionRecorder } from "@/hooks/use-session-recorder";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface SessionRecorderProps {
@@ -18,6 +19,8 @@ export function SessionRecorder({
   isPatientSelected,
   onSessionCreated
 }: SessionRecorderProps) {
+  const [audioTranscription, setAudioTranscription] = useState<string>("");
+  
   const {
     isRecording: isSessionRecording,
     sessionId,
@@ -50,6 +53,8 @@ export function SessionRecorder({
     onTranscriptionComplete: (transcription) => {
       console.log("Transcription received in callback:", transcription.substring(0, 100) + "...");
       if (transcription) {
+        setAudioTranscription(transcription);
+        
         // Update session with transcription
         updateSessionWithTranscription(transcription);
         
@@ -61,6 +66,13 @@ export function SessionRecorder({
     }
   });
 
+  // Update transcription when it changes
+  useEffect(() => {
+    if (audioTranscription) {
+      onTranscriptionReady(audioTranscription);
+    }
+  }, [audioTranscription, onTranscriptionReady]);
+
   // Synchronize session recording with audio recording
   const handleStartRecording = () => {
     startSessionRecording();
@@ -68,26 +80,38 @@ export function SessionRecorder({
   };
 
   const handlePauseRecording = () => {
-    pauseAudioRecording();
-    // We don't pause the session timer
+    if (isAudioRecording && !isAudioPaused) {
+      pauseAudioRecording();
+    }
   };
 
   const handleResumeRecording = () => {
-    resumeAudioRecording();
-    // We don't need to resume the session timer as it keeps running
+    if (isAudioRecording && isAudioPaused) {
+      resumeAudioRecording();
+    }
   };
 
   const handleStopRecording = async () => {
-    stopAudioRecording();
+    // First stop the audio recording - this will create the blob
+    if (isAudioRecording) {
+      stopAudioRecording();
+    }
+    
+    // Then stop the session recording
     stopSessionRecording();
     
-    // Transcribe the recorded audio
-    console.log("Stopping recording and starting transcription...");
-    const transcription = await transcribeAudio();
-    console.log("Transcription result:", transcription ? "Received" : "Empty");
-    
-    // We don't need to call onTranscriptionReady here as it's
-    // already being called in the callback in useAudioRecorder
+    // Wait a moment for the blob to be created before transcribing
+    setTimeout(async () => {
+      // Transcribe the recorded audio
+      console.log("Stopping recording and starting transcription...");
+      try {
+        const transcription = await transcribeAudio();
+        console.log("Transcription result:", transcription ? "Received" : "Empty");
+      } catch (error) {
+        console.error("Error during transcription:", error);
+        toast.error("Error al transcribir el audio");
+      }
+    }, 500);
   };
 
   return (
