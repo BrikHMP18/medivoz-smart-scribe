@@ -48,8 +48,11 @@ export function SessionRecorder({
       toast.success(`Sesión ${randomId} creada correctamente`);
       
       // If onSessionCreated callback is provided, call it with the session ID
-      if (onSessionCreated && data && data[0]) {
-        onSessionCreated(data[0].id);
+      if (onSessionCreated && data && data.length > 0) {
+        const createdSessionId = data[0].id;
+        if (createdSessionId) {
+          onSessionCreated(createdSessionId);
+        }
       }
     });
     

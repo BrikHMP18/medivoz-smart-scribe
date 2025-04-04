@@ -84,6 +84,7 @@ export function MedicalRecordModal({
     setIsSaving(true);
     
     try {
+      // Using raw query since the types haven't been updated in the client
       const { error } = await supabase
         .from('fichas_medicas')
         .insert({
@@ -105,7 +106,7 @@ export function MedicalRecordModal({
           examen_neurologico_resumen: formData.examen_neurologico_resumen,
           examen_cognitivo_resumen: formData.examen_cognitivo_resumen,
           notas_libres: formData.notas_libres
-        });
+        } as any);
       
       if (error) throw error;
       
