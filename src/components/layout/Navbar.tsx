@@ -10,6 +10,7 @@ import {
 import { Menu, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { ThemeToggleButton, ThemeToggle } from "@/components/ThemeToggle";
 
 export function Navbar() {
   const { user, signOut } = useAuth();
@@ -28,14 +29,15 @@ export function Navbar() {
       <div className="container flex h-16 items-center">
         <div className="flex items-center justify-between w-full">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-essalud-blue">EsSalud</div>
+            <div className="text-2xl font-bold text-essalud-blue dark:text-essalud-light">EsSalud</div>
           </Link>
           
           <div className="hidden md:flex gap-6 items-center">
             <nav className="flex items-center space-x-6 text-sm font-medium">
-              <Link to="/" className="transition-colors hover:text-essalud-blue">
+              <Link to="/" className="transition-colors hover:text-essalud-blue dark:hover:text-essalud-light">
                 Inicio
               </Link>
+              <ThemeToggle />
             </nav>
             
             {user ? (
@@ -60,7 +62,8 @@ export function Navbar() {
             )}
           </div>
           
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggleButton variant="ghost" />
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="h-8 w-8">
@@ -69,9 +72,12 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="right">
                 <nav className="flex flex-col gap-4 mt-8">
-                  <Link to="/" className="text-base hover:text-essalud-blue">
+                  <Link to="/" className="text-base hover:text-essalud-blue dark:hover:text-essalud-light">
                     Inicio
                   </Link>
+                  <div className="flex items-center pt-2 pb-4">
+                    <ThemeToggle />
+                  </div>
                   {user ? (
                     <div className="space-y-4 mt-4">
                       <Link to="/dashboard">

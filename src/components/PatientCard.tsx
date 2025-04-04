@@ -14,10 +14,10 @@ interface PatientCardProps {
 
 export function PatientCard({ id, name, age, lastVisit, diagnosis }: PatientCardProps) {
   return (
-    <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow dark:border-muted/20">
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-full bg-essalud-blue/10 flex items-center justify-center text-essalud-blue font-bold text-lg">
+          <div className="h-12 w-12 rounded-full bg-essalud-blue/10 dark:bg-essalud-blue/20 flex items-center justify-center text-essalud-blue dark:text-essalud-light font-bold text-lg">
             {name.charAt(0)}
           </div>
           <div className="space-y-1">
@@ -33,7 +33,7 @@ export function PatientCard({ id, name, age, lastVisit, diagnosis }: PatientCard
           </div>
         </div>
       </CardContent>
-      <CardFooter className="p-4 bg-muted/40 flex items-center justify-between">
+      <CardFooter className="p-4 bg-muted/40 dark:bg-muted/10 flex items-center justify-between">
         <div className="flex items-center text-xs text-muted-foreground">
           <Calendar className="h-3 w-3 mr-1" />
           Última visita: {lastVisit}
