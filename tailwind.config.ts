@@ -20,7 +20,9 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Inter', 'sans-serif'],
+				sans: ['Tahoma', 'Arial', 'sans-serif'],
+				tahoma: ['Tahoma', 'sans-serif'],
+				arial: ['Arial', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -28,6 +30,10 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				essalud: {
+					blue: '#007AC9',    // Azul Pantone 3005C
+					light: '#3DB7E4',    // Celeste Pantone 298C
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -67,22 +73,22 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				medivoz: {
-					50: '#e6f7ff',
-					100: '#b3e7ff',
-					200: '#80d7ff',
-					300: '#4dc7ff',
-					400: '#1ab7ff',
-					500: '#0099e6',
-					600: '#0076b3',
-					700: '#005380',
-					800: '#00334d',
-					900: '#00141f',
+					50: '#e6f5fb',
+					100: '#ccebf7',
+					200: '#99d7ef',
+					300: '#66c3e7',
+					400: '#33afdf',
+					500: '#007AC9', // EsSalud Azul
+					600: '#006ba6',
+					700: '#005083',
+					800: '#00345a',
+					900: '#001a2d',
 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				md: 'calc(var(--radius) - 1px)',
+				sm: 'calc(var(--radius) - 2px)'
 			},
 			keyframes: {
 				'accordion-down': {

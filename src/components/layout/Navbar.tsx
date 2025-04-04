@@ -24,16 +24,16 @@ export function Navbar() {
   };
   
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
+    <header className="sticky top-0 z-40 w-full border-b border-b-[#3DB7E4]/20 bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center">
         <div className="flex items-center justify-between w-full">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold bg-gradient-to-r from-medivoz-400 to-medivoz-600 text-transparent bg-clip-text">MEDIVOZ</div>
+            <div className="text-2xl font-bold text-essalud-blue">EsSalud</div>
           </Link>
           
           <div className="hidden md:flex gap-6 items-center">
             <nav className="flex items-center space-x-6 text-sm font-medium">
-              <Link to="/" className="transition-colors hover:text-foreground/80">
+              <Link to="/" className="transition-colors hover:text-essalud-blue">
                 Inicio
               </Link>
             </nav>
@@ -69,7 +69,7 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="right">
                 <nav className="flex flex-col gap-4 mt-8">
-                  <Link to="/" className="text-base">
+                  <Link to="/" className="text-base hover:text-essalud-blue">
                     Inicio
                   </Link>
                   {user ? (

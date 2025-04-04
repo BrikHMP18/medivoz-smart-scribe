@@ -52,9 +52,9 @@ export function Sidebar() {
   if (isMobile) {
     return (
       <>
-        <div className="fixed top-0 left-0 right-0 h-16 border-b bg-background z-20 flex items-center justify-between px-4">
+        <div className="fixed top-0 left-0 right-0 h-16 border-b border-[#3DB7E4]/20 bg-background z-20 flex items-center justify-between px-4">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-gradient">MEDIVOZ</span>
+            <span className="text-xl font-bold text-essalud-blue">EsSalud</span>
           </Link>
           
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -66,9 +66,9 @@ export function Sidebar() {
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-64">
               <div className="flex flex-col h-full">
-                <div className="flex items-center h-16 px-4 border-b">
+                <div className="flex items-center h-16 px-4 border-b border-[#3DB7E4]/20">
                   <Link to="/" className="flex items-center space-x-2">
-                    <span className="text-xl font-bold text-gradient">MEDIVOZ</span>
+                    <span className="text-xl font-bold text-essalud-blue">EsSalud</span>
                   </Link>
                 </div>
                 
@@ -81,8 +81,8 @@ export function Sidebar() {
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
                           location.pathname === item.href
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground"
+                            ? "bg-essalud-blue text-white"
+                            : "hover:bg-essalud-blue/10 text-foreground hover:text-essalud-blue"
                         )}
                         onClick={() => setMobileOpen(false)}
                       >
@@ -93,7 +93,7 @@ export function Sidebar() {
                   </nav>
                 </div>
                 
-                <div className="border-t p-4">
+                <div className="border-t border-[#3DB7E4]/20 p-4">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -117,19 +117,19 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        "h-screen fixed left-0 top-0 z-40 flex flex-col border-r bg-sidebar transition-all duration-300",
+        "h-screen fixed left-0 top-0 z-40 flex flex-col border-r border-[#3DB7E4]/20 bg-sidebar transition-all duration-300",
         collapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="flex items-center h-16 px-4 border-b">
+      <div className="flex items-center h-16 px-4 border-b border-[#3DB7E4]/20">
         {!collapsed && (
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-gradient">MEDIVOZ</span>
+            <span className="text-xl font-bold text-essalud-blue">EsSalud</span>
           </Link>
         )}
         {collapsed && (
           <Link to="/" className="flex items-center mx-auto">
-            <span className="text-xl font-bold text-medivoz-500">M</span>
+            <span className="text-xl font-bold text-essalud-blue">E</span>
           </Link>
         )}
       </div>
@@ -143,8 +143,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
                 location.pathname === item.href
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground"
+                  ? "bg-essalud-blue text-white"
+                  : "hover:bg-essalud-blue/10 text-foreground hover:text-essalud-blue"
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -154,7 +154,7 @@ export function Sidebar() {
         </nav>
       </div>
       
-      <div className="border-t p-4">
+      <div className="border-t border-[#3DB7E4]/20 p-4">
         <Button
           variant="outline"
           size="sm"
