@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { useAudioWaveform } from "./use-audio-waveform";
 import { useAudioTranscription } from "./use-audio-transcription";
+import { getBestSupportedMimeType, validateAudioBlob } from "@/utils/audio-utils";
 
 interface AudioRecorderOptions {
   onTranscriptionComplete?: (transcription: string) => void;
@@ -18,6 +19,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const audioBlobRef = useRef<Blob | null>(null);
+  const mimeTypeRef = useRef<string>('');
 
   // Use our custom hooks
   const { 
@@ -74,59 +76,46 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       audioChunksRef.current = [];
       audioBlobRef.current = null;
       
-      // Determine supported MIME types
-      const mimeTypes = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/ogg;codecs=opus',
-        'audio/mp4'
-      ];
-      
-      let mimeType = '';
-      for (const type of mimeTypes) {
-        if (MediaRecorder.isTypeSupported(type)) {
-          mimeType = type;
-          break;
-        }
-      }
-      
-      if (!mimeType) {
-        console.warn("No supported MIME types found, using default");
-        mimeType = '';  // Let browser choose default
-      }
-      
-      console.log("Using MIME type:", mimeType);
+      // Determine supported MIME type
+      mimeTypeRef.current = getBestSupportedMimeType();
       
       // Create the MediaRecorder with the determined MIME type
-      mediaRecorderRef.current = mimeType ? 
-        new MediaRecorder(stream, { mimeType }) : 
+      mediaRecorderRef.current = mimeTypeRef.current ? 
+        new MediaRecorder(stream, { mimeType: mimeTypeRef.current }) : 
         new MediaRecorder(stream);
         
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
-          console.log(`Audio chunk received: ${event.data.size} bytes`);
+          console.log(`Audio chunk received: ${event.data.size} bytes, type: ${event.data.type}`);
         }
       };
       
       mediaRecorderRef.current.onstop = () => {
         // Create blob with all chunks
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType || 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, { 
+          type: mimeTypeRef.current || 'audio/webm' 
+        });
         
-        console.log(`Audio recording stopped, creating blob of size: ${audioBlob.size} bytes`);
+        console.log(`Audio recording stopped, creating blob of size: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
         
-        // Store the blob for later use
-        audioBlobRef.current = audioBlob;
-        
-        // Revoke previous URL if it exists
-        if (audioURL) {
-          URL.revokeObjectURL(audioURL);
+        // Validate the blob
+        if (validateAudioBlob(audioBlob)) {
+          // Store the blob for later use
+          audioBlobRef.current = audioBlob;
+          
+          // Revoke previous URL if it exists
+          if (audioURL) {
+            URL.revokeObjectURL(audioURL);
+          }
+          
+          // Create new URL
+          const url = URL.createObjectURL(audioBlob);
+          console.log("Created audio URL:", url);
+          setAudioURL(url);
+        } else {
+          toast.error("Error al crear el audio. Por favor, intente grabar nuevamente.");
         }
-        
-        // Create new URL
-        const url = URL.createObjectURL(audioBlob);
-        console.log("Created audio URL:", url);
-        setAudioURL(url);
       };
       
       mediaRecorderRef.current.start(100); // Collect data more frequently
@@ -235,9 +224,15 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
         // Try to create the blob from chunks
         console.log("Attempting to create blob from chunks");
         try {
-          const mimeType = 'audio/webm';
-          audioBlobRef.current = new Blob(audioChunksRef.current, { type: mimeType });
+          audioBlobRef.current = new Blob(audioChunksRef.current, { 
+            type: mimeTypeRef.current || 'audio/webm' 
+          });
           console.log("Created blob from chunks, size:", audioBlobRef.current.size);
+          
+          if (!validateAudioBlob(audioBlobRef.current)) {
+            toast.error("El audio grabado no es válido");
+            return "";
+          }
         } catch (error) {
           console.error("Failed to create blob from chunks:", error);
           toast.error("Error al procesar el audio grabado");

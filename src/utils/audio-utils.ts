@@ -28,3 +28,61 @@ export const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
+/**
+ * Validates an audio blob
+ * @param blob - The audio blob to validate
+ * @returns True if the blob is valid, false otherwise
+ */
+export const validateAudioBlob = (blob: Blob | null): boolean => {
+  if (!blob) {
+    console.error("Audio blob is null");
+    return false;
+  }
+  
+  if (blob.size === 0) {
+    console.error("Audio blob size is 0");
+    return false;
+  }
+  
+  // Check if the MIME type is valid
+  const validTypes = [
+    'audio/webm',
+    'audio/ogg',
+    'audio/mp4',
+    'audio/wav',
+    'audio/mpeg'
+  ];
+  
+  if (!validTypes.includes(blob.type) && blob.type !== '') {
+    console.warn("Unexpected audio MIME type:", blob.type);
+    // We don't return false here because some browsers might use custom MIME types
+  }
+  
+  console.log(`Audio blob validated: ${blob.size} bytes, type: ${blob.type}`);
+  return true;
+};
+
+/**
+ * Determines the best supported audio MIME type for the browser
+ * @returns The best supported MIME type or empty string if none is supported
+ */
+export const getBestSupportedMimeType = (): string => {
+  const mimeTypes = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/ogg;codecs=opus',
+    'audio/ogg',
+    'audio/mp4',
+    'audio/mpeg'
+  ];
+  
+  for (const type of mimeTypes) {
+    if (MediaRecorder.isTypeSupported(type)) {
+      console.log("Using MIME type:", type);
+      return type;
+    }
+  }
+  
+  console.warn("No supported MIME types found, using default");
+  return '';  // Let browser choose default
+};
