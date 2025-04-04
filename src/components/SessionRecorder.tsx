@@ -61,7 +61,7 @@ export function SessionRecorder({
       // If onSessionCreated callback is provided, call it with the session ID
       if (onSessionCreated && data) {
         // Type assertion to help TypeScript understand the structure
-        const sessionData = data as unknown as Session[];
+        const sessionData = data as Session[];
         if (sessionData && sessionData.length > 0) {
           const createdSession = sessionData[0];
           if (createdSession && createdSession.id) {
