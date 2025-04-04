@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -45,17 +44,15 @@ export function Sidebar() {
   };
 
   useEffect(() => {
-    // Close mobile menu when location changes
     setMobileOpen(false);
   }, [location]);
   
-  // Mobile sidebar
   if (isMobile) {
     return (
       <>
         <div className="fixed top-0 left-0 right-0 h-16 border-b border-[#3DB7E4]/20 bg-background z-20 flex items-center justify-between px-4">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">EsSalud</span>
+            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">MEDIVOZ</span>
           </Link>
           
           <div className="flex items-center gap-2">
@@ -71,7 +68,7 @@ export function Sidebar() {
                 <div className="flex flex-col h-full">
                   <div className="flex items-center justify-between h-16 px-4 border-b border-[#3DB7E4]/20">
                     <Link to="/" className="flex items-center space-x-2">
-                      <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">EsSalud</span>
+                      <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">MEDIVOZ</span>
                     </Link>
                     <ThemeToggleButton variant="ghost" size="sm" />
                   </div>
@@ -118,7 +115,6 @@ export function Sidebar() {
     );
   }
 
-  // Desktop sidebar
   return (
     <div
       className={cn(
@@ -129,12 +125,12 @@ export function Sidebar() {
       <div className="flex items-center justify-between h-16 px-4 border-b border-[#3DB7E4]/20">
         {!collapsed && (
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">EsSalud</span>
+            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">MEDIVOZ</span>
           </Link>
         )}
         {collapsed && (
           <Link to="/" className="flex items-center mx-auto">
-            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">E</span>
+            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">M</span>
           </Link>
         )}
         {!collapsed && (
