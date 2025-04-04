@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { RecordingControls } from "./session/RecordingControls";
 import { useSessionRecorder } from "@/hooks/use-session-recorder";
