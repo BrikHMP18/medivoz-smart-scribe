@@ -3,7 +3,12 @@ import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { useAudioWaveform } from "./use-audio-waveform";
 import { useAudioTranscription } from "./use-audio-transcription";
-import { getBestSupportedMimeType, validateAudioBlob } from "@/utils/audio-utils";
+import { 
+  getBestSupportedMimeType, 
+  validateAudioBlob, 
+  createBlobURL, 
+  revokeBlobURL 
+} from "@/utils/audio-utils";
 
 interface AudioRecorderOptions {
   onTranscriptionComplete?: (transcription: string) => void;
@@ -53,6 +58,49 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
     }
   };
 
+  // Create an audio blob from chunks
+  const createAudioBlob = (): Blob | null => {
+    if (audioChunksRef.current.length === 0) {
+      console.error("No audio chunks available");
+      return null;
+    }
+
+    // If we already have a blob, use it
+    if (audioBlobRef.current) {
+      return audioBlobRef.current;
+    }
+
+    // Create blob from chunks
+    try {
+      const type = mimeTypeRef.current || 'audio/webm';
+      const audioBlob = new Blob(audioChunksRef.current, { type });
+      console.log(`Created audio blob: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+      
+      if (validateAudioBlob(audioBlob)) {
+        audioBlobRef.current = audioBlob;
+        return audioBlob;
+      }
+    } catch (error) {
+      console.error("Error creating audio blob:", error);
+    }
+    
+    return null;
+  };
+
+  // Update audio URL from blob
+  const updateAudioURL = (blob: Blob | null): void => {
+    // Revoke existing URL to prevent memory leaks
+    revokeBlobURL(audioURL);
+    
+    if (!blob) {
+      setAudioURL(null);
+      return;
+    }
+    
+    const url = createBlobURL(blob);
+    setAudioURL(url);
+  };
+
   // Start recording from microphone
   const startRecording = async () => {
     if (isRecording) return;
@@ -75,6 +123,8 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       // Reset audio chunks and blob
       audioChunksRef.current = [];
       audioBlobRef.current = null;
+      revokeBlobURL(audioURL);
+      setAudioURL(null);
       
       // Determine supported MIME type
       mimeTypeRef.current = getBestSupportedMimeType();
@@ -92,30 +142,9 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       };
       
       mediaRecorderRef.current.onstop = () => {
-        // Create blob with all chunks
-        const audioBlob = new Blob(audioChunksRef.current, { 
-          type: mimeTypeRef.current || 'audio/webm' 
-        });
-        
-        console.log(`Audio recording stopped, creating blob of size: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
-        
-        // Validate the blob
-        if (validateAudioBlob(audioBlob)) {
-          // Store the blob for later use
-          audioBlobRef.current = audioBlob;
-          
-          // Revoke previous URL if it exists
-          if (audioURL) {
-            URL.revokeObjectURL(audioURL);
-          }
-          
-          // Create new URL
-          const url = URL.createObjectURL(audioBlob);
-          console.log("Created audio URL:", url);
-          setAudioURL(url);
-        } else {
-          toast.error("Error al crear el audio. Por favor, intente grabar nuevamente.");
-        }
+        // Create blob with all chunks and update audio URL
+        const audioBlob = createAudioBlob();
+        updateAudioURL(audioBlob);
       };
       
       mediaRecorderRef.current.start(100); // Collect data more frequently
@@ -178,7 +207,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
   };
 
   // Stop recording
-  const stopRecording = () => {
+  const stopRecording = async () => {
     console.log("Attempting to stop recording. State:", mediaRecorderRef.current?.state);
     
     if (!isRecording || !mediaRecorderRef.current) {
@@ -208,6 +237,12 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
       setIsRecording(false);
       setIsPaused(false);
       stopWaveformAnimation();
+
+      // Ensure we create an audio blob in case onstop wasn't triggered
+      if (!audioBlobRef.current) {
+        const audioBlob = createAudioBlob();
+        updateAudioURL(audioBlob);
+      }
     } catch (error) {
       console.error("Error stopping recording:", error);
       toast.error("Error al detener la grabación");
@@ -216,43 +251,32 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
 
   // Transcribe audio using the hook
   const transcribeAudio = async (): Promise<string> => {
-    if (!audioBlobRef.current) {
+    // Ensure we have a blob to transcribe
+    const audioBlob = audioBlobRef.current || createAudioBlob();
+    
+    if (!audioBlob) {
       console.error("No audio blob available for transcription");
-      
-      // Check if we have audio chunks but no blob
-      if (audioChunksRef.current.length > 0) {
-        // Try to create the blob from chunks
-        console.log("Attempting to create blob from chunks");
-        try {
-          audioBlobRef.current = new Blob(audioChunksRef.current, { 
-            type: mimeTypeRef.current || 'audio/webm' 
-          });
-          console.log("Created blob from chunks, size:", audioBlobRef.current.size);
-          
-          if (!validateAudioBlob(audioBlobRef.current)) {
-            toast.error("El audio grabado no es válido");
-            return "";
-          }
-        } catch (error) {
-          console.error("Failed to create blob from chunks:", error);
-          toast.error("Error al procesar el audio grabado");
-          return "";
-        }
-      } else {
-        toast.error("No hay audio para transcribir");
-        return "";
-      }
+      toast.error("No hay audio para transcribir");
+      return "";
     }
     
-    return await transcribe(audioBlobRef.current);
+    // Make sure the audio URL is updated
+    if (!audioURL) {
+      updateAudioURL(audioBlob);
+    }
+    
+    return await transcribe(audioBlob);
+  };
+
+  // Get the current audio blob
+  const getAudioBlob = (): Blob | null => {
+    return audioBlobRef.current || createAudioBlob();
   };
 
   // Clean up resources on unmount
   useEffect(() => {
     return () => {
-      if (audioURL) {
-        URL.revokeObjectURL(audioURL);
-      }
+      revokeBlobURL(audioURL);
       stopWaveformAnimation();
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -273,6 +297,7 @@ export function useAudioRecorder(options?: AudioRecorderOptions) {
     pauseRecording,
     resumeRecording,
     stopRecording,
-    transcribeAudio
+    transcribeAudio,
+    getAudioBlob
   };
 }

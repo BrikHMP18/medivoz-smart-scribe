@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Volume2, Play, Pause } from "lucide-react";
+import { Volume2, Play, Pause, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 
 interface AudioPlayerProps {
@@ -12,39 +12,73 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(0.8); // Default volume at 80%
+  const [isMuted, setIsMuted] = useState(false);
+  const prevVolumeRef = useRef(volume);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
+  // Reset player state when the audio URL changes
   useEffect(() => {
-    // Reset player state when the audio URL changes
     setIsPlaying(false);
     setCurrentTime(0);
     
     if (audioURL && audioRef.current) {
-      // Clean up previous audio URL
-      URL.revokeObjectURL(audioRef.current.src);
-      
-      // Set src and load the audio
       audioRef.current.src = audioURL;
       audioRef.current.load();
+      audioRef.current.volume = isMuted ? 0 : volume;
       console.log("Audio URL loaded:", audioURL);
+      
+      // Play audio automatically after a short delay to ensure it's loaded
+      setTimeout(() => {
+        try {
+          const playPromise = audioRef.current?.play();
+          if (playPromise) {
+            playPromiseRef.current = playPromise;
+            playPromise
+              .then(() => {
+                setIsPlaying(true);
+                console.log("Auto-play successful");
+                playPromiseRef.current = null;
+              })
+              .catch(error => {
+                // Auto-play was prevented (expected on many browsers)
+                console.log("Auto-play prevented:", error);
+                playPromiseRef.current = null;
+              });
+          }
+        } catch (error) {
+          console.error("Error during auto-play attempt:", error);
+        }
+      }, 500);
     }
     
     return () => {
-      if (audioRef.current?.src) {
-        // Clean up audio URL when component unmounts
-        URL.revokeObjectURL(audioRef.current.src);
+      if (audioRef.current) {
+        try {
+          if (playPromiseRef.current) {
+            playPromiseRef.current
+              .then(() => {
+                audioRef.current?.pause();
+                setIsPlaying(false);
+              })
+              .catch(e => console.error("Error with play promise during cleanup:", e));
+          } else {
+            audioRef.current.pause();
+          }
+        } catch (e) {
+          console.error("Error pausing audio during cleanup:", e);
+        }
       }
     };
   }, [audioURL]);
 
-  // Ensure volume is applied after component mounts
+  // Apply volume changes
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = volume;
+      audioRef.current.volume = isMuted ? 0 : volume;
     }
-  }, [volume]);
+  }, [volume, isMuted]);
 
   if (!isVisible || !audioURL) {
     return null;
@@ -67,7 +101,6 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
       if (playPromiseRef.current) {
         playPromiseRef.current
           .then(() => {
-            // Only pause after the play promise resolves
             audioRef.current?.pause();
             setIsPlaying(false);
           })
@@ -130,9 +163,20 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
+    if (isMuted && newVolume > 0) {
+      setIsMuted(false);
     }
+    prevVolumeRef.current = newVolume;
+  };
+  
+  const toggleMute = () => {
+    setIsMuted(prev => {
+      // If unmuting, restore previous volume
+      if (prev && volume === 0) {
+        setVolume(prevVolumeRef.current > 0 ? prevVolumeRef.current : 0.8);
+      }
+      return !prev;
+    });
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,7 +200,12 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
     console.error("Audio error:", error);
     console.error("Audio error code:", error?.code);
     console.error("Audio error message:", error?.message);
+    console.error("Audio src:", audioRef.current?.src);
     toast.error("Error al cargar el audio. Por favor, intente grabar nuevamente.");
+  };
+
+  const handleCanPlay = () => {
+    console.log("Audio can play now");
   };
 
   return (
@@ -167,6 +216,8 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
         onError={handleError}
+        onCanPlay={handleCanPlay}
+        preload="auto"
         className="hidden"
       />
       
@@ -201,7 +252,16 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
         </div>
         
         <div className="flex items-center gap-2">
-          <Volume2 className="h-5 w-5 text-muted-foreground" />
+          <button 
+            onClick={toggleMute}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isMuted || volume === 0 ? (
+              <VolumeX className="h-5 w-5" />
+            ) : (
+              <Volume2 className="h-5 w-5" />
+            )}
+          </button>
           <input
             type="range"
             min="0"

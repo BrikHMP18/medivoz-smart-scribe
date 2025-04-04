@@ -86,3 +86,29 @@ export const getBestSupportedMimeType = (): string => {
   console.warn("No supported MIME types found, using default");
   return '';  // Let browser choose default
 };
+
+/**
+ * Creates a blob URL from a blob
+ * @param blob - The blob to create a URL for
+ * @returns The created URL or null if the blob is invalid
+ */
+export const createBlobURL = (blob: Blob | null): string | null => {
+  if (!validateAudioBlob(blob)) {
+    return null;
+  }
+  
+  const url = URL.createObjectURL(blob);
+  console.log("Created audio URL:", url);
+  return url;
+};
+
+/**
+ * Revokes a blob URL
+ * @param url - The URL to revoke
+ */
+export const revokeBlobURL = (url: string | null): void => {
+  if (url) {
+    URL.revokeObjectURL(url);
+    console.log("Revoked audio URL:", url);
+  }
+};
