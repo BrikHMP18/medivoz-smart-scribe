@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { forceLoadMetadata, preloadAudio } from "@/utils/audio";
@@ -9,6 +10,7 @@ export function useAudioPlayer(audioURL: string | null) {
   const [isLoaded, setIsLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
+  const hasAudioLoadedRef = useRef<boolean>(false);
   
   useEffect(() => {
     let isMounted = true;
@@ -17,21 +19,22 @@ export function useAudioPlayer(audioURL: string | null) {
       setIsPlaying(false);
       setCurrentTime(0);
       setIsLoaded(false);
+      hasAudioLoadedRef.current = false;
       
       if (!audioURL) {
         return;
       }
       
-      console.log("New audio URL detected:", audioURL);
+      console.log("Nueva URL de audio detectada:", audioURL);
       
       try {
-        // Preload the audio
+        // Precargar el audio
         const preloadedAudio = await preloadAudio(audioURL);
         
         if (!isMounted) return;
         
         if (preloadedAudio) {
-          // Clean up any existing audio element
+          // Limpiar cualquier elemento de audio existente
           if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.src = "";
@@ -41,33 +44,46 @@ export function useAudioPlayer(audioURL: string | null) {
           audioRef.current = new Audio(audioURL);
           audioRef.current.preload = "auto";
           
-          // Configure audio element events
+          // Configurar eventos del elemento de audio
           audioRef.current.addEventListener("timeupdate", handleTimeUpdate);
           audioRef.current.addEventListener("ended", handleEnded);
-          audioRef.current.addEventListener("error", (ev: Event) => handleError(ev));
+          audioRef.current.addEventListener("error", handleError);
           audioRef.current.addEventListener("canplay", handleCanPlay);
           audioRef.current.addEventListener("loadedmetadata", handleLoadedMetadata);
+          audioRef.current.addEventListener("durationchange", handleDurationChange);
           
-          // Force load metadata to get duration
-          await forceLoadMetadata(audioRef.current);
-          
-          setIsLoaded(true);
-          console.log("Audio player initialized with URL:", audioURL);
-          
-          // Try autoplay after a short delay
-          setTimeout(() => {
-            if (isMounted && audioRef.current) {
-              tryAutoPlay();
+          // Forzar carga de metadatos para obtener duración
+          try {
+            await forceLoadMetadata(audioRef.current);
+            
+            if (isMounted) {
+              hasAudioLoadedRef.current = true;
+              setIsLoaded(true);
+              console.log("Reproductor de audio inicializado con URL:", audioURL);
+              
+              // Intentar reproducción automática después de un breve retraso
+              setTimeout(() => {
+                if (isMounted && audioRef.current && hasAudioLoadedRef.current) {
+                  tryAutoPlay();
+                }
+              }, 800);
             }
-          }, 500);
+          } catch (err) {
+            console.warn("Error en carga de metadatos:", err);
+            // Continuar de todos modos, confiaremos en los eventos canplay
+            if (isMounted) {
+              hasAudioLoadedRef.current = true;
+              setIsLoaded(true);
+            }
+          }
         } else {
-          console.error("Failed to preload audio");
+          console.error("Error al precargar audio");
           if (isMounted) {
             toast.error("Error al cargar el audio");
           }
         }
       } catch (error) {
-        console.error("Error initializing audio:", error);
+        console.error("Error al inicializar audio:", error);
         if (isMounted) {
           toast.error("Error al inicializar el reproductor de audio");
         }
@@ -83,7 +99,7 @@ export function useAudioPlayer(audioURL: string | null) {
   }, [audioURL]);
   
   const tryAutoPlay = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !hasAudioLoadedRef.current) return;
     
     try {
       const playPromise = audioRef.current.play();
@@ -92,31 +108,32 @@ export function useAudioPlayer(audioURL: string | null) {
         playPromise
           .then(() => {
             setIsPlaying(true);
-            console.log("Auto-play successful");
+            console.log("Auto-reproducción exitosa");
             playPromiseRef.current = null;
           })
           .catch(error => {
-            // Auto-play was prevented (expected on many browsers)
-            console.log("Auto-play prevented:", error);
+            // Auto-reproducción fue impedida (esperado en muchos navegadores)
+            console.log("Auto-reproducción impedida:", error);
             playPromiseRef.current = null;
           });
       }
     } catch (error) {
-      console.error("Error during auto-play attempt:", error);
+      console.error("Error durante intento de auto-reproducción:", error);
     }
   };
   
   const cleanupAudio = () => {
     if (audioRef.current) {
       try {
-        // Clean up event listeners
+        // Limpiar event listeners
         audioRef.current.removeEventListener("timeupdate", handleTimeUpdate);
         audioRef.current.removeEventListener("ended", handleEnded);
-        audioRef.current.removeEventListener("error", (ev: Event) => handleError(ev));
+        audioRef.current.removeEventListener("error", handleError);
         audioRef.current.removeEventListener("canplay", handleCanPlay);
         audioRef.current.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        audioRef.current.removeEventListener("durationchange", handleDurationChange);
         
-        // Properly handle play promise before pausing
+        // Manejar adecuadamente la promesa de reproducción antes de pausar
         if (playPromiseRef.current) {
           playPromiseRef.current
             .then(() => {
@@ -139,26 +156,36 @@ export function useAudioPlayer(audioURL: string | null) {
           audioRef.current.load();
         }
       } catch (e) {
-        console.error("Error cleaning up audio:", e);
+        console.error("Error al limpiar audio:", e);
       }
     }
   };
 
-  // Event handlers
+  // Manejadores de eventos
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+  
+  const handleDurationChange = () => {
+    if (audioRef.current) {
+      const audioDuration = audioRef.current.duration;
+      if (!isNaN(audioDuration) && isFinite(audioDuration)) {
+        console.log("Duración de audio actualizada:", audioDuration);
+        setDuration(audioDuration);
+      }
     }
   };
 
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       const audioDuration = audioRef.current.duration;
-      console.log("Audio metadata loaded, duration:", audioDuration);
+      console.log("Metadatos de audio cargados, duración:", audioDuration);
       
       if (isNaN(audioDuration) || !isFinite(audioDuration)) {
-        console.warn("Invalid audio duration:", audioDuration);
-        setDuration(0);
+        console.warn("Duración de audio no válida:", audioDuration);
+        // No actualizamos la duración aquí, esperaremos el evento durationchange o canplay
       } else {
         setDuration(audioDuration);
       }
@@ -166,14 +193,18 @@ export function useAudioPlayer(audioURL: string | null) {
   };
 
   const handleCanPlay = () => {
-    console.log("Audio can play now, duration:", audioRef.current?.duration);
+    console.log("Audio listo para reproducir, duración:", audioRef.current?.duration);
     if (audioRef.current && !isNaN(audioRef.current.duration) && isFinite(audioRef.current.duration)) {
       setDuration(audioRef.current.duration);
     }
+    
+    // Asegurar que isLoaded sea true incluso si los metadatos fallan
+    hasAudioLoadedRef.current = true;
+    setIsLoaded(true);
   };
 
   const handleEnded = () => {
-    console.log("Audio playback ended");
+    console.log("Reproducción de audio finalizada");
     setIsPlaying(false);
     setCurrentTime(0);
     if (audioRef.current) {
@@ -184,14 +215,18 @@ export function useAudioPlayer(audioURL: string | null) {
   const handleError = (event: Event) => {
     const audioElement = event.target as HTMLAudioElement;
     const error = audioElement.error;
-    console.error("Audio error:", error);
-    console.error("Audio error code:", error?.code);
-    console.error("Audio error message:", error?.message);
-    console.error("Audio src:", audioRef.current?.src);
-    toast.error("Error al reproducir el audio. Por favor, intente grabar nuevamente.");
+    console.error("Error de audio:", error);
+    console.error("Código de error de audio:", error?.code);
+    console.error("Mensaje de error de audio:", error?.message);
+    console.error("Fuente de audio:", audioRef.current?.src);
+    
+    // Solo mostrar toast si el audio debería estar cargado pero falló
+    if (hasAudioLoadedRef.current) {
+      toast.error("Error al reproducir el audio. Por favor, intente grabar nuevamente.");
+    }
   };
 
-  // Playback control functions
+  // Funciones de control de reproducción
   const handlePlayPause = () => {
     if (!audioRef.current || !isLoaded) {
       toast.error("Audio no está listo para reproducirse");
@@ -199,7 +234,7 @@ export function useAudioPlayer(audioURL: string | null) {
     }
     
     if (isPlaying) {
-      // If currently playing, pause the audio
+      // Si está reproduciendo, pausar el audio
       if (playPromiseRef.current) {
         playPromiseRef.current
           .then(() => {
@@ -209,7 +244,7 @@ export function useAudioPlayer(audioURL: string | null) {
             }
           })
           .catch(error => {
-            console.error("Error with play promise during pause:", error);
+            console.error("Error con promesa de reproducción durante pausa:", error);
           });
       } else {
         audioRef.current.pause();
@@ -217,28 +252,28 @@ export function useAudioPlayer(audioURL: string | null) {
       }
     } else {
       try {
-        // Store the play promise
-        console.log("Attempting to play audio...");
+        // Almacenar la promesa de reproducción
+        console.log("Intentando reproducir audio...");
         audioRef.current.currentTime = currentTime;
         playPromiseRef.current = audioRef.current.play();
         
-        // Only set the state to playing after the promise resolves
+        // Solo establecer estado a reproduciendo después de que la promesa se resuelva
         if (playPromiseRef.current) {
           playPromiseRef.current
             .then(() => {
-              console.log("Audio playback started successfully");
+              console.log("Reproducción de audio iniciada exitosamente");
               setIsPlaying(true);
               playPromiseRef.current = null;
             })
             .catch(error => {
-              console.error("Error playing audio:", error);
+              console.error("Error al reproducir audio:", error);
               toast.error("Error al reproducir el audio. Por favor, intente de nuevo.");
               setIsPlaying(false);
               playPromiseRef.current = null;
             });
         }
       } catch (error) {
-        console.error("Exception during play:", error);
+        console.error("Excepción durante reproducción:", error);
         toast.error("Error al reproducir el audio. Por favor, intente de nuevo.");
         setIsPlaying(false);
       }

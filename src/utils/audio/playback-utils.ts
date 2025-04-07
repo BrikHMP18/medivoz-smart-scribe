@@ -1,8 +1,8 @@
 
 /**
- * Preloads an audio file for better playback
- * @param url - The URL of the audio file
- * @returns A promise that resolves when the audio is loaded
+ * Precarga un archivo de audio para mejor reproducción
+ * @param url - La URL del archivo de audio
+ * @returns Una promesa que se resuelve cuando el audio está cargado
  */
 export const preloadAudio = (url: string | null): Promise<HTMLAudioElement | null> => {
   return new Promise((resolve) => {
@@ -14,13 +14,13 @@ export const preloadAudio = (url: string | null): Promise<HTMLAudioElement | nul
     const audio = new Audio();
     
     const onLoaded = () => {
-      console.log("Audio preloaded successfully:", url);
+      console.log("Audio precargado exitosamente:", url);
       audio.removeEventListener('canplaythrough', onLoaded);
       resolve(audio);
     };
     
     const onError = (error: Event) => {
-      console.error("Error preloading audio:", error);
+      console.error("Error al precargar audio:", error);
       audio.removeEventListener('error', onError);
       resolve(null);
     };
@@ -28,28 +28,31 @@ export const preloadAudio = (url: string | null): Promise<HTMLAudioElement | nul
     audio.addEventListener('canplaythrough', onLoaded);
     audio.addEventListener('error', onError);
     audio.preload = 'auto';
-    audio.src = url;
-    audio.load();
     
-    // Set a timeout to resolve anyway after 5 seconds
+    // Usar un timeout más largo para asegurar que el audio se carga correctamente
+    const timeoutMs = 8000; // 8 segundos
     setTimeout(() => {
       audio.removeEventListener('canplaythrough', onLoaded);
       audio.removeEventListener('error', onError);
-      console.warn("Audio preload timed out, continuing anyway");
+      console.warn(`Tiempo de espera de precarga de audio agotado después de ${timeoutMs}ms, continuando de todos modos`);
       resolve(audio);
-    }, 5000);
+    }, timeoutMs);
+    
+    // Asignar src después de configurar los listeners
+    audio.src = url;
+    audio.load();
   });
 };
 
 /**
- * Force browser to load audio metadata
- * @param audioElement - The audio element to load metadata for
- * @returns A promise that resolves when metadata is loaded or rejects on error
+ * Fuerza al navegador a cargar los metadatos de audio
+ * @param audioElement - El elemento de audio para cargar metadatos
+ * @returns Una promesa que se resuelve cuando los metadatos están cargados o se rechaza en caso de error
  */
 export const forceLoadMetadata = (audioElement: HTMLAudioElement): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (audioElement.readyState >= 1) {
-      // Metadata is already loaded
+      // Los metadatos ya están cargados
       resolve();
       return;
     }
@@ -63,41 +66,56 @@ export const forceLoadMetadata = (audioElement: HTMLAudioElement): Promise<void>
     const handleError = (e: Event) => {
       audioElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audioElement.removeEventListener('error', handleError);
-      reject(new Error(`Error loading audio metadata: ${(e.target as HTMLAudioElement).error?.message || 'Unknown error'}`));
+      reject(new Error(`Error al cargar metadatos de audio: ${(e.target as HTMLAudioElement).error?.message || 'Error desconocido'}`));
     };
     
     audioElement.addEventListener('loadedmetadata', handleLoadedMetadata);
     audioElement.addEventListener('error', handleError);
     
-    // Try to force load the metadata
-    if (audioElement.paused) {
-      audioElement.load();
-      
-      // Some browsers need a play/pause to fully load metadata
-      const playPromise = audioElement.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => audioElement.pause())
-          .catch(err => console.warn("Play attempt to load metadata failed:", err));
-      }
-    }
+    // Intentar forzar la carga de metadatos
+    audioElement.load();
     
-    // Set a timeout to resolve anyway after 3 seconds
+    // Algunos navegadores pueden necesitar un intento de reproducción para cargar los metadatos
+    const attemptPlayForMetadata = () => {
+      if (audioElement.paused) {
+        try {
+          const playPromise = audioElement.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                audioElement.pause();
+                audioElement.currentTime = 0;
+              })
+              .catch(err => {
+                console.log("Intento de reproducción para cargar metadatos falló:", err);
+                // No es un problema crítico, el usuario tendrá que iniciar la reproducción manualmente
+              });
+          }
+        } catch (err) {
+          console.log("Error en intento de reproducción para metadatos:", err);
+        }
+      }
+    };
+    
+    // Intentar reproducir después de un breve retraso para permitir la carga inicial
+    setTimeout(attemptPlayForMetadata, 300);
+    
+    // Establecer un tiempo de espera más largo para resolver de todos modos después de 6 segundos
     setTimeout(() => {
       audioElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audioElement.removeEventListener('error', handleError);
-      console.warn("Metadata load timed out, continuing anyway");
+      console.warn("Carga de metadatos agotada, continuando de todos modos");
       resolve();
-    }, 3000);
+    }, 6000);
   });
 };
 
 /**
- * Safely loads an audio file with proper error handling
- * @param url - The URL of the audio file
- * @param onSuccess - Callback for successful loading
- * @param onError - Callback for error
- * @returns The created audio element
+ * Carga segura de un archivo de audio con manejo de errores adecuado
+ * @param url - La URL del archivo de audio
+ * @param onSuccess - Callback para carga exitosa
+ * @param onError - Callback para error
+ * @returns El elemento de audio creado
  */
 export const safeLoadAudio = (
   url: string, 
@@ -112,18 +130,29 @@ export const safeLoadAudio = (
   
   audio.addEventListener('error', (event) => {
     const errorMsg = audio.error ? 
-      `Error loading audio: ${audio.error.code} - ${audio.error.message}` : 
-      'Unknown audio loading error';
+      `Error al cargar audio: ${audio.error.code} - ${audio.error.message}` : 
+      'Error desconocido al cargar audio';
     console.error(errorMsg);
     if (onError) onError(new Error(errorMsg));
   });
   
-  // Add source with error handling
+  // Agregar manejador para metadatos cargados
+  audio.addEventListener('loadedmetadata', () => {
+    if (isNaN(audio.duration) || !isFinite(audio.duration)) {
+      console.warn("Duración de audio no válida al cargar metadatos, intentando corregir");
+      // No hacer nada aquí, solo registrar el problema
+    } else {
+      console.log("Metadatos de audio cargados con duración:", audio.duration);
+    }
+  });
+  
+  // Agregar fuente con manejo de errores
   try {
+    audio.preload = 'auto';
     audio.src = url;
     audio.load();
   } catch (error) {
-    console.error('Exception setting audio source:', error);
+    console.error('Excepción al establecer fuente de audio:', error);
     if (onError) onError(error instanceof Error ? error : new Error(String(error)));
   }
   
