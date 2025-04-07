@@ -6,13 +6,15 @@ interface WaveformProps {
   height?: number;
   color?: string;
   isActive?: boolean;
+  playbackProgress?: number; // Added new prop to show playback progress
 }
 
 export function Waveform({ 
   data, 
   height = 40, 
   color = "#ef4444", 
-  isActive = true 
+  isActive = true,
+  playbackProgress = 1 // Default to showing all bars
 }: WaveformProps) {
   if (!data || data.length === 0) {
     return (
@@ -26,6 +28,8 @@ export function Waveform({
   }
 
   const max = Math.max(...data, 1);
+  // Calculate which bars should be highlighted based on playback progress
+  const progressIndex = Math.floor(data.length * playbackProgress);
   
   return (
     <div 
@@ -34,16 +38,17 @@ export function Waveform({
     >
       {data.map((value, index) => {
         const normalizedHeight = (value / max) * height;
+        const isPlayed = index <= progressIndex;
         return (
           <div 
             key={index}
             className="w-full rounded-t-sm"
             style={{
               height: `${Math.max(normalizedHeight, 2)}px`,
-              backgroundColor: color,
-              opacity: isActive ? 1 : 0.6,
-              transition: "height 0.1s ease-in-out",
-              animation: isActive ? "pulse 1.5s infinite ease-in-out" : "none"
+              backgroundColor: isPlayed ? color : "#cbd5e1", // Played bars use accent color, unplayed use muted color
+              opacity: isActive && isPlayed ? 1 : 0.6,
+              transition: "height 0.1s ease-in-out, background-color 0.3s ease",
+              animation: isActive && isPlayed ? "pulse 1.5s infinite ease-in-out" : "none"
             }}
           />
         );

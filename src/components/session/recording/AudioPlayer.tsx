@@ -3,6 +3,9 @@ import { useAudioPlayer } from "./audio-player/useAudioPlayer";
 import { PlayerControls } from "./audio-player/PlayerControls";
 import { ProgressBar } from "./audio-player/ProgressBar";
 import { StatusIndicator } from "./audio-player/StatusIndicator";
+import { Waveform } from "../../session/Waveform";
+import { generateWaveformData } from "../recording/audio-player/utils/waveformUtils";
+import { useState, useEffect } from "react";
 
 interface AudioPlayerProps {
   audioURL: string | null;
@@ -18,6 +21,17 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
     handlePlayPause,
     handleSeek
   } = useAudioPlayer(audioURL);
+  
+  const [waveformData, setWaveformData] = useState<number[]>([]);
+  const playbackProgress = duration ? currentTime / duration : 0;
+  
+  // Generate waveform data when audio is loaded
+  useEffect(() => {
+    if (isLoaded && audioURL) {
+      const data = generateWaveformData(40); // Generate 40 points for the waveform
+      setWaveformData(data);
+    }
+  }, [isLoaded, audioURL]);
 
   if (!isVisible || !audioURL) {
     return null;
@@ -25,7 +39,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
 
   return (
     <div className="w-full p-4 bg-card rounded-md border shadow-sm">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 mb-2">
         <PlayerControls
           isPlaying={isPlaying}
           isLoaded={isLoaded}
@@ -37,6 +51,15 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
           duration={duration}
           isLoaded={isLoaded}
           onSeek={handleSeek}
+        />
+      </div>
+      
+      <div className="mt-2 mb-1 bg-muted/30 p-2 rounded-md">
+        <Waveform 
+          data={waveformData} 
+          height={32} 
+          isActive={isPlaying}
+          playbackProgress={playbackProgress}
         />
       </div>
       
