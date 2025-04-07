@@ -4,7 +4,7 @@ import { TranscriptionSnippet } from "./medical-record/TranscriptionSnippet";
 import { MedicalRecordForm } from "./medical-record/MedicalRecordForm";
 import { MedicalRecordActions } from "./medical-record/MedicalRecordActions";
 import { PatientInfoCard } from "./medical-record/PatientInfoCard";
-import { useMedicalRecord } from "@/hooks/use-medical-record";
+import { useMedicalRecord } from "@/hooks/medical-record/use-medical-record";
 import { useMedicalRecordAutoFill } from "@/hooks/use-medical-record-auto-fill";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
