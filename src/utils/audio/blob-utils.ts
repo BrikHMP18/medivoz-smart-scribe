@@ -1,52 +1,51 @@
 
 /**
- * Utilidades para manejo y conversión de blobs
+ * Utility functions for blob handling and conversion
  */
 
 /**
- * Convierte un Blob a cadena base64
- * @param blob - El blob de audio a convertir
- * @returns Una promesa que se resuelve a una cadena base64
+ * Converts a Blob to base64 string
+ * @param blob - The audio blob to convert
+ * @returns A promise that resolves to a base64 string
  */
 export const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result === 'string') {
-        // Eliminar prefijo de URL de datos
+        // Remove data URL prefix
         const base64 = reader.result.split(',')[1];
         resolve(base64);
       } else {
-        reject(new Error("El resultado de FileReader no es una cadena"));
+        reject(new Error("FileReader result is not a string"));
       }
     };
     reader.onerror = (event) => {
-      console.error("Error de FileReader:", reader.error);
-      reject(new Error("Error de FileReader: " + (reader.error?.message || "Error desconocido")));
+      console.error("FileReader error:", reader.error);
+      reject(new Error("FileReader error: " + (reader.error?.message || "Unknown error")));
     };
     reader.readAsDataURL(blob);
   });
 };
 
 /**
- * Valida un blob de audio
- * @param blob - El blob de audio a validar
- * @returns True si el blob es válido, false en caso contrario
+ * Validates an audio blob
+ * @param blob - The audio blob to validate
+ * @returns True if the blob is valid, false otherwise
  */
 export const validateAudioBlob = (blob: Blob | null): boolean => {
   if (!blob) {
-    console.error("El blob de audio es nulo");
+    console.error("Audio blob is null");
     return false;
   }
   
   if (blob.size === 0) {
-    console.error("El tamaño del blob de audio es 0");
+    console.error("Audio blob size is 0");
     return false;
   }
   
-  // Comprobar si el tipo MIME es válido
+  // Check if the MIME type is valid
   const validTypes = [
-    'audio/webm;codecs=opus',
     'audio/webm',
     'audio/ogg',
     'audio/mp4',
@@ -54,19 +53,19 @@ export const validateAudioBlob = (blob: Blob | null): boolean => {
     'audio/mpeg'
   ];
   
-  // Registrar pero no invalidar por tipo MIME desconocido
-  if (!validTypes.some(type => blob.type.startsWith(type.split(';')[0])) && blob.type !== '') {
-    console.log(`Formato de audio detectado: ${blob.type}. Continuando de todos modos.`);
+  if (!validTypes.includes(blob.type) && blob.type !== '') {
+    console.warn("Unexpected audio MIME type:", blob.type);
+    // We don't return false here because some browsers might use custom MIME types
   }
   
-  console.log(`Blob de audio validado: ${blob.size} bytes, tipo: ${blob.type}`);
+  console.log(`Audio blob validated: ${blob.size} bytes, type: ${blob.type}`);
   return true;
 };
 
 /**
- * Crea una URL de blob a partir de un blob
- * @param blob - El blob para el que crear una URL
- * @returns La URL creada o null si el blob no es válido
+ * Creates a blob URL from a blob
+ * @param blob - The blob to create a URL for
+ * @returns The created URL or null if the blob is invalid
  */
 export const createBlobURL = (blob: Blob | null): string | null => {
   if (!validateAudioBlob(blob)) {
@@ -74,21 +73,17 @@ export const createBlobURL = (blob: Blob | null): string | null => {
   }
   
   const url = URL.createObjectURL(blob);
-  console.log("URL de audio creada:", url);
+  console.log("Created audio URL:", url);
   return url;
 };
 
 /**
- * Revoca una URL de blob
- * @param url - La URL a revocar
+ * Revokes a blob URL
+ * @param url - The URL to revoke
  */
 export const revokeBlobURL = (url: string | null): void => {
   if (url) {
-    try {
-      URL.revokeObjectURL(url);
-      console.log("URL de audio revocada:", url);
-    } catch (error) {
-      console.error("Error al revocar URL:", error);
-    }
+    URL.revokeObjectURL(url);
+    console.log("Revoked audio URL:", url);
   }
 };

@@ -1,7 +1,7 @@
 
 /**
- * Determina el mejor tipo MIME de audio compatible con el navegador
- * @returns El mejor tipo MIME compatible o cadena vacía si ninguno es compatible
+ * Determines the best supported audio MIME type for the browser
+ * @returns The best supported MIME type or empty string if none is supported
  */
 export const getBestSupportedMimeType = (): string => {
   const mimeTypes = [
@@ -15,19 +15,19 @@ export const getBestSupportedMimeType = (): string => {
   
   for (const type of mimeTypes) {
     if (MediaRecorder.isTypeSupported(type)) {
-      console.log("Usando tipo MIME:", type);
+      console.log("Using MIME type:", type);
       return type;
     }
   }
   
-  console.warn("No se encontraron tipos MIME compatibles, usando el predeterminado del navegador");
-  return '';  // Dejar que el navegador elija el predeterminado
+  console.warn("No supported MIME types found, using default");
+  return '';  // Let browser choose default
 };
 
 /**
- * Crea un listener seguro para elementos de audio que se puede eliminar correctamente
- * @param handler - La función manejadora de eventos
- * @returns Una función que se puede usar como listener de eventos
+ * Creates a safe listener for audio elements that can be properly removed
+ * @param handler - The event handler function
+ * @returns A function that can be used as an event listener
  */
 export const createSafeAudioErrorListener = (handler: (error: MediaError | null) => void) => {
   return (event: Event) => {
