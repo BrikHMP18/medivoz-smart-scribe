@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -14,13 +14,15 @@ import { ThemeToggleButton, ThemeToggle } from "@/components/ThemeToggle";
 
 export function Navbar() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast.success("Sesión cerrada exitosamente");
+      // Navigate to home page after sign out
+      navigate("/");
     } catch (error) {
-      toast.error("Error al cerrar sesión");
+      console.error("Error signing out:", error);
     }
   };
   

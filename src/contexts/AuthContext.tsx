@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type AuthContextType = {
   session: Session | null;
@@ -21,8 +22,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        if (event === 'SIGNED_OUT') {
+          // Clear user and session state immediately on sign out
+          setSession(null);
+          setUser(null);
+        } else {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+        }
         setLoading(false);
       }
     );
@@ -38,7 +45,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Clear local state first
+      setUser(null);
+      setSession(null);
+      
+      // Then call Supabase sign out
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast.success("Sesión cerrada exitosamente");
+    } catch (error: any) {
+      console.error("Error during sign out:", error);
+      toast.error("Error al cerrar sesión: " + (error?.message || "Error desconocido"));
+      
+      // Force clear session anyway
+      localStorage.removeItem('supabase.auth.token');
+    }
   };
 
   const value = {

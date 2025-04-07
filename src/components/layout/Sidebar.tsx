@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Home, Users, Mic, LogOut, Menu, X } from "lucide-react";
@@ -15,6 +16,7 @@ export function Sidebar() {
   const { signOut } = useAuth();
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
   
   const navItems = [
     {
@@ -37,9 +39,9 @@ export function Sidebar() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast.success("Sesión cerrada exitosamente");
+      navigate("/");
     } catch (error) {
-      toast.error("Error al cerrar sesión");
+      console.error("Error signing out:", error);
     }
   };
 
