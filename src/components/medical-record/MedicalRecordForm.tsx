@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FileText, Stethoscope, Clipboard, Brain, Pill, NotebookText } from "lucide-react";
 
 interface MedicalRecordFormData {
   motivo_consulta: string;
@@ -22,12 +23,16 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold border-b pb-1">Datos Clínicos</h3>
+        <h3 className="text-lg font-semibold border-b pb-2 flex items-center gap-2 text-primary">
+          <Stethoscope className="h-5 w-5" />
+          Datos Clínicos
+        </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="motivo_consulta" className="flex items-center">
-              <span className="text-primary font-medium">Motivo de Consulta</span>
+          <div className="space-y-2 bg-primary/5 p-3 rounded-lg border border-primary/10">
+            <Label htmlFor="motivo_consulta" className="flex items-center text-sm font-medium">
+              <FileText className="h-4 w-4 mr-2 text-primary" />
+              <span>Motivo de Consulta</span>
               <span className="ml-1 text-xs text-muted-foreground">(Auto-rellenado)</span>
             </Label>
             <Input
@@ -40,9 +45,10 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="diagnostico_principal" className="flex items-center">
-              <span className="text-primary font-medium">Diagnóstico Principal</span>
+          <div className="space-y-2 bg-primary/5 p-3 rounded-lg border border-primary/10">
+            <Label htmlFor="diagnostico_principal" className="flex items-center text-sm font-medium">
+              <Brain className="h-4 w-4 mr-2 text-primary" />
+              <span>Diagnóstico Principal</span>
               <span className="ml-1 text-xs text-muted-foreground">(Auto-calculado)</span>
             </Label>
             <Input
@@ -56,9 +62,10 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
           </div>
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="sintomas_principales" className="flex items-center">
-            <span className="text-primary font-medium">Síntomas Principales</span>
+        <div className="space-y-2 bg-primary/5 p-3 rounded-lg border border-primary/10">
+          <Label htmlFor="sintomas_principales" className="flex items-center text-sm font-medium">
+            <Clipboard className="h-4 w-4 mr-2 text-primary" />
+            <span>Síntomas Principales</span>
             <span className="ml-1 text-xs text-muted-foreground">(Auto-rellenado)</span>
           </Label>
           <Textarea
@@ -72,9 +79,10 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="antecedentes_relevantes" className="flex items-center">
-            <span className="text-primary font-medium">Antecedentes Relevantes</span>
+        <div className="space-y-2 bg-primary/5 p-3 rounded-lg border border-primary/10">
+          <Label htmlFor="antecedentes_relevantes" className="flex items-center text-sm font-medium">
+            <NotebookText className="h-4 w-4 mr-2 text-primary" />
+            <span>Antecedentes Relevantes</span>
             <span className="ml-1 text-xs text-muted-foreground">(Auto-rellenado)</span>
           </Label>
           <Textarea
@@ -88,9 +96,10 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="plan_tratamiento" className="flex items-center">
-            <span className="text-primary font-medium">Plan de Tratamiento</span>
+        <div className="space-y-2 bg-primary/5 p-3 rounded-lg border border-primary/10">
+          <Label htmlFor="plan_tratamiento" className="flex items-center text-sm font-medium">
+            <Pill className="h-4 w-4 mr-2 text-primary" />
+            <span>Plan de Tratamiento</span>
             <span className="ml-1 text-xs text-muted-foreground">(Generado por IA)</span>
           </Label>
           <ScrollArea className="h-[160px] border rounded-md p-2 border-primary/20">
@@ -106,9 +115,10 @@ export function MedicalRecordForm({ formData, onChange }: MedicalRecordFormProps
           </ScrollArea>
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="notas_adicionales" className="flex items-center">
-            <span className="text-primary font-medium">Notas Adicionales</span>
+        <div className="space-y-2 bg-primary/5 p-3 rounded-lg border border-primary/10">
+          <Label htmlFor="notas_adicionales" className="flex items-center text-sm font-medium">
+            <FileText className="h-4 w-4 mr-2 text-primary" />
+            <span>Notas Adicionales</span>
             <span className="ml-1 text-xs text-muted-foreground">(Auto-rellenado)</span>
           </Label>
           <Textarea

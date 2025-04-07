@@ -7,8 +7,10 @@ import { PatientInfoCard } from "./medical-record/PatientInfoCard";
 import { useMedicalRecord } from "@/hooks/use-medical-record";
 import { useMedicalRecordAutoFill } from "@/hooks/use-medical-record-auto-fill";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { LoaderCircle, Sparkles } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface MedicalRecordModalProps {
   open: boolean;
@@ -23,6 +25,8 @@ export function MedicalRecordModal({
   patientId, 
   sessionId 
 }: MedicalRecordModalProps) {
+  const [autoFilledOnce, setAutoFilledOnce] = useState(false);
+  
   const { 
     formData, 
     patientData,
@@ -44,14 +48,33 @@ export function MedicalRecordModal({
   } = useMedicalRecordAutoFill();
 
   const handleSaveAndClose = async () => {
+    if (!patientId || !sessionId) {
+      toast.error("No hay un paciente o sesión seleccionada");
+      return;
+    }
+    
     const success = await handleSave();
     if (success) {
+      toast.success("Ficha médica guardada exitosamente");
       onOpenChange(false);
+    }
+  };
+
+  const handleExportPDFClick = async () => {
+    if (!patientId || !sessionId) {
+      toast.error("No hay un paciente o sesión seleccionada");
+      return;
+    }
+    
+    const success = await handleExportPDF();
+    if (success) {
+      toast.success("PDF exportado exitosamente");
     }
   };
 
   const handleAutoFill = async () => {
     if (!fullTranscription) {
+      toast.error("No hay transcripción para analizar");
       return;
     }
     
@@ -59,21 +82,28 @@ export function MedicalRecordModal({
     
     if (medicalRecordData) {
       setFormData(medicalRecordData);
+      setAutoFilledOnce(true);
+      toast.success("Ficha médica auto-rellenada exitosamente");
     }
   };
 
   // Auto-trigger the auto-fill when the modal opens and there's transcription available
   useEffect(() => {
-    if (open && fullTranscription && !formData.motivo_consulta) {
+    if (open && fullTranscription && !autoFilledOnce && !formData.motivo_consulta) {
       handleAutoFill();
     }
-  }, [open, fullTranscription]);
+  }, [open, fullTranscription, autoFilledOnce, formData.motivo_consulta]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
         <DialogHeader className="mb-4">
-          <DialogTitle className="text-xl md:text-2xl">Ficha Médica</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl md:text-2xl text-primary">Ficha Médica</DialogTitle>
+            <Badge variant="outline" className="bg-primary/10 text-primary text-xs">
+              Sesión: {sessionId?.substring(0, 8) || "Nueva"}
+            </Badge>
+          </div>
           <DialogDescription className="text-sm md:text-base">
             Información extraída automáticamente de la transcripción
           </DialogDescription>
@@ -88,15 +118,20 @@ export function MedicalRecordModal({
           />
         )}
 
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Transcripción de la consulta</h3>
+        <div className="flex items-center justify-between mb-2 mt-4">
+          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+            Transcripción de la consulta
+            <Badge variant="outline" className="text-xs ml-2 bg-muted/50">
+              {(fullTranscription?.length || 0).toLocaleString()} caracteres
+            </Badge>
+          </h3>
           
           <Button
             size="sm"
             variant="outline"
             onClick={handleAutoFill}
             disabled={isAutoFilling || !fullTranscription}
-            className="flex items-center gap-1 text-xs h-8"
+            className="flex items-center gap-1 text-xs h-8 bg-primary/5 hover:bg-primary/10 border-primary/20"
           >
             {isAutoFilling ? (
               <>
@@ -119,7 +154,7 @@ export function MedicalRecordModal({
           onToggleTranscription={toggleTranscriptionView}
         />
 
-        <div className="grid grid-cols-1 gap-6 py-4">
+        <div className="grid grid-cols-1 gap-6 py-4 mt-2">
           <MedicalRecordForm formData={formData} onChange={handleChange} />
         </div>
 
@@ -129,7 +164,7 @@ export function MedicalRecordModal({
             isExporting={isExporting}
             onClose={() => onOpenChange(false)}
             onSave={handleSaveAndClose}
-            onExport={handleExportPDF}
+            onExport={handleExportPDFClick}
           />
         </DialogFooter>
       </DialogContent>

@@ -17,12 +17,13 @@ export function useMedicalRecordAutoFill() {
   const [autoFillData, setAutoFillData] = useState<MedicalRecordData | null>(null);
 
   const autoFillMedicalRecord = async (transcription: string): Promise<MedicalRecordData | null> => {
-    if (!transcription) {
-      toast.error("No hay transcripción para analizar");
+    if (!transcription || transcription.trim().length < 20) {
+      toast.error("La transcripción es demasiado corta para ser analizada");
       return null;
     }
     
     setIsAutoFilling(true);
+    toast.info("Analizando transcripción con IA...");
     
     try {
       const { data, error } = await supabase.functions.invoke('auto-fill-medical-record', {
@@ -30,8 +31,8 @@ export function useMedicalRecordAutoFill() {
       });
       
       if (error) {
-        console.error("Error invoking auto-fill function:", error);
-        toast.error("Error al auto-rellenar la ficha médica");
+        console.error("Error invocando función de auto-rellenado:", error);
+        toast.error("Error al procesar la transcripción");
         return null;
       }
       
@@ -49,12 +50,16 @@ export function useMedicalRecordAutoFill() {
         antecedentes_relevantes: data.medicalRecord.antecedentes_relevantes || ""
       };
       
-      setAutoFillData(medicalRecord);
+      // Validate data
+      if (!medicalRecord.motivo_consulta || !medicalRecord.diagnostico_principal) {
+        console.warn("Auto-fill returned incomplete data:", medicalRecord);
+        toast.warning("La IA generó información incompleta. Revise y complete los campos manualmente.");
+      }
       
-      toast.success("Ficha médica generada automáticamente");
+      setAutoFillData(medicalRecord);
       return medicalRecord;
     } catch (error) {
-      console.error("Error in autoFillMedicalRecord:", error);
+      console.error("Error en autoFillMedicalRecord:", error);
       toast.error("Error al procesar la transcripción");
       return null;
     } finally {
