@@ -130,6 +130,10 @@ export const saveMedicalRecord = async (
   setIsSaving(true);
   
   try {
+    console.log("Attempting to save medical record, record exists:", recordExists);
+    console.log("Session ID:", sessionId);
+    console.log("Patient ID:", patientId);
+    
     // Check if record already exists
     if (recordExists) {
       // Update existing record
@@ -146,9 +150,20 @@ export const saveMedicalRecord = async (
         .eq('sesion_id', sessionId)
         .eq('paciente_id', patientId);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Update error:", error);
+        throw error;
+      }
     } else {
       // Insert new record
+      console.log("Inserting new record with data:", {
+        paciente_id: patientId,
+        sesion_id: sessionId,
+        motivo_consulta: formData.motivo_consulta,
+        diagnostico_principal: formData.diagnostico_principal,
+        plan_tratamiento: formData.plan_tratamiento,
+      });
+      
       const { error } = await supabase
         .from('fichas_medicas')
         .insert({
@@ -162,7 +177,10 @@ export const saveMedicalRecord = async (
           antecedentes_relevantes: formData.antecedentes_relevantes || null
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Insert error:", error);
+        throw error;
+      }
     }
     
     // Update the patient's diagnostico in the pacientes table
@@ -179,9 +197,9 @@ export const saveMedicalRecord = async (
     
     toast.success("Ficha médica guardada exitosamente");
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error saving medical record:", error);
-    toast.error("Error al guardar la ficha médica");
+    toast.error(`Error al guardar la ficha médica: ${error.message || 'Error desconocido'}`);
     return false;
   } finally {
     setIsSaving(false);
