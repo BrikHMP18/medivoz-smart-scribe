@@ -50,17 +50,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setSession(null);
       
-      // Then call Supabase sign out
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Force clear local storage first to ensure we don't have stale session data
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Only attempt to call Supabase signOut if we have a session
+      if (session) {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      }
       
       toast.success("Sesión cerrada exitosamente");
     } catch (error: any) {
       console.error("Error during sign out:", error);
-      toast.error("Error al cerrar sesión: " + (error?.message || "Error desconocido"));
       
-      // Force clear session anyway
-      localStorage.removeItem('supabase.auth.token');
+      // Even if there's an error, make sure we clear local state
+      localStorage.removeItem('sb-ncmgxsrlzbqyqkowomkr-auth-token');
+      
+      // Check if it's a session missing error - not a critical error to show to user
+      if (error.message && error.message.includes("Auth session missing")) {
+        console.log("No active session to sign out from, proceeding anyway");
+        toast.success("Sesión cerrada exitosamente");
+      } else {
+        toast.error("Error al cerrar sesión: " + (error?.message || "Error desconocido"));
+      }
     }
   };
 
