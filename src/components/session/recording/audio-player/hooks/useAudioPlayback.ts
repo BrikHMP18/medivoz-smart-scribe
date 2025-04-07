@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { handleAudioError } from "../utils/errorHandlers";
 
@@ -8,6 +8,17 @@ export function useAudioPlayback(audioURL: string | null) {
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
+
+  // Initialize audio element when component mounts
+  useEffect(() => {
+    if (!audioRef.current && typeof Audio !== 'undefined') {
+      audioRef.current = new Audio();
+    }
+    
+    return () => {
+      // Cleanup handled in useAudioCleanup
+    };
+  }, []);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {

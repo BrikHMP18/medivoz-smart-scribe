@@ -36,25 +36,35 @@ export function useAudioInitialization(
             audioRef.current.pause();
             audioRef.current.src = "";
             audioRef.current.load();
+            
+            // For existing element, we can update its properties
+            audioRef.current.src = audioURL;
+            audioRef.current.preload = "auto";
+          } else {
+            // If there's no audio element in the ref, we create one
+            // but we can't directly assign to audioRef.current as it's read-only
+            // Instead we'll need to handle this in the parent component
+            console.log("No audio element in ref, parent should handle creation");
           }
           
-          audioRef.current = new Audio(audioURL);
-          audioRef.current.preload = "auto";
-          
-          // Configure audio element events
-          audioRef.current.addEventListener("timeupdate", handleTimeUpdate);
-          audioRef.current.addEventListener("ended", handleEnded);
-          audioRef.current.addEventListener("error", handleError);
-          
-          setIsLoaded(true);
-          console.log("Audio player initialized with URL:", audioURL);
-          
-          // Try autoplay after a short delay
-          setTimeout(() => {
-            if (isMounted && audioRef.current) {
-              tryAutoPlay(audioRef.current);
-            }
-          }, 500);
+          // Configure audio element events if it exists
+          if (audioRef.current) {
+            audioRef.current.addEventListener("timeupdate", handleTimeUpdate);
+            audioRef.current.addEventListener("ended", handleEnded);
+            audioRef.current.addEventListener("error", handleError);
+            
+            setIsLoaded(true);
+            console.log("Audio player initialized with URL:", audioURL);
+            
+            // Try autoplay after a short delay
+            setTimeout(() => {
+              if (isMounted && audioRef.current) {
+                tryAutoPlay(audioRef.current);
+              }
+            }, 500);
+          } else {
+            console.error("Audio element not available");
+          }
         } else {
           console.error("Failed to preload audio");
           if (isMounted) {
