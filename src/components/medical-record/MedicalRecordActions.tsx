@@ -27,6 +27,7 @@ export function MedicalRecordActions({
               variant="outline" 
               onClick={onClose} 
               className="flex-shrink-0 text-sm hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
+              size="sm"
             >
               <X className="h-4 w-4 mr-2" />
               Cerrar sin guardar

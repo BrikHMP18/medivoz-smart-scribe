@@ -55,7 +55,6 @@ export function MedicalRecordModal({
     
     const success = await handleSave();
     if (success) {
-      toast.success("Ficha médica guardada exitosamente");
       onOpenChange(false);
     }
   };
@@ -66,10 +65,7 @@ export function MedicalRecordModal({
       return;
     }
     
-    const success = await handleExportPDF();
-    if (success) {
-      toast.success("PDF exportado exitosamente");
-    }
+    await handleExportPDF();
   };
 
   const handleAutoFill = async () => {

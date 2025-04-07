@@ -211,13 +211,18 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
       }
       
       // Update the patient's diagnostico in the pacientes table
-      await supabase
+      const { error } = await supabase
         .from('pacientes')
         .update({
           diagnostico: formData.diagnostico_principal
         })
         .eq('id', patientId);
       
+      if (error) {
+        console.warn("Error updating patient diagnostico:", error);
+      }
+      
+      toast.success("Ficha médica guardada exitosamente");
       return true;
     } catch (error) {
       console.error("Error saving medical record:", error);
@@ -237,15 +242,6 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     setIsExporting(true);
     
     try {
-      // Make sure to save the record first
-      if (!recordExists) {
-        const saved = await handleSave();
-        if (!saved) {
-          toast.error("Error al guardar los datos antes de exportar");
-          return false;
-        }
-      }
-      
       // Generate PDF
       const doc = new jsPDF();
       
@@ -369,6 +365,7 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
       const fileName = `ficha_medica_${patientData.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
       
+      toast.success("PDF exportado exitosamente");
       return true;
     } catch (error) {
       console.error("Error exporting PDF:", error);
