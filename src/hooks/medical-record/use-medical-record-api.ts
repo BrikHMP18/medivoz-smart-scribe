@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface MedicalRecordFormData {
+export interface MedicalRecordFormData {
   motivo_consulta: string;
   diagnostico_principal: string;
   plan_tratamiento: string;
@@ -11,7 +11,7 @@ interface MedicalRecordFormData {
   antecedentes_relevantes: string;
 }
 
-interface PatientData {
+export interface PatientData {
   nombre: string;
   edad: number | null;
   ocupacion: string | null;

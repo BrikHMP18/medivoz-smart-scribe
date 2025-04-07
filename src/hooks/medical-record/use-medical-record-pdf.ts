@@ -2,22 +2,7 @@
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import { toast } from "sonner";
-
-interface PatientData {
-  nombre: string;
-  edad: number | null;
-  ocupacion: string | null;
-  procedencia: string | null;
-}
-
-interface MedicalRecordFormData {
-  motivo_consulta: string;
-  diagnostico_principal: string;
-  plan_tratamiento: string;
-  notas_adicionales: string;
-  sintomas_principales: string;
-  antecedentes_relevantes: string;
-}
+import { PatientData, MedicalRecordFormData } from "./use-medical-record-api";
 
 export const exportMedicalRecordPDF = async (
   patientData: PatientData | null,

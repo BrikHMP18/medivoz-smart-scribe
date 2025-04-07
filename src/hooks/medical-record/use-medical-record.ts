@@ -6,24 +6,10 @@ import {
   checkRecordExists,
   fetchExistingRecord,
   fetchPatientData,
-  saveMedicalRecord
+  saveMedicalRecord,
+  MedicalRecordFormData,
+  PatientData
 } from "./use-medical-record-api";
-
-interface MedicalRecordFormData {
-  motivo_consulta: string;
-  diagnostico_principal: string;
-  plan_tratamiento: string;
-  notas_adicionales: string;
-  sintomas_principales: string;
-  antecedentes_relevantes: string;
-}
-
-interface PatientData {
-  nombre: string;
-  edad: number | null;
-  ocupacion: string | null;
-  procedencia: string | null;
-}
 
 export function useMedicalRecord(sessionId: string | null, patientId: string | null) {
   const [isSaving, setIsSaving] = useState(false);
@@ -125,3 +111,6 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     recordExists
   };
 }
+
+// Re-export the types from API file for convenience
+export type { MedicalRecordFormData, PatientData } from "./use-medical-record-api";
