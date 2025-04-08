@@ -30,9 +30,16 @@ export function useMedicalRecordAutoFill() {
       console.log("Sending transcription to AI for analysis, length:", transcription.length);
       console.log("First 100 chars:", transcription.substring(0, 100));
       
+      // Add a timeout to the request to prevent hanging indefinitely
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
+      
       const { data, error } = await supabase.functions.invoke('auto-fill-medical-record', {
-        body: { transcription }
+        body: { transcription },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (error) {
         console.error("Error invocando función de auto-rellenado:", error);
@@ -61,13 +68,21 @@ export function useMedicalRecordAutoFill() {
       if (!medicalRecord.motivo_consulta || !medicalRecord.diagnostico_principal) {
         console.warn("Auto-fill returned incomplete data:", medicalRecord);
         toast.warning("La IA generó información incompleta. Revise y complete los campos manualmente.");
+      } else {
+        toast.success("Ficha médica generada exitosamente");
       }
       
       setAutoFillData(medicalRecord);
       return medicalRecord;
     } catch (error) {
-      console.error("Error en autoFillMedicalRecord:", error);
-      toast.error("Error al procesar la transcripción");
+      // Check if it's an abort error (timeout)
+      if (error.name === 'AbortError') {
+        console.error("La solicitud de auto-rellenado ha excedido el tiempo límite");
+        toast.error("La solicitud ha tardado demasiado tiempo. Intente nuevamente");
+      } else {
+        console.error("Error en autoFillMedicalRecord:", error);
+        toast.error("Error al procesar la transcripción");
+      }
       return null;
     } finally {
       setIsAutoFilling(false);

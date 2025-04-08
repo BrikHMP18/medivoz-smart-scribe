@@ -14,6 +14,7 @@ import {
 export function useMedicalRecord(sessionId: string | null, patientId: string | null) {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [transcriptionSnippet, setTranscriptionSnippet] = useState<string>("");
   const [fullTranscription, setFullTranscription] = useState<string>("");
   const [showFullTranscription, setShowFullTranscription] = useState(false);
@@ -32,19 +33,26 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
   // Effect to load all necessary data when sessionId or patientId changes
   useEffect(() => {
     const loadAllData = async () => {
-      if (sessionId) {
-        console.log("Loading transcription for session:", sessionId);
-        await loadTranscription();
-      }
-      
-      if (patientId) {
-        console.log("Loading patient data for patient:", patientId);
-        await loadPatientData();
-      }
-      
-      if (sessionId && patientId) {
-        console.log("Loading record data for session:", sessionId, "and patient:", patientId);
-        await loadRecordData();
+      setIsLoading(true);
+      try {
+        if (sessionId) {
+          console.log("Loading transcription for session:", sessionId);
+          await loadTranscription();
+        }
+        
+        if (patientId) {
+          console.log("Loading patient data for patient:", patientId);
+          await loadPatientData();
+        }
+        
+        if (sessionId && patientId) {
+          console.log("Loading record data for session:", sessionId, "and patient:", patientId);
+          await loadRecordData();
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -55,16 +63,20 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     if (!sessionId) return;
     
     console.log("Fetching transcription data for session:", sessionId);
-    const transcription = await fetchTranscriptionData(sessionId);
-    if (transcription) {
-      console.log("Transcription loaded, length:", transcription.length);
-      setFullTranscription(transcription);
-      
-      // Get the first 200 characters as snippet
-      const snippet = transcription.substring(0, 200) + (transcription.length > 200 ? '...' : '');
-      setTranscriptionSnippet(snippet);
-    } else {
-      console.warn("No transcription found for session:", sessionId);
+    try {
+      const transcription = await fetchTranscriptionData(sessionId);
+      if (transcription) {
+        console.log("Transcription loaded, length:", transcription.length);
+        setFullTranscription(transcription);
+        
+        // Get the first 200 characters as snippet
+        const snippet = transcription.substring(0, 200) + (transcription.length > 200 ? '...' : '');
+        setTranscriptionSnippet(snippet);
+      } else {
+        console.warn("No transcription found for session:", sessionId);
+      }
+    } catch (error) {
+      console.error("Error loading transcription:", error);
     }
   };
 
@@ -72,18 +84,22 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     if (!sessionId || !patientId) return;
     
     console.log("Checking if record exists for session:", sessionId, "and patient:", patientId);
-    const exists = await checkRecordExists(sessionId, patientId);
-    setRecordExists(exists);
-    
-    if (exists) {
-      console.log("Record exists, loading data");
-      const recordData = await fetchExistingRecord(sessionId, patientId);
-      if (recordData) {
-        console.log("Record data loaded:", recordData);
-        setFormData(recordData);
+    try {
+      const exists = await checkRecordExists(sessionId, patientId);
+      setRecordExists(exists);
+      
+      if (exists) {
+        console.log("Record exists, loading data");
+        const recordData = await fetchExistingRecord(sessionId, patientId);
+        if (recordData) {
+          console.log("Record data loaded:", recordData);
+          setFormData(recordData);
+        }
+      } else {
+        console.log("No existing record found, will create new when saved");
       }
-    } else {
-      console.log("No existing record found, will create new when saved");
+    } catch (error) {
+      console.error("Error checking record existence:", error);
     }
   };
 
@@ -91,10 +107,14 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     if (!patientId) return;
     
     console.log("Loading patient data for patient:", patientId);
-    const data = await fetchPatientData(patientId);
-    if (data) {
-      console.log("Patient data loaded:", data);
-      setPatientData(data);
+    try {
+      const data = await fetchPatientData(patientId);
+      if (data) {
+        console.log("Patient data loaded:", data);
+        setPatientData(data);
+      }
+    } catch (error) {
+      console.error("Error loading patient data:", error);
     }
   };
 
@@ -108,11 +128,21 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
   };
 
   const handleSave = async () => {
-    return await saveMedicalRecord(formData, patientId || "", sessionId || "", recordExists, setIsSaving);
+    try {
+      return await saveMedicalRecord(formData, patientId || "", sessionId || "", recordExists, setIsSaving);
+    } catch (error) {
+      console.error("Error saving medical record:", error);
+      return false;
+    }
   };
 
   const handleExportPDF = async () => {
-    return await exportMedicalRecordPDF(patientData, formData, setIsExporting);
+    try {
+      return await exportMedicalRecordPDF(patientData, formData, setIsExporting);
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      return false;
+    }
   };
 
   return {
@@ -123,6 +153,7 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     showFullTranscription,
     isSaving,
     isExporting,
+    isLoading,
     handleChange,
     toggleTranscriptionView,
     handleSave,

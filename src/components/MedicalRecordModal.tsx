@@ -27,6 +27,7 @@ export function MedicalRecordModal({
 }: MedicalRecordModalProps) {
   const [autoFilledOnce, setAutoFilledOnce] = useState(false);
   const autoFillAttempted = useRef(false);
+  const autoFillTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { 
     formData, 
@@ -76,6 +77,11 @@ export function MedicalRecordModal({
       return;
     }
     
+    if (isAutoFilling) {
+      toast.info("Espere mientras se completa el análisis actual");
+      return;
+    }
+    
     console.log("Manual auto-fill triggered with transcription length:", fullTranscription.length);
     const medicalRecordData = await autoFillMedicalRecord(fullTranscription);
     
@@ -98,13 +104,30 @@ export function MedicalRecordModal({
       autoFillAttempted.current = true;
       
       // Add a delay to ensure transcription is fully processed
-      const timer = setTimeout(() => {
-        handleAutoFill();
-      }, 1000);
+      if (autoFillTimeoutRef.current) {
+        clearTimeout(autoFillTimeoutRef.current);
+      }
       
-      return () => clearTimeout(timer);
+      autoFillTimeoutRef.current = setTimeout(() => {
+        handleAutoFill();
+      }, 1500);
     }
+    
+    // Clean up timeout when component unmounts or modal closes
+    return () => {
+      if (autoFillTimeoutRef.current) {
+        clearTimeout(autoFillTimeoutRef.current);
+        autoFillTimeoutRef.current = null;
+      }
+    };
   }, [open, fullTranscription, autoFilledOnce, formData.motivo_consulta]);
+
+  // Reset the attempt status when the modal is closed
+  useEffect(() => {
+    if (!open) {
+      autoFillAttempted.current = false;
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

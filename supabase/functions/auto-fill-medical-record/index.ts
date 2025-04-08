@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import OpenAI from "https://esm.sh/openai@4.20.1";
@@ -274,14 +273,30 @@ serve(async (req) => {
 
     console.log("Processing transcription:", transcription.substring(0, 100) + "...");
     
-    // Execute the workflow
-    const medicalRecord = await executeWorkflow(transcription);
+    // Add a deadline to each step of the workflow to prevent timeouts
+    const timeout = 25000; // 25 seconds
     
-    // Return the generated medical record
-    return new Response(
-      JSON.stringify({ medicalRecord }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    // Execute the workflow with timeout handling
+    try {
+      const medicalRecord = await Promise.race([
+        executeWorkflow(transcription),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Workflow execution timed out")), timeout)
+        )
+      ]) as MedicalRecord;
+      
+      // Return the generated medical record
+      return new Response(
+        JSON.stringify({ medicalRecord }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (timeoutError) {
+      console.error("Workflow execution timed out:", timeoutError);
+      return new Response(
+        JSON.stringify({ error: "Processing timed out. Try again with a shorter transcription." }),
+        { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
   } catch (error) {
     console.error("Error processing request:", error);
     return new Response(
