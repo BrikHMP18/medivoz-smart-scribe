@@ -1,12 +1,11 @@
-
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useMedicalRecordAutoFill } from "@/hooks/use-medical-record-auto-fill";
+import { useMedicalRecordAutoFill } from "@/hooks/medical-record-auto-fill";
 import { TranscriptionPanel } from "./TranscriptionPanel";
 import { MedicalRecordForm } from "../medical-record/MedicalRecordForm";
 import { MedicalRecordActions } from "../medical-record/MedicalRecordActions";
 import { DialogFooter } from "../ui/dialog";
-import { MedicalRecordFormData } from "@/hooks/medical-record/use-medical-record-api";
+import { MedicalRecordFormData } from "@/hooks/medical-record/types";
 
 interface MedicalRecordContainerProps {
   formData: MedicalRecordFormData;
