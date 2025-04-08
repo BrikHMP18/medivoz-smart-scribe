@@ -10,14 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, User } from "lucide-react";
-
-interface Patient {
-  id: string;
-  nombre: string;
-  dni: string;
-  edad: number | null;
-  diagnostico: string | null;
-}
+import { Patient } from "@/components/patients/PatientDialogTypes";
 
 export default function Session() {
   const [transcription, setTranscription] = useState("");
@@ -39,7 +32,7 @@ export default function Session() {
     try {
       const { data, error } = await supabase
         .from('pacientes')
-        .select('id, nombre, dni, edad, diagnostico')
+        .select('id, nombre, dni, edad, diagnostico, ocupacion, procedencia')
         .eq('id', patientId)
         .single();
       
