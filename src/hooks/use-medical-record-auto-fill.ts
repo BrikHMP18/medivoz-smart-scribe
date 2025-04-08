@@ -30,70 +30,61 @@ export function useMedicalRecordAutoFill() {
       console.log("Sending transcription to AI for analysis, length:", transcription.length);
       console.log("First 100 chars:", transcription.substring(0, 100));
       
-      // Initialize timeout handling
-      let timeoutId: NodeJS.Timeout | null = null;
+      // Create an AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 30000); // 30 seconds timeout
       
-      // Create a promise that will reject after the timeout
-      const timeoutPromise = new Promise<null>((_, reject) => {
-        timeoutId = setTimeout(() => {
-          reject(new Error("Auto-fill request timed out"));
-        }, 30000); // 30 seconds timeout
-      });
-      
-      // Create the actual request promise
-      const requestPromise = new Promise<MedicalRecordData | null>(async (resolve, reject) => {
-        try {
-          const { data, error } = await supabase.functions.invoke('auto-fill-medical-record', {
-            body: { transcription }
-          });
-          
-          if (error) {
-            console.error("Error invocando función de auto-rellenado:", error);
-            reject(error);
-            return;
-          }
-          
-          if (!data?.medicalRecord) {
-            console.error("No medical record data returned from API:", data);
-            reject(new Error("No se pudo generar la ficha médica automáticamente"));
-            return;
-          }
-          
-          console.log("Received medical record data from AI:", data.medicalRecord);
-          
-          const medicalRecord: MedicalRecordData = {
-            motivo_consulta: data.medicalRecord.motivo_consulta || "",
-            diagnostico_principal: data.medicalRecord.diagnostico_principal || "",
-            plan_tratamiento: data.medicalRecord.plan_tratamiento || "",
-            notas_adicionales: data.medicalRecord.notas_adicionales || "",
-            sintomas_principales: data.medicalRecord.sintomas_principales || "",
-            antecedentes_relevantes: data.medicalRecord.antecedentes_relevantes || ""
-          };
-          
-          resolve(medicalRecord);
-        } catch (error) {
-          reject(error);
-        }
-      });
-      
-      // Race the request against the timeout
-      const medicalRecord = await Promise.race([requestPromise, timeoutPromise]) as MedicalRecordData | null;
-      
-      // Clear the timeout if the request completed
-      if (timeoutId) {
+      try {
+        const { data, error } = await supabase.functions.invoke('auto-fill-medical-record', {
+          body: { transcription }
+        });
+        
+        // Clear the timeout since the request completed
         clearTimeout(timeoutId);
+        
+        if (error) {
+          console.error("Error invocando función de auto-rellenado:", error);
+          throw error;
+        }
+        
+        if (!data?.medicalRecord) {
+          console.error("No medical record data returned from API:", data);
+          throw new Error("No se pudo generar la ficha médica automáticamente");
+        }
+        
+        console.log("Received medical record data from AI:", data.medicalRecord);
+        
+        const medicalRecord: MedicalRecordData = {
+          motivo_consulta: data.medicalRecord.motivo_consulta || "",
+          diagnostico_principal: data.medicalRecord.diagnostico_principal || "",
+          plan_tratamiento: data.medicalRecord.plan_tratamiento || "",
+          notas_adicionales: data.medicalRecord.notas_adicionales || "",
+          sintomas_principales: data.medicalRecord.sintomas_principales || "",
+          antecedentes_relevantes: data.medicalRecord.antecedentes_relevantes || ""
+        };
+        
+        // Validate data
+        if (!medicalRecord.motivo_consulta || !medicalRecord.diagnostico_principal) {
+          console.warn("Auto-fill returned incomplete data:", medicalRecord);
+          toast.warning("La IA generó información incompleta. Revise y complete los campos manualmente.");
+        } else {
+          toast.success("Ficha médica generada exitosamente");
+        }
+        
+        setAutoFillData(medicalRecord);
+        return medicalRecord;
+      } catch (abortError) {
+        // Clear the timeout to prevent memory leaks
+        clearTimeout(timeoutId);
+        
+        if (controller.signal.aborted) {
+          console.error("La solicitud de auto-rellenado ha excedido el tiempo límite");
+          throw new Error("Auto-fill request timed out");
+        }
+        throw abortError;
       }
-      
-      // Validate data
-      if (medicalRecord && (!medicalRecord.motivo_consulta || !medicalRecord.diagnostico_principal)) {
-        console.warn("Auto-fill returned incomplete data:", medicalRecord);
-        toast.warning("La IA generó información incompleta. Revise y complete los campos manualmente.");
-      } else if (medicalRecord) {
-        toast.success("Ficha médica generada exitosamente");
-      }
-      
-      setAutoFillData(medicalRecord);
-      return medicalRecord;
     } catch (error: any) {
       // Check if it's a timeout error
       if (error.message === "Auto-fill request timed out") {

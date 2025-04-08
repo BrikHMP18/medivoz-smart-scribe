@@ -112,9 +112,8 @@ export function MedicalRecordModal({
       transcriptionChecks.current += 1;
       
       // Try to refresh the transcription data
-      if (refreshTranscription) {
-        await refreshTranscription();
-      }
+      const refreshedTranscription = await refreshTranscription();
+      console.log("Refreshed transcription, length:", refreshedTranscription?.length || 0);
       
       // Schedule next check
       return new Promise<boolean>(resolve => {
@@ -125,29 +124,33 @@ export function MedicalRecordModal({
       });
     } else {
       console.log("Transcription not available after maximum retries");
-      toast.warn("No se pudo obtener la transcripción completa para análisis automático");
+      toast.warning("No se pudo obtener la transcripción completa para análisis automático");
       return false;
     }
   };
 
   // Auto-trigger the auto-fill when the modal opens for the first time and transcription is available
   useEffect(() => {
-    if (open && !autoFilledOnce && !autoFillAttempted.current && 
-        !formData.motivo_consulta) {
+    if (open && !formData.motivo_consulta) {
       console.log("Auto-filling medical record on modal open");
       
-      // Mark that we've tried auto-filling
-      autoFillAttempted.current = true;
+      // Reset attempts on new modal open
+      autoFillAttempted.current = false;
       transcriptionChecks.current = 0;
       
-      // Add a delay to ensure transcription is fully processed
-      if (autoFillTimeoutRef.current) {
-        clearTimeout(autoFillTimeoutRef.current);
-      }
+      if (!autoFillAttempted.current) {
+        // Mark that we've tried auto-filling
+        autoFillAttempted.current = true;
       
-      autoFillTimeoutRef.current = setTimeout(() => {
-        checkAndAutoFillWithRetry();
-      }, 1000);
+        // Add a delay to ensure transcription is fully processed
+        if (autoFillTimeoutRef.current) {
+          clearTimeout(autoFillTimeoutRef.current);
+        }
+        
+        autoFillTimeoutRef.current = setTimeout(() => {
+          checkAndAutoFillWithRetry();
+        }, 1000);
+      }
     }
     
     // Clean up timeout when component unmounts or modal closes
@@ -157,15 +160,7 @@ export function MedicalRecordModal({
         autoFillTimeoutRef.current = null;
       }
     };
-  }, [open, fullTranscription, autoFilledOnce, formData.motivo_consulta]);
-
-  // Reset the attempt status when the modal is closed
-  useEffect(() => {
-    if (!open) {
-      autoFillAttempted.current = false;
-      transcriptionChecks.current = 0;
-    }
-  }, [open]);
+  }, [open, fullTranscription, formData.motivo_consulta]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

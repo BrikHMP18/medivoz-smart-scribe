@@ -31,7 +31,7 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
   });
 
   const loadTranscription = useCallback(async () => {
-    if (!sessionId) return;
+    if (!sessionId) return "";
     
     console.log("Fetching transcription data for session:", sessionId);
     try {
@@ -122,7 +122,8 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
   }, [sessionId, patientId, loadTranscription, loadPatientData, loadRecordData]);
 
   const refreshTranscription = useCallback(async () => {
-    return await loadTranscription();
+    const transcription = await loadTranscription();
+    return transcription;
   }, [loadTranscription]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
