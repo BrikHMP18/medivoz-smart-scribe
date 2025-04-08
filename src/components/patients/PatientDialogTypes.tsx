@@ -21,6 +21,7 @@ export interface Patient {
   ocupacion: string | null;
   procedencia: string | null;
   diagnostico: string | null;
+  ultima_visita?: string | null; // Added to fix type compatibility
 }
 
 export type PatientDialogMode = 'create' | 'edit';

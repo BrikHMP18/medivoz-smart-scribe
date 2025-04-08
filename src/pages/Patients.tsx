@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { 
@@ -14,7 +15,7 @@ import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { PatientsHeader } from "@/components/patients/PatientsHeader";
 import { PatientFilters } from "@/components/patients/PatientFilters";
 import { PatientsList } from "@/components/patients/PatientsList";
-import { Patient } from "@/components/patients/PatientDialogTypes";
+import { Patient, PatientDialogMode } from "@/components/patients/PatientDialogTypes";
 
 export default function Patients() {
   const [searchQuery, setSearchQuery] = useState("");

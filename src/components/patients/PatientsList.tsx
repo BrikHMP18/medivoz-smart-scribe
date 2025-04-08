@@ -1,5 +1,3 @@
-
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -14,17 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { PatientCard } from "@/components/PatientCard";
-
-interface Patient {
-  id: string;
-  nombre: string;
-  edad: number | null;
-  dni: string;
-  ocupacion: string | null;
-  procedencia: string | null;
-  diagnostico: string | null;
-  ultima_visita: string | null;
-}
+import { Patient } from "@/components/patients/PatientDialogTypes";
 
 interface PatientsListProps {
   patients: Patient[] | null;
@@ -65,7 +53,7 @@ export function PatientsList({ patients, isLoading, searchQuery, onEdit, onDelet
     <>
       {/* Mobile view: Cards */}
       <div className="grid grid-cols-1 gap-4 md:hidden">
-        {patients.map((patient) => (
+        {patients?.map((patient) => (
           <PatientCard 
             key={patient.id}
             id={patient.id}
@@ -93,7 +81,7 @@ export function PatientsList({ patients, isLoading, searchQuery, onEdit, onDelet
             </TableRow>
           </TableHeader>
           <TableBody>
-            {patients.map((patient) => (
+            {patients?.map((patient) => (
               <TableRow key={patient.id} className="cursor-pointer hover:bg-muted">
                 <TableCell className="font-medium">
                   <Link to={`/session?patientId=${patient.id}`} className="hover:underline">

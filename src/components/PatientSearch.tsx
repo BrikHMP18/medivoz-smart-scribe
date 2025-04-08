@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,14 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PatientDialog } from "@/components/PatientDialog";
 import { toast } from "sonner";
-
-interface Patient {
-  id: string;
-  nombre: string;
-  dni: string;
-  edad: number | null;
-  diagnostico: string | null;
-}
+import { Patient } from "@/components/patients/PatientDialogTypes";
 
 interface PatientSearchProps {
   onPatientSelect: (patient: Patient) => void;
@@ -45,7 +37,7 @@ export function PatientSearch({ onPatientSelect, selectedPatient }: PatientSearc
         return [];
       }
       
-      return data;
+      return data as Patient[];
     },
     enabled: debouncedSearchQuery.length >= 2
   });
@@ -60,7 +52,6 @@ export function PatientSearch({ onPatientSelect, selectedPatient }: PatientSearc
   };
   
   const handlePatientCreated = () => {
-    // Force refetch patients when a new one is created
     toast.success("Paciente creado. Ahora puedes seleccionarlo en la búsqueda.");
   };
   
