@@ -17,9 +17,9 @@ export const invokeAutoFillFunction = async (
   console.log("First 100 chars:", transcription.substring(0, 100));
   
   try {
+    // Use a regular fetch with AbortController instead of signal in function invoke
     const { data, error } = await supabase.functions.invoke('auto-fill-medical-record', {
-      body: { transcription },
-      signal: controller.signal
+      body: { transcription }
     });
     
     if (error) {
