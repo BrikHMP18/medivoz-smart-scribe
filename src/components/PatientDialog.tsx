@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,18 +33,32 @@ const patientFormSchema = z.object({
   edad: z.coerce.number().optional().nullable(),
   ocupacion: z.string().optional(),
   procedencia: z.string().optional(),
+  diagnostico: z.string().optional(),
 });
 
 type PatientFormValues = z.infer<typeof patientFormSchema>;
+
+interface Patient {
+  id: string;
+  nombre: string;
+  dni: string;
+  edad: number | null;
+  ocupacion: string | null;
+  procedencia: string | null;
+  diagnostico: string | null;
+}
 
 interface PatientDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  patient?: Patient | null;
+  mode?: 'create' | 'edit';
 }
 
-export function PatientDialog({ open, onOpenChange, onSuccess }: PatientDialogProps) {
+export function PatientDialog({ open, onOpenChange, onSuccess, patient, mode = 'create' }: PatientDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isEditing = mode === 'edit';
   
   // Initialize form
   const form = useForm<PatientFormValues>({
@@ -54,34 +68,81 @@ export function PatientDialog({ open, onOpenChange, onSuccess }: PatientDialogPr
       dni: "",
       edad: null,
       ocupacion: "",
-      procedencia: ""
+      procedencia: "",
+      diagnostico: "",
     },
   });
+  
+  // Update form values when editing a patient
+  useEffect(() => {
+    if (isEditing && patient) {
+      form.reset({
+        nombre: patient.nombre,
+        dni: patient.dni,
+        edad: patient.edad,
+        ocupacion: patient.ocupacion || "",
+        procedencia: patient.procedencia || "",
+        diagnostico: patient.diagnostico || "",
+      });
+    } else if (!isEditing) {
+      form.reset({
+        nombre: "",
+        dni: "",
+        edad: null,
+        ocupacion: "",
+        procedencia: "",
+        diagnostico: "",
+      });
+    }
+  }, [isEditing, patient, form, open]);
   
   const onSubmit = async (data: PatientFormValues) => {
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase.from('pacientes').insert([{
-        nombre: data.nombre,
-        dni: data.dni,
-        edad: data.edad,
-        ocupacion: data.ocupacion || null,
-        procedencia: data.procedencia || null,
-      }]);
-      
-      if (error) {
-        throw error;
+      if (isEditing && patient) {
+        // Update existing patient
+        const { error } = await supabase.from('pacientes')
+          .update({
+            nombre: data.nombre,
+            dni: data.dni,
+            edad: data.edad,
+            ocupacion: data.ocupacion || null,
+            procedencia: data.procedencia || null,
+            diagnostico: data.diagnostico || null,
+          })
+          .eq('id', patient.id);
+        
+        if (error) {
+          throw error;
+        }
+        
+        toast.success("Paciente actualizado correctamente");
+      } else {
+        // Create new patient
+        const { error } = await supabase.from('pacientes').insert([{
+          nombre: data.nombre,
+          dni: data.dni,
+          edad: data.edad,
+          ocupacion: data.ocupacion || null,
+          procedencia: data.procedencia || null,
+          diagnostico: data.diagnostico || null,
+        }]);
+        
+        if (error) {
+          throw error;
+        }
+        
+        toast.success("Paciente registrado correctamente");
       }
       
-      toast.success("Paciente registrado correctamente");
       form.reset();
       onOpenChange(false);
       if (onSuccess) onSuccess();
       
     } catch (error) {
-      console.error("Error registrando paciente:", error);
-      toast.error("Error al registrar paciente");
+      console.error(`Error ${isEditing ? 'actualizando' : 'registrando'} paciente:`, error);
+      toast.error(`Error al ${isEditing ? 'actualizar' : 'registrar'} paciente`);
     } finally {
       setIsSubmitting(false);
     }
@@ -91,9 +152,12 @@ export function PatientDialog({ open, onOpenChange, onSuccess }: PatientDialogPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nuevo Paciente</DialogTitle>
+          <DialogTitle>{isEditing ? 'Editar Paciente' : 'Nuevo Paciente'}</DialogTitle>
           <DialogDescription>
-            Complete los datos del paciente. Solo nombre y DNI son obligatorios.
+            {isEditing 
+              ? 'Actualice los datos del paciente seleccionado.'
+              : 'Complete los datos del paciente. Solo nombre y DNI son obligatorios.'
+            }
           </DialogDescription>
         </DialogHeader>
         
@@ -177,6 +241,21 @@ export function PatientDialog({ open, onOpenChange, onSuccess }: PatientDialogPr
               )}
             />
             
+            <FormField
+              control={form.control}
+              name="diagnostico"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Diagnóstico</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Diagnóstico preliminar" {...field} />
+                  </FormControl>
+                  <FormDescription>Opcional</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <DialogFooter>
               <Button 
                 type="button" 
@@ -190,9 +269,9 @@ export function PatientDialog({ open, onOpenChange, onSuccess }: PatientDialogPr
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando...
+                    {isEditing ? 'Actualizando...' : 'Guardando...'}
                   </>
-                ) : "Guardar Paciente"}
+                ) : isEditing ? 'Actualizar Paciente' : 'Guardar Paciente'}
               </Button>
             </DialogFooter>
           </form>
