@@ -29,51 +29,71 @@ export function useMedicalRecord(sessionId: string | null, patientId: string | n
     antecedentes_relevantes: ""
   });
 
+  // Effect to load all necessary data when sessionId or patientId changes
   useEffect(() => {
-    if (sessionId) {
-      loadTranscription();
-      if (patientId) {
-        loadRecordData();
+    const loadAllData = async () => {
+      if (sessionId) {
+        console.log("Loading transcription for session:", sessionId);
+        await loadTranscription();
       }
-    }
+      
+      if (patientId) {
+        console.log("Loading patient data for patient:", patientId);
+        await loadPatientData();
+      }
+      
+      if (sessionId && patientId) {
+        console.log("Loading record data for session:", sessionId, "and patient:", patientId);
+        await loadRecordData();
+      }
+    };
     
-    if (patientId) {
-      loadPatientData();
-    }
+    loadAllData();
   }, [sessionId, patientId]);
 
   const loadTranscription = async () => {
     if (!sessionId) return;
     
+    console.log("Fetching transcription data for session:", sessionId);
     const transcription = await fetchTranscriptionData(sessionId);
     if (transcription) {
+      console.log("Transcription loaded, length:", transcription.length);
       setFullTranscription(transcription);
       
       // Get the first 200 characters as snippet
       const snippet = transcription.substring(0, 200) + (transcription.length > 200 ? '...' : '');
       setTranscriptionSnippet(snippet);
+    } else {
+      console.warn("No transcription found for session:", sessionId);
     }
   };
 
   const loadRecordData = async () => {
     if (!sessionId || !patientId) return;
     
+    console.log("Checking if record exists for session:", sessionId, "and patient:", patientId);
     const exists = await checkRecordExists(sessionId, patientId);
     setRecordExists(exists);
     
     if (exists) {
+      console.log("Record exists, loading data");
       const recordData = await fetchExistingRecord(sessionId, patientId);
       if (recordData) {
+        console.log("Record data loaded:", recordData);
         setFormData(recordData);
       }
+    } else {
+      console.log("No existing record found, will create new when saved");
     }
   };
 
   const loadPatientData = async () => {
     if (!patientId) return;
     
+    console.log("Loading patient data for patient:", patientId);
     const data = await fetchPatientData(patientId);
     if (data) {
+      console.log("Patient data loaded:", data);
       setPatientData(data);
     }
   };

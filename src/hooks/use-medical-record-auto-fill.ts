@@ -18,6 +18,7 @@ export function useMedicalRecordAutoFill() {
 
   const autoFillMedicalRecord = async (transcription: string): Promise<MedicalRecordData | null> => {
     if (!transcription || transcription.trim().length < 20) {
+      console.error("Transcription too short:", transcription);
       toast.error("La transcripción es demasiado corta para ser analizada");
       return null;
     }
@@ -26,6 +27,9 @@ export function useMedicalRecordAutoFill() {
     toast.info("Analizando transcripción con IA...");
     
     try {
+      console.log("Sending transcription to AI for analysis, length:", transcription.length);
+      console.log("First 100 chars:", transcription.substring(0, 100));
+      
       const { data, error } = await supabase.functions.invoke('auto-fill-medical-record', {
         body: { transcription }
       });
@@ -37,9 +41,12 @@ export function useMedicalRecordAutoFill() {
       }
       
       if (!data?.medicalRecord) {
+        console.error("No medical record data returned from API:", data);
         toast.error("No se pudo generar la ficha médica automáticamente");
         return null;
       }
+      
+      console.log("Received medical record data from AI:", data.medicalRecord);
       
       const medicalRecord: MedicalRecordData = {
         motivo_consulta: data.medicalRecord.motivo_consulta || "",

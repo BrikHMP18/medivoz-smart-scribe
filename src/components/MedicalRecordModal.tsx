@@ -9,7 +9,7 @@ import { useMedicalRecordAutoFill } from "@/hooks/use-medical-record-auto-fill";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoaderCircle, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 
 interface MedicalRecordModalProps {
@@ -26,6 +26,7 @@ export function MedicalRecordModal({
   sessionId 
 }: MedicalRecordModalProps) {
   const [autoFilledOnce, setAutoFilledOnce] = useState(false);
+  const autoFillAttempted = useRef(false);
   
   const { 
     formData, 
@@ -75,6 +76,7 @@ export function MedicalRecordModal({
       return;
     }
     
+    console.log("Manual auto-fill triggered with transcription length:", fullTranscription.length);
     const medicalRecordData = await autoFillMedicalRecord(fullTranscription);
     
     if (medicalRecordData) {
@@ -84,14 +86,21 @@ export function MedicalRecordModal({
     }
   };
 
-  // Auto-trigger the auto-fill only when the modal opens for the first time
+  // Auto-trigger the auto-fill when the modal opens for the first time and transcription is available
   useEffect(() => {
-    if (open && fullTranscription && !autoFilledOnce && !formData.motivo_consulta) {
-      console.log("Auto-filling medical record for the first time");
-      // Add a slight delay to ensure transcription is fully loaded
+    if (open && fullTranscription && !autoFilledOnce && !autoFillAttempted.current && 
+        !formData.motivo_consulta && fullTranscription.length > 50) {
+      console.log("Auto-filling medical record on modal open");
+      console.log("Transcription length:", fullTranscription.length);
+      console.log("Form data empty?", !formData.motivo_consulta);
+      
+      // Mark that we've tried auto-filling
+      autoFillAttempted.current = true;
+      
+      // Add a delay to ensure transcription is fully processed
       const timer = setTimeout(() => {
         handleAutoFill();
-      }, 500);
+      }, 1000);
       
       return () => clearTimeout(timer);
     }
