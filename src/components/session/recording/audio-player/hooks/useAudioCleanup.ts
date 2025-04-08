@@ -11,10 +11,22 @@ export function useAudioCleanup(
     return () => {
       cleanup();
     };
+  }, []);
+
+  // Also clean up when audioURL changes
+  useEffect(() => {
+    // No need to clean up when a new URL is set - that's handled in initialization
+    // This is just to revoke the old URL
+    if (audioURL === null) {
+      cleanup();
+    }
   }, [audioURL]);
 
   const cleanup = () => {
-    revokeBlobURL(audioURL);
+    // Only revoke blob URL when it's actually a blob URL
+    if (audioURL && audioURL.startsWith('blob:')) {
+      revokeBlobURL(audioURL);
+    }
     
     if (audioRef.current) {
       try {

@@ -48,6 +48,12 @@ export const preloadAudio = (url: string | null): Promise<HTMLAudioElement | nul
  */
 export const forceLoadMetadata = (audioElement: HTMLAudioElement): Promise<void> => {
   return new Promise((resolve, reject) => {
+    // Check if the audio element has a valid source
+    if (!audioElement.src || audioElement.src === window.location.href) {
+      resolve(); // No need to load metadata for empty source
+      return;
+    }
+
     if (audioElement.readyState >= 1) {
       // Metadata is already loaded
       resolve();
@@ -74,11 +80,18 @@ export const forceLoadMetadata = (audioElement: HTMLAudioElement): Promise<void>
       audioElement.load();
       
       // Some browsers need a play/pause to fully load metadata
-      const playPromise = audioElement.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => audioElement.pause())
-          .catch(err => console.warn("Play attempt to load metadata failed:", err));
+      // Only try this if the src is valid
+      if (audioElement.src && audioElement.src !== window.location.href) {
+        try {
+          const playPromise = audioElement.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => audioElement.pause())
+              .catch(err => console.warn("Play attempt to load metadata failed:", err));
+          }
+        } catch (err) {
+          console.warn("Error during play attempt to load metadata:", err);
+        }
       }
     }
     

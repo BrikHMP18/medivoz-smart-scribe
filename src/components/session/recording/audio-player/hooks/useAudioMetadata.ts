@@ -34,10 +34,12 @@ export function useAudioMetadata(audioRef: React.RefObject<HTMLAudioElement>) {
       audioElement.addEventListener("loadedmetadata", handleLoadedMetadata);
       audioElement.addEventListener("canplay", handleCanPlay);
       
-      // Force load metadata to get duration
-      forceLoadMetadata(audioElement).catch(error => 
-        console.warn("Error loading metadata:", error)
-      );
+      // Only force load metadata if there's a valid source
+      if (audioElement.src && audioElement.src !== window.location.href) {
+        forceLoadMetadata(audioElement).catch(error => 
+          console.warn("Error loading metadata:", error)
+        );
+      }
     }
     
     return () => {

@@ -55,9 +55,6 @@ export function useAudioInitialization(
             
             setIsLoaded(true);
             console.log("Audio player initialized with URL:", audioURL);
-            
-            // Remove auto-play functionality entirely
-            // The play button will now be the only way to trigger playback
           } else {
             console.error("Audio element not available");
           }
