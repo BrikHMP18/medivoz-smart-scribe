@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { 
@@ -15,18 +14,7 @@ import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { PatientsHeader } from "@/components/patients/PatientsHeader";
 import { PatientFilters } from "@/components/patients/PatientFilters";
 import { PatientsList } from "@/components/patients/PatientsList";
-
-// Type definition based on Supabase schema
-interface Patient {
-  id: string;
-  nombre: string;
-  edad: number | null;
-  dni: string;
-  ocupacion: string | null;
-  procedencia: string | null;
-  diagnostico: string | null;
-  ultima_visita: string | null;
-}
+import { Patient } from "@/components/patients/PatientDialogTypes";
 
 export default function Patients() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +25,6 @@ export default function Patients() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   
-  // Fetch patients from Supabase
   const { data: patients, isLoading, error, refetch } = useQuery({
     queryKey: ['patients', debouncedSearchQuery],
     queryFn: async () => {
@@ -57,7 +44,6 @@ export default function Patients() {
     }
   });
   
-  // Handle errors
   if (error) {
     toast.error("Error al cargar los pacientes");
     console.error(error);
@@ -133,7 +119,6 @@ export default function Patients() {
             </CardContent>
           </Card>
           
-          {/* Patient Dialog */}
           <PatientDialog 
             open={isPatientDialogOpen} 
             onOpenChange={setIsPatientDialogOpen}
@@ -142,7 +127,6 @@ export default function Patients() {
             mode={dialogMode}
           />
           
-          {/* Delete Confirmation Dialog */}
           <DeleteConfirmDialog
             open={isDeleteDialogOpen}
             onOpenChange={setIsDeleteDialogOpen}

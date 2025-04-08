@@ -2,61 +2,40 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-
-// Define form validation schema
-const patientFormSchema = z.object({
-  nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
-  dni: z.string().min(1, { message: "El DNI es obligatorio" }),
-  edad: z.coerce.number().optional().nullable(),
-  ocupacion: z.string().optional(),
-  procedencia: z.string().optional(),
-  diagnostico: z.string().optional(),
-});
-
-type PatientFormValues = z.infer<typeof patientFormSchema>;
-
-interface Patient {
-  id: string;
-  nombre: string;
-  dni: string;
-  edad: number | null;
-  ocupacion: string | null;
-  procedencia: string | null;
-  diagnostico: string | null;
-}
+import { Form } from "@/components/ui/form";
+import { PatientFormFields } from "@/components/patients/PatientFormFields";
+import { PatientDialogActions } from "@/components/patients/PatientDialogActions";
+import { 
+  patientFormSchema, 
+  PatientFormValues, 
+  Patient, 
+  PatientDialogMode 
+} from "@/components/patients/PatientDialogTypes";
 
 interface PatientDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
   patient?: Patient | null;
-  mode?: 'create' | 'edit';
+  mode?: PatientDialogMode;
 }
 
-export function PatientDialog({ open, onOpenChange, onSuccess, patient, mode = 'create' }: PatientDialogProps) {
+export function PatientDialog({ 
+  open, 
+  onOpenChange, 
+  onSuccess, 
+  patient, 
+  mode = 'create' 
+}: PatientDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = mode === 'edit';
   
@@ -163,117 +142,13 @@ export function PatientDialog({ open, onOpenChange, onSuccess, patient, mode = '
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="nombre"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre completo*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Juan Pérez" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <PatientFormFields form={form} />
             
-            <FormField
-              control={form.control}
-              name="dni"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>DNI*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="12345678" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <PatientDialogActions 
+              isSubmitting={isSubmitting} 
+              isEditing={isEditing} 
+              onCancel={() => onOpenChange(false)} 
             />
-            
-            <FormField
-              control={form.control}
-              name="edad"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Edad</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="30" 
-                      type="number" 
-                      onChange={(e) => field.onChange(e.target.value === "" ? null : parseInt(e.target.value, 10))}
-                      value={field.value === null ? "" : field.value}
-                    />
-                  </FormControl>
-                  <FormDescription>Opcional</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="ocupacion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ocupación</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ingeniero" {...field} />
-                  </FormControl>
-                  <FormDescription>Opcional</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="procedencia"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Procedencia</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Buenos Aires" {...field} />
-                  </FormControl>
-                  <FormDescription>Opcional</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="diagnostico"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Diagnóstico</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Diagnóstico preliminar" {...field} />
-                  </FormControl>
-                  <FormDescription>Opcional</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isEditing ? 'Actualizando...' : 'Guardando...'}
-                  </>
-                ) : isEditing ? 'Actualizar Paciente' : 'Guardar Paciente'}
-              </Button>
-            </DialogFooter>
           </form>
         </Form>
       </DialogContent>
