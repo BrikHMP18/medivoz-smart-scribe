@@ -28,6 +28,8 @@ export function MedicalRecordModal({
   const [autoFilledOnce, setAutoFilledOnce] = useState(false);
   const autoFillAttempted = useRef(false);
   const autoFillTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const transcriptionChecks = useRef<number>(0);
+  const maxTranscriptionChecks = 5; // Maximum number of retries
   
   const { 
     formData, 
@@ -42,7 +44,8 @@ export function MedicalRecordModal({
     handleSave, 
     handleExportPDF,
     setFormData,
-    recordExists
+    recordExists,
+    refreshTranscription
   } = useMedicalRecord(sessionId || null, patientId || null);
 
   const {
@@ -92,16 +95,50 @@ export function MedicalRecordModal({
     }
   };
 
+  // Check if transcription is available, and if not, retry a few times
+  const checkAndAutoFillWithRetry = async () => {
+    console.log("Checking transcription availability", { 
+      attempt: transcriptionChecks.current + 1, 
+      hasTranscription: !!fullTranscription,
+      transcriptionLength: fullTranscription?.length || 0
+    });
+    
+    if (fullTranscription && fullTranscription.length > 50) {
+      console.log("Transcription found, proceeding with auto-fill");
+      await handleAutoFill();
+      return true;
+    } else if (transcriptionChecks.current < maxTranscriptionChecks) {
+      console.log("Transcription not available yet, refreshing and retrying...");
+      transcriptionChecks.current += 1;
+      
+      // Try to refresh the transcription data
+      if (refreshTranscription) {
+        await refreshTranscription();
+      }
+      
+      // Schedule next check
+      return new Promise<boolean>(resolve => {
+        autoFillTimeoutRef.current = setTimeout(async () => {
+          const result = await checkAndAutoFillWithRetry();
+          resolve(result);
+        }, 2000); // Retry after 2 seconds
+      });
+    } else {
+      console.log("Transcription not available after maximum retries");
+      toast.warn("No se pudo obtener la transcripción completa para análisis automático");
+      return false;
+    }
+  };
+
   // Auto-trigger the auto-fill when the modal opens for the first time and transcription is available
   useEffect(() => {
-    if (open && fullTranscription && !autoFilledOnce && !autoFillAttempted.current && 
-        !formData.motivo_consulta && fullTranscription.length > 50) {
+    if (open && !autoFilledOnce && !autoFillAttempted.current && 
+        !formData.motivo_consulta) {
       console.log("Auto-filling medical record on modal open");
-      console.log("Transcription length:", fullTranscription.length);
-      console.log("Form data empty?", !formData.motivo_consulta);
       
       // Mark that we've tried auto-filling
       autoFillAttempted.current = true;
+      transcriptionChecks.current = 0;
       
       // Add a delay to ensure transcription is fully processed
       if (autoFillTimeoutRef.current) {
@@ -109,8 +146,8 @@ export function MedicalRecordModal({
       }
       
       autoFillTimeoutRef.current = setTimeout(() => {
-        handleAutoFill();
-      }, 1500);
+        checkAndAutoFillWithRetry();
+      }, 1000);
     }
     
     // Clean up timeout when component unmounts or modal closes
@@ -126,6 +163,7 @@ export function MedicalRecordModal({
   useEffect(() => {
     if (!open) {
       autoFillAttempted.current = false;
+      transcriptionChecks.current = 0;
     }
   }, [open]);
 
