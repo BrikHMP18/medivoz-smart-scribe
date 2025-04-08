@@ -14,6 +14,13 @@ interface TranscriptionProps {
 export function Transcription({ transcription, patientId, sessionId }: TranscriptionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
+  const handleOpenModal = () => {
+    if (!sessionId || !patientId) {
+      return;
+    }
+    setIsModalOpen(true);
+  };
+  
   if (!transcription) {
     return (
       <Card className="h-full flex items-center justify-center bg-muted/30 dark:bg-muted/10">
@@ -34,7 +41,7 @@ export function Transcription({ transcription, patientId, sessionId }: Transcrip
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-[#3DB7E4]/10 dark:border-[#3DB7E4]/5">
           <CardTitle className="text-lg md:text-xl text-essalud-blue dark:text-essalud-light">Transcripción</CardTitle>
           <Button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenModal}
             disabled={!sessionId || !patientId}
             size="sm"
             className="text-sm"
@@ -49,12 +56,14 @@ export function Transcription({ transcription, patientId, sessionId }: Transcrip
         </CardContent>
       </Card>
       
-      <MedicalRecordModal 
-        open={isModalOpen} 
-        onOpenChange={setIsModalOpen}
-        patientId={patientId}
-        sessionId={sessionId}
-      />
+      {(sessionId && patientId) && (
+        <MedicalRecordModal 
+          open={isModalOpen} 
+          onOpenChange={setIsModalOpen}
+          patientId={patientId}
+          sessionId={sessionId}
+        />
+      )}
     </>
   );
 }

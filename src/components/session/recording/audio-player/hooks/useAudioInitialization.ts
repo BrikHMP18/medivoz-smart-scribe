@@ -56,12 +56,8 @@ export function useAudioInitialization(
             setIsLoaded(true);
             console.log("Audio player initialized with URL:", audioURL);
             
-            // Try autoplay after a short delay
-            setTimeout(() => {
-              if (isMounted && audioRef.current) {
-                tryAutoPlay(audioRef.current);
-              }
-            }, 500);
+            // Remove auto-play functionality entirely
+            // The play button will now be the only way to trigger playback
           } else {
             console.error("Audio element not available");
           }
@@ -95,24 +91,6 @@ export function useAudioInitialization(
       }
     };
   }, [audioURL]);
-
-  const tryAutoPlay = (audioElement: HTMLAudioElement) => {
-    try {
-      const playPromise = audioElement.play();
-      if (playPromise) {
-        playPromise
-          .then(() => {
-            console.log("Auto-play successful");
-          })
-          .catch(error => {
-            // Auto-play was prevented (expected on many browsers)
-            console.log("Auto-play prevented:", error);
-          });
-      }
-    } catch (error) {
-      console.error("Error during auto-play attempt:", error);
-    }
-  };
 
   return { isLoaded };
 }

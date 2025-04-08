@@ -39,7 +39,8 @@ export function MedicalRecordModal({
     toggleTranscriptionView,
     handleSave, 
     handleExportPDF,
-    setFormData
+    setFormData,
+    recordExists
   } = useMedicalRecord(sessionId || null, patientId || null);
 
   const {
@@ -83,10 +84,16 @@ export function MedicalRecordModal({
     }
   };
 
-  // Auto-trigger the auto-fill when the modal opens and there's transcription available
+  // Auto-trigger the auto-fill only when the modal opens for the first time
   useEffect(() => {
     if (open && fullTranscription && !autoFilledOnce && !formData.motivo_consulta) {
-      handleAutoFill();
+      console.log("Auto-filling medical record for the first time");
+      // Add a slight delay to ensure transcription is fully loaded
+      const timer = setTimeout(() => {
+        handleAutoFill();
+      }, 500);
+      
+      return () => clearTimeout(timer);
     }
   }, [open, fullTranscription, autoFilledOnce, formData.motivo_consulta]);
 
