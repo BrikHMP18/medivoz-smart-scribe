@@ -34,9 +34,9 @@ export function useMedicalRecordAutoFill() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
       
+      // Remove the signal property and use AbortController differently
       const { data, error } = await supabase.functions.invoke('auto-fill-medical-record', {
-        body: { transcription },
-        signal: controller.signal
+        body: { transcription }
       });
       
       clearTimeout(timeoutId);
