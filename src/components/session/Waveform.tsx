@@ -22,7 +22,7 @@ export function Waveform({
         className="h-10 flex items-center justify-center w-full" 
         style={{ height: `${height}px` }}
       >
-        <div className="bg-red-200 w-full h-[2px]"></div>
+        <div className="bg-muted w-full h-[2px] dark:bg-muted/30"></div>
       </div>
     );
   }
@@ -42,10 +42,10 @@ export function Waveform({
         return (
           <div 
             key={index}
-            className="w-full rounded-t-sm"
+            className="w-full rounded-t-sm transition-all"
             style={{
               height: `${Math.max(normalizedHeight, 2)}px`,
-              backgroundColor: isPlayed ? color : "#cbd5e1", // Played bars use accent color, unplayed use muted color
+              backgroundColor: isPlayed ? color : "hsl(var(--muted))",
               opacity: isActive && isPlayed ? 1 : 0.6,
               transition: "height 0.1s ease-in-out, background-color 0.3s ease",
               animation: isActive && isPlayed ? "pulse 1.5s infinite ease-in-out" : "none"

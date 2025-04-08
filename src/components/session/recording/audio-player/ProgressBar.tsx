@@ -1,5 +1,6 @@
 
 import { formatTime } from "../audio-player/utils";
+import { Slider } from "@/components/ui/slider";
 
 interface ProgressBarProps {
   currentTime: number;
@@ -22,7 +23,7 @@ export function ProgressBar({ currentTime, duration, isLoaded, onSeek }: Progres
         max={duration || 0}
         value={currentTime}
         onChange={onSeek}
-        className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+        className="w-full h-2 bg-secondary/50 rounded-lg appearance-none cursor-pointer accent-primary dark:bg-secondary/30"
         step="0.01"
         disabled={!isLoaded}
       />

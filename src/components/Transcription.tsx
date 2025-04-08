@@ -50,7 +50,7 @@ export function Transcription({ transcription, patientId, sessionId }: Transcrip
           </Button>
         </CardHeader>
         <CardContent className="overflow-auto flex-grow p-4">
-          <div className="space-y-4 whitespace-pre-line text-sm md:text-base">
+          <div className="space-y-4 whitespace-pre-line text-sm md:text-base dark:text-slate-100">
             {transcription}
           </div>
         </CardContent>

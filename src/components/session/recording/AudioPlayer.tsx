@@ -6,6 +6,7 @@ import { StatusIndicator } from "./audio-player/StatusIndicator";
 import { Waveform } from "../../session/Waveform";
 import { generateWaveformData } from "../recording/audio-player/utils/waveformUtils";
 import { useState, useEffect } from "react";
+import { Slider } from "@/components/ui/slider";
 
 interface AudioPlayerProps {
   audioURL: string | null;
@@ -38,7 +39,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
   }
 
   return (
-    <div className="w-full p-4 bg-card rounded-md border shadow-sm">
+    <div className="w-full p-4 bg-card rounded-md border shadow-sm dark:border-muted/20">
       <div className="flex items-center justify-between gap-4 mb-2">
         <PlayerControls
           isPlaying={isPlaying}
@@ -60,6 +61,7 @@ export function AudioPlayer({ audioURL, isVisible }: AudioPlayerProps) {
           height={32} 
           isActive={isPlaying}
           playbackProgress={playbackProgress}
+          color="hsl(var(--primary))"
         />
       </div>
       

@@ -12,7 +12,7 @@ export function PlayerControls({ isPlaying, isLoaded, onPlayPause }: PlayerContr
     <button
       onClick={onPlayPause}
       disabled={!isLoaded}
-      className="p-2 rounded-full bg-primary/90 text-primary-foreground hover:bg-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="p-2 rounded-full bg-primary/90 text-primary-foreground hover:bg-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:hover:bg-primary/80"
       aria-label={isPlaying ? "Pausar audio" : "Reproducir audio"}
     >
       {isPlaying ? (
