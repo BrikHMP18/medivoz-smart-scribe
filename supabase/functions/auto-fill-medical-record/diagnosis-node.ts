@@ -1,7 +1,7 @@
 
 import { openai } from "./openai-client.ts";
 import { ExtractionResult, DiagnosisResult } from "./types.ts";
-import { DEFAULT_MODEL, DIAGNOSIS_TIMEOUT } from "./constants.ts";
+import { DEFAULT_MODEL } from "./constants.ts";
 
 // Generate diagnosis based on extracted data
 export async function generateDiagnosis(extractedData: ExtractionResult): Promise<DiagnosisResult> {
@@ -43,8 +43,7 @@ export async function generateDiagnosis(extractedData: ExtractionResult): Promis
           }
         }
       ],
-      function_call: { name: "provide_diagnosis" },
-      timeout: DIAGNOSIS_TIMEOUT
+      function_call: { name: "provide_diagnosis" }
     });
 
     const functionCall = response.choices[0]?.message?.function_call;

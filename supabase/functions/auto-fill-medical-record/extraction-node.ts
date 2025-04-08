@@ -1,7 +1,7 @@
 
 import { openai } from "./openai-client.ts";
 import { ExtractionResult } from "./types.ts";
-import { DEFAULT_MODEL, EXTRACTION_TIMEOUT } from "./constants.ts";
+import { DEFAULT_MODEL } from "./constants.ts";
 
 // Extract clinical data from transcription
 export async function extractClinicalData(transcription: string): Promise<ExtractionResult> {
@@ -48,8 +48,7 @@ export async function extractClinicalData(transcription: string): Promise<Extrac
           }
         }
       ],
-      function_call: { name: "extract_clinical_data" },
-      timeout: EXTRACTION_TIMEOUT
+      function_call: { name: "extract_clinical_data" }
     });
 
     // Parse the function call response

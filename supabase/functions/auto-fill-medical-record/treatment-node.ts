@@ -1,7 +1,7 @@
 
 import { openai } from "./openai-client.ts";
 import { ExtractionResult, DiagnosisResult, TreatmentResult } from "./types.ts";
-import { DEFAULT_MODEL, TREATMENT_TIMEOUT } from "./constants.ts";
+import { DEFAULT_MODEL } from "./constants.ts";
 
 // Generate treatment plan based on diagnosis and extracted data
 export async function generateTreatmentPlan(
@@ -47,8 +47,7 @@ export async function generateTreatmentPlan(
           }
         }
       ],
-      function_call: { name: "provide_treatment_plan" },
-      timeout: TREATMENT_TIMEOUT
+      function_call: { name: "provide_treatment_plan" }
     });
 
     const functionCall = response.choices[0]?.message?.function_call;
