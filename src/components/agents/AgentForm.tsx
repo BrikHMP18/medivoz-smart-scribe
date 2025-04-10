@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useAgents } from "@/contexts/AgentsContext";
 import { Agent } from "@/types/agents";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,28 +13,31 @@ import { Badge } from "@/components/ui/badge";
 import { 
   BookOpen, 
   FileText, 
-  GitFork, 
   Save, 
   Settings, 
   Trash2, 
   AlertTriangle, 
-  Play 
+  Play,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { toast } from "sonner";
-import { AgentFlow } from "./AgentFlow";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface AgentFormProps {
   agentId: string;
 }
 
 export function AgentForm({ agentId }: AgentFormProps) {
-  const { getAgentById, updateAgent, agents } = useAgents();
+  const { getAgentById, updateAgent } = useAgents();
   const agent = getAgentById(agentId);
   
   const [formData, setFormData] = useState<Agent | undefined>(agent);
   const [testInput, setTestInput] = useState("");
   const [testOutput, setTestOutput] = useState("");
   const [isTesting, setIsTesting] = useState(false);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isTestOpen, setIsTestOpen] = useState(false);
 
   if (!formData) {
     return (
@@ -88,9 +90,6 @@ export function AgentForm({ agentId }: AgentFormProps) {
     }, 1500);
   };
 
-  // Filtrar agentes que podrían ser dependencias (evitar loops)
-  const possibleDependencies = agents.filter(a => a.id !== agentId);
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -110,16 +109,18 @@ export function AgentForm({ agentId }: AgentFormProps) {
         </div>
       </div>
 
-      <Tabs defaultValue="prompt">
-        <TabsList className="grid grid-cols-1 md:grid-cols-4 mb-6">
-          <TabsTrigger value="prompt">Prompt Base</TabsTrigger>
-          <TabsTrigger value="config">Configuración</TabsTrigger>
-          <TabsTrigger value="dependencies">Dependencias</TabsTrigger>
-          <TabsTrigger value="test">Zona de Pruebas</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="prompt" className="space-y-6">
-          <div className="grid gap-6">
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileText className="h-5 w-5 mr-2" />
+              Información Básica
+            </CardTitle>
+            <CardDescription>
+              Información principal del agente
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Nombre del Agente</Label>
               <Input 
@@ -138,186 +139,168 @@ export function AgentForm({ agentId }: AgentFormProps) {
             </div>
             
             <div className="space-y-2">
-              <Label>Prompt Base</Label>
-              <Textarea 
-                value={formData.prompt || ''} 
-                onChange={e => handleInputChange('prompt', e.target.value)} 
-                rows={12}
-                placeholder="Ingrese el prompt base que el agente utilizará..."
-                className="font-mono text-sm"
+              <Label>Tipo de Agente</Label>
+              <div className="mt-1">
+                <Badge 
+                  className={`
+                    ${formData.tipo === 'Transcriptor' ? 'bg-blue-500' : ''}
+                    ${formData.tipo === 'Extractor' ? 'bg-green-500' : ''}
+                    ${formData.tipo === 'Diagnóstico' ? 'bg-purple-500' : ''}
+                    ${formData.tipo === 'Tratamiento' ? 'bg-amber-500' : ''}
+                  `}
+                >
+                  {formData.tipo}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileText className="h-5 w-5 mr-2" />
+              Prompt Base
+            </CardTitle>
+            <CardDescription>
+              Instrucciones base que definen el comportamiento del agente
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea 
+              value={formData.prompt || ''} 
+              onChange={e => handleInputChange('prompt', e.target.value)} 
+              rows={8}
+              placeholder="Ingrese el prompt base que el agente utilizará..."
+              className="font-mono text-sm"
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <BookOpen className="h-5 w-5 mr-2" />
+              Documentos Relacionados
+            </CardTitle>
+            <CardDescription>
+              Archivos y referencias utilizados por este agente
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {formData.documentos && formData.documentos.length > 0 ? (
+                <ul className="space-y-2">
+                  {formData.documentos.map((doc, index) => (
+                    <li key={index} className="flex items-center">
+                      <BookOpen className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>{doc}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No hay documentos asociados</p>
+              )}
+            </div>
+            <Button variant="outline" size="sm" className="mt-4 w-full">
+              Gestionar Documentos
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Collapsible 
+          open={isConfigOpen} 
+          onOpenChange={setIsConfigOpen}
+          className="border rounded-lg"
+        >
+          <CollapsibleTrigger asChild>
+            <Button 
+              variant="ghost" 
+              className="flex w-full justify-between p-6 rounded-lg"
+            >
+              <div className="flex items-center text-left font-medium">
+                <Settings className="h-5 w-5 mr-2" />
+                Configuración Técnica
+              </div>
+              {isConfigOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-6 pb-6 space-y-4">
+            <div className="space-y-2">
+              <Label>Modelo de IA</Label>
+              <Select 
+                value={formData.configuracion?.modelo || "gpt-4o"} 
+                onValueChange={v => handleConfigChange('modelo', v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un modelo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                  <SelectItem value="gpt-4">GPT-4</SelectItem>
+                  <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+                  <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Temperatura</Label>
+              <Select 
+                value={formData.configuracion?.temperatura?.toString() || "0.7"} 
+                onValueChange={v => handleConfigChange('temperatura', parseFloat(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione temperatura" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0.1">0.1 - Muy determinista</SelectItem>
+                  <SelectItem value="0.3">0.3 - Poco creativo</SelectItem>
+                  <SelectItem value="0.5">0.5 - Balanceado</SelectItem>
+                  <SelectItem value="0.7">0.7 - Creativo</SelectItem>
+                  <SelectItem value="1.0">1.0 - Muy creativo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center justify-between space-x-2">
+              <Label htmlFor="auto-flow">Flujo Automático</Label>
+              <Switch 
+                id="auto-flow" 
+                checked={formData.configuracion?.flujoAutomatico || false}
+                onCheckedChange={v => handleConfigChange('flujoAutomatico', v)}
               />
             </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="config" className="space-y-6">
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Settings className="h-5 w-5 mr-2" />
-                  Configuración Técnica
-                </CardTitle>
-                <CardDescription>
-                  Parámetros técnicos del agente
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Modelo de IA</Label>
-                  <Select 
-                    value={formData.configuracion?.modelo || "gpt-4o"} 
-                    onValueChange={v => handleConfigChange('modelo', v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un modelo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                      <SelectItem value="gpt-4">GPT-4</SelectItem>
-                      <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                      <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Temperatura</Label>
-                  <Select 
-                    value={formData.configuracion?.temperatura?.toString() || "0.7"} 
-                    onValueChange={v => handleConfigChange('temperatura', parseFloat(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione temperatura" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0.1">0.1 - Muy determinista</SelectItem>
-                      <SelectItem value="0.3">0.3 - Poco creativo</SelectItem>
-                      <SelectItem value="0.5">0.5 - Balanceado</SelectItem>
-                      <SelectItem value="0.7">0.7 - Creativo</SelectItem>
-                      <SelectItem value="1.0">1.0 - Muy creativo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="auto-flow">Flujo Automático</Label>
-                  <Switch 
-                    id="auto-flow" 
-                    checked={formData.configuracion?.flujoAutomatico || false}
-                    onCheckedChange={v => handleConfigChange('flujoAutomatico', v)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="incluir-ref">Incluir Referencias</Label>
-                  <Switch 
-                    id="incluir-ref" 
-                    checked={formData.configuracion?.incluyeReferencias || false}
-                    onCheckedChange={v => handleConfigChange('incluyeReferencias', v)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Documentos Relacionados
-                </CardTitle>
-                <CardDescription>
-                  Archivos y referencias utilizados por este agente
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {formData.documentos && formData.documentos.length > 0 ? (
-                    <ul className="space-y-2">
-                      {formData.documentos.map((doc, index) => (
-                        <li key={index} className="flex items-center">
-                          <BookOpen className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>{doc}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No hay documentos asociados</p>
-                  )}
-                </div>
-                <Button variant="outline" size="sm" className="mt-4 w-full">
-                  Gestionar Documentos
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="dependencies" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <GitFork className="h-5 w-5 mr-2" />
-                Dependencias
-              </CardTitle>
-              <CardDescription>
-                Agentes de los que depende este agente
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Agentes conectados</Label>
-                <div className="flex flex-wrap gap-2 py-2">
-                  {formData.dependencias && formData.dependencias.length > 0 ? (
-                    formData.dependencias.map(depId => {
-                      const dep = getAgentById(depId);
-                      return dep ? (
-                        <Badge key={depId} variant="secondary" className="py-1">
-                          {dep.nombre}
-                        </Badge>
-                      ) : null;
-                    })
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Este agente no depende de otros agentes</p>
-                  )}
-                </div>
-                <div className="mt-4">
-                  <Label>Agregar dependencia</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar agente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {possibleDependencies.map(agent => (
-                        <SelectItem key={agent.id} value={agent.id}>
-                          {agent.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="pt-4">
-                <h4 className="mb-3 font-medium">Visualización de Flujo</h4>
-                <AgentFlow readOnly />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="test" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
+          </CollapsibleContent>
+        </Collapsible>
+
+        <Collapsible 
+          open={isTestOpen} 
+          onOpenChange={setIsTestOpen}
+          className="border rounded-lg"
+        >
+          <CollapsibleTrigger asChild>
+            <Button 
+              variant="ghost" 
+              className="flex w-full justify-between p-6 rounded-lg"
+            >
+              <div className="flex items-center text-left font-medium">
                 <Play className="h-5 w-5 mr-2" />
-                Zona de Prueba
-              </CardTitle>
-              <CardDescription>
-                Pruebe el funcionamiento del agente con texto de ejemplo
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+                Zona de Pruebas
+              </div>
+              {isTestOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-6 pb-6">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Texto de entrada</Label>
                 <Textarea 
@@ -344,10 +327,10 @@ export function AgentForm({ agentId }: AgentFormProps) {
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
     </div>
   );
 }
