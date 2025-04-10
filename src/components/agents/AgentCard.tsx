@@ -1,11 +1,11 @@
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Agent } from "@/types/agents";
 import { Link } from "react-router-dom";
-import { Edit, Play } from "lucide-react";
+import { Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const agentTypeColors = {
@@ -32,29 +32,16 @@ export function AgentCard({ agent }: AgentCardProps) {
           </Badge>
         </div>
         <CardTitle className="text-xl mt-2">{agent.nombre}</CardTitle>
-        <CardDescription className="line-clamp-2">{agent.descripcion}</CardDescription>
       </CardHeader>
-      <CardContent className="pb-2">
-        <div className="text-sm text-muted-foreground">
-          {agent.dependencias && agent.dependencias.length > 0 ? (
-            <p>{agent.dependencias.length} dependencia{agent.dependencias.length !== 1 ? 's' : ''}</p>
-          ) : (
-            <p>Sin dependencias</p>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between pt-2">
-        <Button variant="outline" size="sm" asChild>
+      <CardContent className="pb-4">
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{agent.descripcion}</p>
+        <Button variant="outline" size="sm" asChild className="w-full">
           <Link to={`/agents/${agent.id}`}>
             <Edit className="h-4 w-4 mr-2" />
             Editar
           </Link>
         </Button>
-        <Button size="sm" variant="secondary">
-          <Play className="h-4 w-4 mr-2" />
-          Probar
-        </Button>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 }

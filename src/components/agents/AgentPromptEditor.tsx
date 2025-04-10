@@ -10,14 +10,17 @@ interface AgentPromptEditorProps {
 
 export function AgentPromptEditor({ prompt, onChange }: AgentPromptEditorProps) {
   return (
-    <div>
+    <div className="space-y-2">
       <Textarea 
         value={prompt || ''} 
         onChange={e => onChange(e.target.value)} 
-        rows={8}
+        rows={10}
         placeholder="Ingrese el prompt base que el agente utilizará..."
-        className="font-mono text-sm"
+        className="font-mono text-sm resize-y min-h-[200px] focus:outline-none focus:ring-1 focus:ring-primary"
       />
+      <p className="text-xs text-muted-foreground">
+        Este prompt define las instrucciones y comportamiento del agente. Sea específico en la tarea que debe realizar.
+      </p>
     </div>
   );
 }

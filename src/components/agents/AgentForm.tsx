@@ -3,15 +3,13 @@ import React, { useState } from "react";
 import { useAgents } from "@/contexts/AgentsContext";
 import { Agent } from "@/types/agents";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, FileText, BookOpen, Save, Settings, Trash2, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertTriangle, FileText, BookOpen, Save, Settings, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Separator } from "@/components/ui/separator";
 import { AgentBasicInfo } from "./AgentBasicInfo";
 import { AgentPromptEditor } from "./AgentPromptEditor";
 import { AgentDocuments } from "./AgentDocuments";
 import { AgentConfiguration } from "./AgentConfiguration";
-import { AgentTestArea } from "./AgentTestArea";
 
 interface AgentFormProps {
   agentId: string;
@@ -22,8 +20,6 @@ export function AgentForm({ agentId }: AgentFormProps) {
   const agent = getAgentById(agentId);
   
   const [formData, setFormData] = useState<Agent | undefined>(agent);
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [isTestOpen, setIsTestOpen] = useState(false);
 
   if (!formData) {
     return (
@@ -67,7 +63,7 @@ export function AgentForm({ agentId }: AgentFormProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{formData.nombre}</h1>
@@ -85,109 +81,54 @@ export function AgentForm({ agentId }: AgentFormProps) {
         </div>
       </div>
 
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="h-5 w-5 mr-2" />
-              Información Básica
-            </CardTitle>
-            <CardDescription>
-              Información principal del agente
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AgentBasicInfo agent={formData} onInputChange={handleInputChange} />
-          </CardContent>
-        </Card>
+      <div className="space-y-8">
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-xl font-semibold">Información Básica</h2>
+          </div>
+          <Separator className="mb-4" />
+          <AgentBasicInfo agent={formData} onInputChange={handleInputChange} />
+        </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="h-5 w-5 mr-2" />
-              Prompt Base
-            </CardTitle>
-            <CardDescription>
-              Instrucciones base que definen el comportamiento del agente
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AgentPromptEditor 
-              prompt={formData.prompt} 
-              onChange={(value) => handleInputChange('prompt', value)} 
-            />
-          </CardContent>
-        </Card>
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-xl font-semibold">Prompt Base</h2>
+          </div>
+          <Separator className="mb-4" />
+          <p className="text-sm text-muted-foreground mb-4">
+            Instrucciones base que definen el comportamiento del agente
+          </p>
+          <AgentPromptEditor 
+            prompt={formData.prompt} 
+            onChange={(value) => handleInputChange('prompt', value)} 
+          />
+        </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BookOpen className="h-5 w-5 mr-2" />
-              Documentos Relacionados
-            </CardTitle>
-            <CardDescription>
-              Archivos y referencias utilizados por este agente
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AgentDocuments documents={formData.documentos} />
-          </CardContent>
-        </Card>
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <BookOpen className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-xl font-semibold">Documentos Relacionados</h2>
+          </div>
+          <Separator className="mb-4" />
+          <p className="text-sm text-muted-foreground mb-4">
+            Archivos y referencias utilizados por este agente
+          </p>
+          <AgentDocuments documents={formData.documentos} />
+        </section>
 
-        <Collapsible 
-          open={isConfigOpen} 
-          onOpenChange={setIsConfigOpen}
-          className="border rounded-lg"
-        >
-          <CollapsibleTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className="flex w-full justify-between p-6 rounded-lg"
-            >
-              <div className="flex items-center text-left font-medium">
-                <Settings className="h-5 w-5 mr-2" />
-                Configuración Técnica
-              </div>
-              {isConfigOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="px-6 pb-6">
-            <AgentConfiguration 
-              config={formData.configuracion} 
-              onConfigChange={handleConfigChange} 
-            />
-          </CollapsibleContent>
-        </Collapsible>
-
-        <Collapsible 
-          open={isTestOpen} 
-          onOpenChange={setIsTestOpen}
-          className="border rounded-lg"
-        >
-          <CollapsibleTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className="flex w-full justify-between p-6 rounded-lg"
-            >
-              <div className="flex items-center text-left font-medium">
-                <Play className="h-5 w-5 mr-2" />
-                Zona de Pruebas
-              </div>
-              {isTestOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="px-6 pb-6">
-            <AgentTestArea agent={formData} />
-          </CollapsibleContent>
-        </Collapsible>
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Settings className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-xl font-semibold">Configuración Técnica</h2>
+          </div>
+          <Separator className="mb-4" />
+          <AgentConfiguration 
+            config={formData.configuracion} 
+            onConfigChange={handleConfigChange} 
+          />
+        </section>
       </div>
     </div>
   );
