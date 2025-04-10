@@ -24,7 +24,10 @@ export function AgentFlow({ readOnly = false }: AgentFlowProps) {
     return agents.map((agent, index) => ({
       id: agent.id,
       data: { label: agent.nombre, type: agent.tipo },
-      position: { x: 250 * (index % 2), y: 150 * Math.floor(index / 2) },
+      position: { 
+        x: 250 * index, 
+        y: 100 
+      },
       style: { 
         background: nodeColors[agent.tipo],
         color: 'white',
@@ -74,7 +77,10 @@ export function AgentFlow({ readOnly = false }: AgentFlowProps) {
         onConnect={readOnly ? undefined : onConnect}
         fitView
         panOnScroll
-        selectionOnDrag
+        selectionOnDrag={!readOnly}
+        nodesDraggable={!readOnly}
+        nodesConnectable={!readOnly}
+        elementsSelectable={!readOnly}
         className="bg-sidebar dark:bg-background/80"
       >
         <Background color="#aaa" gap={16} />
