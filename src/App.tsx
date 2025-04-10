@@ -12,6 +12,8 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import Session from "./pages/Session";
+import Agents from "./pages/Agents";
+import AgentDetail from "./pages/AgentDetail";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PrivateRoute } from "./components/auth/PrivateRoute";
@@ -43,6 +45,8 @@ const App = () => {
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/patients" element={<Patients />} />
                       <Route path="/session" element={<Session />} />
+                      <Route path="/agents" element={<Agents />} />
+                      <Route path="/agents/:id" element={<AgentDetail />} />
                     </Route>
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Home, Users, Mic, LogOut, Menu, X } from "lucide-react";
+import { Home, Users, Mic, LogOut, Menu, X, Cpu } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -33,6 +33,11 @@ export function Sidebar() {
       name: "Sesión",
       href: "/session",
       icon: Mic
+    },
+    {
+      name: "Agentes",
+      href: "/agents",
+      icon: Cpu
     }
   ];
   
