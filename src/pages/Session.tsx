@@ -59,7 +59,7 @@ export default function Session() {
       <div className="flex-1 overflow-auto pl-16 lg:pl-64">
         <div className="container mx-auto py-6 px-4 md:px-6">
           <header className="mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-medivoz-400 to-medivoz-600 text-transparent bg-clip-text">
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-asclepia-400 to-asclepia-600 text-transparent bg-clip-text">
               Sesión de Consulta
             </h1>
             <p className="text-muted-foreground">

@@ -72,7 +72,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				medivoz: {
+				asclepia: {
 					50: '#e6f5fb',
 					100: '#ccebf7',
 					200: '#99d7ef',

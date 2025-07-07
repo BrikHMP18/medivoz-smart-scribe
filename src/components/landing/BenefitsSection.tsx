@@ -38,21 +38,21 @@ export const BenefitsSection = () => {
             
             <div className="mt-8">
               <Link to="/signup">
-                <Button className="bg-medivoz-500 hover:bg-medivoz-600">
+                <Button className="bg-asclepia-500 hover:bg-asclepia-600">
                   Comenzar Prueba Gratuita
                 </Button>
               </Link>
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-medivoz-400 to-medivoz-600 p-1 rounded-2xl">
+          <div className="bg-gradient-to-br from-asclepia-400 to-asclepia-600 p-1 rounded-2xl">
             <div className="bg-background rounded-xl p-8">
-              <h3 className="text-xl font-bold mb-4">MEDIVOZ en Cifras</h3>
+              <h3 className="text-xl font-bold mb-4">AsclepIA en Cifras</h3>
               
               <div className="grid grid-cols-2 gap-6">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center p-4">
-                    <p className="text-4xl font-bold text-medivoz-500">{stat.value}</p>
+                    <p className="text-4xl font-bold text-asclepia-500">{stat.value}</p>
                     <p className="text-sm text-muted-foreground mt-2">{stat.label}</p>
                   </div>
                 ))}

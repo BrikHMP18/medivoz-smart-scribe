@@ -58,7 +58,7 @@ export function PatientSearch({ onPatientSelect, selectedPatient }: PatientSearc
   return (
     <div className="space-y-4">
       {selectedPatient ? (
-        <Card className="border-2 border-medivoz-100">
+        <Card className="border-2 border-asclepia-100">
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div>

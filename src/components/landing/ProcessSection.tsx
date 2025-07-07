@@ -28,10 +28,10 @@ export const ProcessSection = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="rounded-2xl overflow-hidden border shadow-lg bg-medivoz-100 relative">
+            <div className="rounded-2xl overflow-hidden border shadow-lg bg-asclepia-100 relative">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center p-4">
-                  <h3 className="text-xl font-bold text-medivoz-700 mb-2">
+                  <h3 className="text-xl font-bold text-asclepia-700 mb-2">
                     {currentSlide === 0 && "Generando Código de Sesión"}
                     {currentSlide === 1 && "Grabando Consulta"}
                     {currentSlide === 2 && "Transcripción Completa"}

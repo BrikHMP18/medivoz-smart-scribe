@@ -59,7 +59,7 @@ export function Sidebar() {
       <>
         <div className="fixed top-0 left-0 right-0 h-16 border-b border-[#3DB7E4]/20 bg-background z-20 flex items-center justify-between px-4">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">MEDIVOZ</span>
+            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">AsclepIA</span>
           </Link>
           
           <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export function Sidebar() {
                 <div className="flex flex-col h-full">
                   <div className="flex items-center justify-between h-16 px-4 border-b border-[#3DB7E4]/20">
                     <Link to="/" className="flex items-center space-x-2">
-                      <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">MEDIVOZ</span>
+                      <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">AsclepIA</span>
                     </Link>
                     <ThemeToggleButton variant="ghost" size="sm" />
                   </div>
@@ -132,7 +132,7 @@ export function Sidebar() {
       <div className="flex items-center justify-between h-16 px-4 border-b border-[#3DB7E4]/20">
         {!collapsed && (
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">MEDIVOZ</span>
+            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">AsclepIA</span>
           </Link>
         )}
         {collapsed && (

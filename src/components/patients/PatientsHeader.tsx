@@ -14,7 +14,7 @@ export function PatientsHeader({ onCreateNewPatient }: PatientsHeaderProps) {
         <p className="text-muted-foreground">Gestiona la información de los pacientes</p>
       </div>
       <Button 
-        className="bg-medivoz-500 hover:bg-medivoz-600 w-full md:w-auto"
+        className="bg-asclepia-500 hover:bg-asclepia-600 w-full md:w-auto"
         onClick={onCreateNewPatient}
       >
         <UserPlus className="h-4 w-4 mr-2" />

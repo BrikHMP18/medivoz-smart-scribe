@@ -62,7 +62,7 @@ export default function Dashboard() {
             {isLoading ? (
               <Card className="p-6">
                 <div className="flex justify-center items-center p-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-medivoz-500" />
+                  <Loader2 className="h-6 w-6 animate-spin text-asclepia-500" />
                 </div>
               </Card>
             ) : (
@@ -102,7 +102,7 @@ export default function Dashboard() {
               <Link to="/session" className="block">
                 <Card className="hover:shadow-md transition-all h-full">
                   <CardContent className="p-6 flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-medivoz-100 flex items-center justify-center text-medivoz-600">
+                    <div className="h-10 w-10 rounded-full bg-asclepia-100 flex items-center justify-center text-asclepia-600">
                       <Mic className="h-5 w-5" />
                     </div>
                     <div>
