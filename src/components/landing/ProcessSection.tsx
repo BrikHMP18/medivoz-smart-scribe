@@ -22,7 +22,7 @@ export const ProcessSection = () => {
   ];
 
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-12 bg-muted/30">
       <div className="container">
         <h2 className="text-3xl font-bold text-center mb-16">Cómo Funciona</h2>
         

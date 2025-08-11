@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 export const HeroSection = () => {
   return (
-    <section className="py-20 md:py-32 container">
+    <section className="py-12 md:py-16 container">
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight animate-fade-in">
           <span className="text-gradient">Medivoz</span>
