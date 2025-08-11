@@ -8,7 +8,7 @@ export const HeroSection = () => {
     <section className="py-20 md:py-32 container">
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight animate-fade-in">
-          <span className="text-gradient">AsclepIA</span>
+          <span className="text-gradient">Medivoz</span>
           <br/>
           <span className="text-4xl md:text-5xl">Escriba Inteligente</span>
         </h1>
@@ -19,7 +19,7 @@ export const HeroSection = () => {
         
         <div className="mt-10 flex flex-wrap gap-4 justify-center">
           <Link to="/signup">
-            <Button size="lg" className="bg-asclepia-500 hover:bg-asclepia-600">
+            <Button size="lg" className="bg-medivoz-500 hover:bg-medivoz-600">
               Comenzar Ahora
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>

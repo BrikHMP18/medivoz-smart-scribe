@@ -30,7 +30,7 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
-				essalud: {
+				medivoz: {
 					blue: '#007AC9',    // Azul Pantone 3005C
 					light: '#3DB7E4',    // Celeste Pantone 298C
 				},
@@ -72,7 +72,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				asclepia: {
+				medivoz: {
 					50: '#e6f5fb',
 					100: '#ccebf7',
 					200: '#99d7ef',

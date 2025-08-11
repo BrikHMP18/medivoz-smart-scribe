@@ -59,7 +59,7 @@ export function Sidebar() {
       <>
         <div className="fixed top-0 left-0 right-0 h-16 border-b border-[#3DB7E4]/20 bg-background z-20 flex items-center justify-between px-4">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">AsclepIA</span>
+            <span className="text-xl font-bold text-medivoz-blue dark:text-medivoz-light">Medivoz</span>
           </Link>
           
           <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export function Sidebar() {
                 <div className="flex flex-col h-full">
                   <div className="flex items-center justify-between h-16 px-4 border-b border-[#3DB7E4]/20">
                     <Link to="/" className="flex items-center space-x-2">
-                      <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">AsclepIA</span>
+                      <span className="text-xl font-bold text-medivoz-blue dark:text-medivoz-light">Medivoz</span>
                     </Link>
                     <ThemeToggleButton variant="ghost" size="sm" />
                   </div>
@@ -89,8 +89,8 @@ export function Sidebar() {
                           className={cn(
                             "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
                             location.pathname === item.href
-                              ? "bg-essalud-blue text-white dark:bg-essalud-light dark:text-background"
-                              : "hover:bg-essalud-blue/10 text-foreground hover:text-essalud-blue dark:hover:text-essalud-light"
+                              ? "bg-medivoz-blue text-white dark:bg-medivoz-light dark:text-background"
+                              : "hover:bg-medivoz-blue/10 text-foreground hover:text-medivoz-blue dark:hover:text-medivoz-light"
                           )}
                           onClick={() => setMobileOpen(false)}
                         >
@@ -132,12 +132,12 @@ export function Sidebar() {
       <div className="flex items-center justify-between h-16 px-4 border-b border-[#3DB7E4]/20">
         {!collapsed && (
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">AsclepIA</span>
+            <span className="text-xl font-bold text-medivoz-blue dark:text-medivoz-light">Medivoz</span>
           </Link>
         )}
         {collapsed && (
           <Link to="/" className="flex items-center mx-auto">
-            <span className="text-xl font-bold text-essalud-blue dark:text-essalud-light">M</span>
+            <span className="text-xl font-bold text-medivoz-blue dark:text-medivoz-light">M</span>
           </Link>
         )}
         {!collapsed && (
@@ -154,8 +154,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
                 location.pathname === item.href
-                  ? "bg-essalud-blue text-white dark:bg-essalud-light dark:text-background"
-                  : "hover:bg-essalud-blue/10 text-foreground hover:text-essalud-blue dark:hover:text-essalud-light"
+                  ? "bg-medivoz-blue text-white dark:bg-medivoz-light dark:text-background"
+                  : "hover:bg-medivoz-blue/10 text-foreground hover:text-medivoz-blue dark:hover:text-medivoz-light"
               )}
             >
               <item.icon className="h-5 w-5" />

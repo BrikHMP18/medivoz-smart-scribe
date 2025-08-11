@@ -31,7 +31,7 @@ export function Navbar() {
       <div className="container flex h-16 items-center">
         <div className="flex items-center justify-between w-full">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-essalud-blue dark:text-essalud-light">AsclepIA</div>
+            <div className="text-2xl font-bold text-medivoz-blue dark:text-medivoz-light">Medivoz</div>
           </Link>
           
           <div className="hidden md:flex gap-6 items-center">

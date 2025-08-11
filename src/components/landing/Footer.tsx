@@ -7,8 +7,8 @@ export const Footer = () => {
       <div className="container">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-6 md:mb-0">
-            <div className="text-2xl font-bold text-gradient">AsclepIA</div>
-            <p className="text-muted-foreground mt-2">© {new Date().getFullYear()} AsclepIA. Todos los derechos reservados.</p>
+            <div className="text-2xl font-bold text-gradient">Medivoz</div>
+            <p className="text-muted-foreground mt-2">© {new Date().getFullYear()} Medivoz. Todos los derechos reservados.</p>
           </div>
           
           <div className="flex gap-8">
