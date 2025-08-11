@@ -28,29 +28,31 @@ export const ProcessSection = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="rounded-2xl overflow-hidden border shadow-lg bg-asclepia-100 relative">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center p-4">
-                  {currentSlide === 0 ? (
-                    <img 
-                      src="/lovable-uploads/78f5be33-db14-4a1e-9ae4-9090735758a9.png" 
-                      alt="Doctor y paciente en consulta médica"
-                      className="w-32 h-32 mx-auto object-contain"
-                    />
-                  ) : (
-                    <h3 className="text-xl font-bold text-medivoz-700 mb-2">
-                      {currentSlide === 1 && "Grabando Consulta"}
-                      {currentSlide === 2 && "Transcripción Completa"}
-                      {currentSlide === 3 && "Ficha Médica Prellenada"}
-                    </h3>
-                  )}
+            <div className="flex items-center justify-center">
+              {currentSlide === 0 ? (
+                <img 
+                  src="/lovable-uploads/78f5be33-db14-4a1e-9ae4-9090735758a9.png" 
+                  alt="Doctor y paciente en consulta médica"
+                  className="w-80 h-80 mx-auto object-contain"
+                />
+              ) : (
+                <div className="rounded-2xl overflow-hidden border shadow-lg bg-medivoz-100 relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <h3 className="text-xl font-bold text-medivoz-700 mb-2">
+                        {currentSlide === 1 && "Grabando Consulta"}
+                        {currentSlide === 2 && "Transcripción Completa"}
+                        {currentSlide === 3 && "Ficha Médica Prellenada"}
+                      </h3>
+                    </div>
+                  </div>
+                  <img 
+                    src={slideImages[currentSlide]} 
+                    alt={steps[currentSlide]} 
+                    className="w-full h-64 object-contain opacity-30"
+                  />
                 </div>
-              </div>
-              <img 
-                src={slideImages[currentSlide]} 
-                alt={steps[currentSlide]} 
-                className="w-full h-64 object-contain opacity-30"
-              />
+              )}
             </div>
           </div>
           
