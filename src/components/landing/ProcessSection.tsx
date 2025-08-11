@@ -31,12 +31,19 @@ export const ProcessSection = () => {
             <div className="rounded-2xl overflow-hidden border shadow-lg bg-asclepia-100 relative">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center p-4">
-                  <h3 className="text-xl font-bold text-asclepia-700 mb-2">
-                    {currentSlide === 0 && "Generando Código de Sesión"}
-                    {currentSlide === 1 && "Grabando Consulta"}
-                    {currentSlide === 2 && "Transcripción Completa"}
-                    {currentSlide === 3 && "Ficha Médica Prellenada"}
-                  </h3>
+                  {currentSlide === 0 ? (
+                    <img 
+                      src="/lovable-uploads/78f5be33-db14-4a1e-9ae4-9090735758a9.png" 
+                      alt="Doctor y paciente en consulta médica"
+                      className="w-32 h-32 mx-auto object-contain"
+                    />
+                  ) : (
+                    <h3 className="text-xl font-bold text-medivoz-700 mb-2">
+                      {currentSlide === 1 && "Grabando Consulta"}
+                      {currentSlide === 2 && "Transcripción Completa"}
+                      {currentSlide === 3 && "Ficha Médica Prellenada"}
+                    </h3>
+                  )}
                 </div>
               </div>
               <img 
