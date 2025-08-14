@@ -64,7 +64,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Error during sign out:", error);
       
       // Even if there's an error, make sure we clear local state
-      localStorage.removeItem('sb-ncmgxsrlzbqyqkowomkr-auth-token');
+      // Clear all supabase auth tokens from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-') && key.includes('-auth-token')) {
+          localStorage.removeItem(key);
+        }
+      });
       
       // Check if it's a session missing error - not a critical error to show to user
       if (error.message && error.message.includes("Auth session missing")) {
