@@ -19,6 +19,7 @@ export type Database = {
           antecedentes_relevantes: string | null
           created_at: string
           diagnostico_principal: string
+          doctor_id: string | null
           id: string
           motivo_consulta: string
           notas_adicionales: string | null
@@ -32,6 +33,7 @@ export type Database = {
           antecedentes_relevantes?: string | null
           created_at?: string
           diagnostico_principal: string
+          doctor_id?: string | null
           id?: string
           motivo_consulta: string
           notas_adicionales?: string | null
@@ -45,6 +47,7 @@ export type Database = {
           antecedentes_relevantes?: string | null
           created_at?: string
           diagnostico_principal?: string
+          doctor_id?: string | null
           id?: string
           motivo_consulta?: string
           notas_adicionales?: string | null
@@ -76,6 +79,7 @@ export type Database = {
           created_at: string
           diagnostico: string | null
           dni: string
+          doctor_id: string | null
           edad: number | null
           id: string
           nombre: string
@@ -88,6 +92,7 @@ export type Database = {
           created_at?: string
           diagnostico?: string | null
           dni: string
+          doctor_id?: string | null
           edad?: number | null
           id?: string
           nombre: string
@@ -100,6 +105,7 @@ export type Database = {
           created_at?: string
           diagnostico?: string | null
           dni?: string
+          doctor_id?: string | null
           edad?: number | null
           id?: string
           nombre?: string
@@ -138,6 +144,7 @@ export type Database = {
         Row: {
           codigo_sesion: string
           created_at: string
+          doctor_id: string | null
           fecha_consulta: string
           id: string
           paciente_id: string
@@ -147,6 +154,7 @@ export type Database = {
         Insert: {
           codigo_sesion: string
           created_at?: string
+          doctor_id?: string | null
           fecha_consulta?: string
           id?: string
           paciente_id: string
@@ -156,6 +164,7 @@ export type Database = {
         Update: {
           codigo_sesion?: string
           created_at?: string
+          doctor_id?: string | null
           fecha_consulta?: string
           id?: string
           paciente_id?: string

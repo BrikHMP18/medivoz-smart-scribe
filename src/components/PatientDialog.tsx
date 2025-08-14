@@ -98,7 +98,12 @@ export function PatientDialog({
         
         toast.success("Paciente actualizado correctamente");
       } else {
-        // Create new patient
+        // Create new patient with current doctor
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error("Usuario no autenticado");
+        }
+
         const { error } = await supabase.from('pacientes').insert([{
           nombre: data.nombre,
           dni: data.dni,
@@ -106,6 +111,7 @@ export function PatientDialog({
           ocupacion: data.ocupacion || null,
           procedencia: data.procedencia || null,
           diagnostico: data.diagnostico || null,
+          doctor_id: user.id,
         }]);
         
         if (error) {
