@@ -59,12 +59,6 @@ export const saveMedicalRecord = async (
         plan_tratamiento: formData.plan_tratamiento,
       });
       
-      // Get current user for doctor_id
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error("Usuario no autenticado");
-      }
-
       const { error } = await supabase
         .from('fichas_medicas')
         .insert({
@@ -75,8 +69,7 @@ export const saveMedicalRecord = async (
           plan_tratamiento: formData.plan_tratamiento,
           notas_adicionales: formData.notas_adicionales || null,
           sintomas_principales: formData.sintomas_principales || null,
-          antecedentes_relevantes: formData.antecedentes_relevantes || null,
-          doctor_id: user.id,
+          antecedentes_relevantes: formData.antecedentes_relevantes || null
         });
       
       if (error) {
