@@ -43,9 +43,29 @@ export function PatientsList({ patients, isLoading, searchQuery, onEdit, onDelet
 
   if (!patients || patients.length === 0) {
     return (
-      <p className="text-center py-4 text-muted-foreground">
-        {searchQuery ? "No se encontraron pacientes con ese criterio" : "No hay pacientes registrados"}
-      </p>
+      <div className="text-center py-12">
+        <div className="mx-auto max-w-md">
+          {searchQuery ? (
+            <>
+              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                No se encontraron pacientes
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                No hay pacientes que coincidan con "{searchQuery}"
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                No hay pacientes registrados
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Comienza agregando tu primer paciente para poder crear sesiones médicas
+              </p>
+            </>
+          )}
+        </div>
+      </div>
     );
   }
 

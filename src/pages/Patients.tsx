@@ -42,16 +42,20 @@ export default function Patients() {
       }
       
       return data as Patient[];
-    }
+    },
+    retry: 1,
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
   
   if (error) {
     toast.error("Error al cargar los pacientes");
-    console.error(error);
+    console.error("Patients query error:", error);
   }
+  
   
   const handlePatientCreated = () => {
     refetch();
+    toast.success("¡Paciente creado exitosamente! Ya puedes crear sesiones médicas.");
   };
   
   const handleEditPatient = (patient: Patient) => {
@@ -78,7 +82,7 @@ export default function Patients() {
       if (error) throw error;
       
       toast.success("Paciente eliminado correctamente");
-      refetch();
+      await refetch();
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error eliminando paciente:", error);
