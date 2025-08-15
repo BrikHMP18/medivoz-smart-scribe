@@ -1,73 +1,189 @@
-# Bienvenido a medivoz
+# 🎤 Medivoz - Transcripción Inteligente para Consultas Médicas
 
-## Project info
+Medivoz es una aplicación web avanzada diseñada para transformar la documentación médica mediante transcripción inteligente de consultas y generación automática de fichas clínicas con inteligencia artificial.
 
-**URL**: https://lovable.dev/projects/7e7d155c-47c6-4806-a8f9-abf81baf5654
+## 📋 Descripción del Proyecto
 
-## How can I edit this code?
+Medivoz permite a los profesionales médicos:
+- **Grabar consultas médicas** con transcripción en tiempo real
+- **Diferenciar voces** de doctor y paciente con marcas de tiempo precisas
+- **Generar automáticamente** fichas médicas estructuradas usando IA
+- **Gestionar pacientes** de forma organizada por doctor
+- **Exportar documentación** en formato PDF profesional
 
-There are several ways of editing your application.
+## ✨ Características Principales
 
-**Use Lovable**
+### 🎯 Transcripción Inteligente
+- Transcripción en tiempo real con OpenAI Whisper
+- Diferenciación automática de voces (Doctor/Paciente)
+- Marcas de tiempo precisas para cada intervención
+- Visualización de forma de onda del audio
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/7e7d155c-47c6-4806-a8f9-abf81baf5654) and start prompting.
+### 🤖 IA para Fichas Médicas
+- Prellenado automático de fichas clínicas
+- Análisis de síntomas y diagnósticos
+- Extracción de información médica relevante
+- Generación de planes de tratamiento
 
-Changes made via Lovable will be committed automatically to this repo.
+### 👥 Gestión de Pacientes
+- Registro y gestión de pacientes por doctor
+- Historial médico completo
+- Búsqueda y filtros avanzados
+- Vinculación con sesiones de consulta
 
-**Use your preferred IDE**
+### 📊 Panel de Control
+- Dashboard con métricas de sesiones
+- Gestión de agentes de IA personalizados
+- Configuración de flujos de trabajo médicos
+- Temas claro/oscuro
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠️ Stack Tecnológico
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Frontend
+- **React 18** con TypeScript
+- **Vite** como bundler de desarrollo
+- **Tailwind CSS** para estilos
+- **shadcn/ui** como sistema de diseño
+- **Radix UI** para componentes accesibles
 
-Follow these steps:
+### Backend & Base de Datos
+- **Supabase** como backend-as-a-service
+- **PostgreSQL** con Row Level Security (RLS)
+- **Supabase Auth** para autenticación
+- **Supabase Edge Functions** para lógica serverless
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+### Integraciones de IA
+- **OpenAI API** para transcripción (Whisper)
+- **OpenAI GPT** para análisis y generación de fichas médicas
+- **Flujos de trabajo personalizados** con agentes especializados
+
+### Herramientas Adicionales
+- **React Hook Form** + **Zod** para formularios
+- **TanStack Query** para gestión de estado servidor
+- **jsPDF** para generación de documentos
+- **Lucide React** para iconografía
+
+## 🚀 Instalación y Configuración
+
+### Prerrequisitos
+- Node.js 18+ y npm
+- Cuenta de Supabase
+- API Key de OpenAI
+
+### Configuración Local
+
+```bash
+# 1. Clonar el repositorio
 git clone <YOUR_GIT_URL>
+cd medivoz
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 2. Instalar dependencias
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 3. Configurar variables de entorno
+# Crear archivo .env.local con:
+# VITE_SUPABASE_URL=your_supabase_url
+# VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 4. Iniciar el servidor de desarrollo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Configuración de Supabase
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Base de datos**: Las migraciones se ejecutan automáticamente
+2. **Autenticación**: Configurar proveedores en el dashboard
+3. **Edge Functions**: Configurar secrets de OpenAI
+4. **Storage**: Configurar buckets para archivos de audio
 
-**Use GitHub Codespaces**
+## 📁 Arquitectura del Proyecto
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+src/
+├── components/          # Componentes reutilizables
+│   ├── ui/             # Componentes base (shadcn/ui)
+│   ├── auth/           # Componentes de autenticación
+│   ├── agents/         # Gestión de agentes de IA
+│   ├── patients/       # Gestión de pacientes
+│   ├── session/        # Grabación y transcripción
+│   └── medical-record/ # Fichas médicas
+├── hooks/              # Custom hooks
+│   ├── medical-record/ # Hooks para fichas médicas
+│   └── ...            # Otros hooks especializados
+├── pages/              # Páginas principales
+├── contexts/           # Contextos de React
+├── integrations/       # Integraciones externas
+│   └── supabase/      # Cliente y configuración
+└── utils/             # Utilidades y helpers
 
-## What technologies are used for this project?
+supabase/
+├── functions/          # Edge Functions
+│   ├── transcribe-audio/     # Transcripción con OpenAI
+│   └── auto-fill-medical-record/ # IA para fichas
+└── migrations/         # Migraciones de base de datos
+```
 
-This project is built with:
+## 🔧 Edge Functions
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### `transcribe-audio`
+Procesa archivos de audio y los envía a OpenAI Whisper para transcripción con diferenciación de voces.
 
-## How can I deploy this project?
+### `auto-fill-medical-record`
+Analiza transcripciones médicas y genera automáticamente fichas clínicas estructuradas usando GPT-4.
 
-Simply open [Lovable](https://lovable.dev/projects/7e7d155c-47c6-4806-a8f9-abf81baf5654) and click on Share -> Publish.
+## 🔐 Seguridad
 
-## Can I connect a custom domain to my Lovable project?
+- **Row Level Security (RLS)** en todas las tablas
+- **Autenticación** obligatoria para todas las funcionalidades
+- **Políticas de acceso** basadas en el usuario autenticado
+- **Validación** de tipos con TypeScript y Zod
 
-Yes it is!
+## 📱 Características Móviles
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Diseño completamente responsive
+- Optimizado para dispositivos móviles
+- Grabación de audio en dispositivos táctiles
+- Interfaz adaptativa según el tamaño de pantalla
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🚀 Despliegue
+
+### Lovable (Recomendado)
+```bash
+# Desde el panel de Lovable
+Share → Publish
+```
+
+### Manual
+```bash
+# Build de producción
+npm run build
+
+# El contenido de dist/ puede desplegarse en cualquier hosting estático
+```
+
+## 🤝 Contribuciones
+
+1. Fork el proyecto
+2. Crea una rama feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 🔗 Links Útiles
+
+- **Proyecto en Lovable**: [https://lovable.dev/projects/7e7d155c-47c6-4806-a8f9-abf81baf5654](https://lovable.dev/projects/7e7d155c-47c6-4806-a8f9-abf81baf5654)
+- **Documentación de Lovable**: [https://docs.lovable.dev/](https://docs.lovable.dev/)
+- **Supabase Dashboard**: Configuración de backend y base de datos
+- **Documentación de Supabase**: [https://supabase.com/docs](https://supabase.com/docs)
+
+## 🏥 Sobre Medivoz
+
+Medivoz representa el futuro de la documentación médica, combinando tecnologías de vanguardia con las necesidades reales de los profesionales de la salud. Nuestro objetivo es reducir significativamente el tiempo dedicado a la documentación, permitiendo que los médicos se enfoquen en lo más importante: la atención al paciente.
+
+---
+
+*Desarrollado con ❤️ para mejorar la atención médica a través de la tecnología.*
