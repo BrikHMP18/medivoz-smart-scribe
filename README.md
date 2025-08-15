@@ -82,8 +82,7 @@ npm install
 
 # 3. Configurar variables de entorno
 # Crear archivo .env.local con:
-# VITE_SUPABASE_URL=your_supabase_url
-# VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+# Configurar variables de entorno de Supabase en el archivo .env
 
 # 4. Iniciar el servidor de desarrollo
 npm run dev
@@ -175,8 +174,8 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 🔗 Links Útiles
 
-- **Proyecto en Lovable**: [https://lovable.dev/projects/7e7d155c-47c6-4806-a8f9-abf81baf5654](https://lovable.dev/projects/7e7d155c-47c6-4806-a8f9-abf81baf5654)
-- **Documentación de Lovable**: [https://docs.lovable.dev/](https://docs.lovable.dev/)
+- **Repositorio del Proyecto**: [Medivoz en GitHub](https://github.com)
+- **Documentación de Supabase**: [https://supabase.com/docs](https://supabase.com/docs)
 - **Supabase Dashboard**: Configuración de backend y base de datos
 - **Documentación de Supabase**: [https://supabase.com/docs](https://supabase.com/docs)
 
