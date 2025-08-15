@@ -68,7 +68,7 @@ export function ControlButtons({
         <Button
           variant="default"
           size="lg"
-          className="bg-asclepia-500 hover:bg-asclepia-600"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={onStartRecording}
           disabled={permissionDenied}
         >
@@ -105,7 +105,7 @@ export function ControlButtons({
           <Button
             variant="default"
             size="lg"
-            className="bg-asclepia-500 hover:bg-asclepia-600"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={onResumeRecording}
           >
             <Play className="mr-2 h-5 w-5" />
