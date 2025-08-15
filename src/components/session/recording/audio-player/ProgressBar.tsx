@@ -23,7 +23,7 @@ export function ProgressBar({ currentTime, duration, isLoaded, onSeek }: Progres
         max={duration || 0}
         value={currentTime}
         onChange={onSeek}
-        className="w-full h-2 bg-secondary/50 rounded-lg appearance-none cursor-pointer accent-primary dark:bg-secondary/30"
+        className="w-full h-2 bg-secondary/50 rounded-lg appearance-none cursor-pointer accent-primary"
         step="0.01"
         disabled={!isLoaded}
       />

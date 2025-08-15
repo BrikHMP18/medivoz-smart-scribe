@@ -58,13 +58,13 @@ export function PatientSearch({ onPatientSelect, selectedPatient }: PatientSearc
   return (
     <div className="space-y-4">
       {selectedPatient ? (
-        <Card className="border-2 border-asclepia-100">
+        <Card className="border-2 border-primary/20">
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="font-medium text-lg">{selectedPatient.nombre}</h3>
+                <h3 className="font-medium text-lg text-card-foreground">{selectedPatient.nombre}</h3>
                 <p className="text-sm text-muted-foreground">DNI: {selectedPatient.dni}</p>
-                {selectedPatient.edad && <p className="text-sm">{selectedPatient.edad} años</p>}
+                {selectedPatient.edad && <p className="text-sm text-card-foreground">{selectedPatient.edad} años</p>}
               </div>
               <Button variant="ghost" size="sm" onClick={handleClearSelection}>
                 <X className="h-4 w-4" />
@@ -103,10 +103,10 @@ export function PatientSearch({ onPatientSelect, selectedPatient }: PatientSearc
                     onClick={() => handleSelect(patient)}
                   >
                     <div>
-                      <div className="font-medium">{patient.nombre}</div>
+                      <div className="font-medium text-card-foreground">{patient.nombre}</div>
                       <div className="text-sm text-muted-foreground">DNI: {patient.dni}</div>
                     </div>
-                    {patient.edad && <div className="text-sm">{patient.edad} años</div>}
+                    {patient.edad && <div className="text-sm text-card-foreground">{patient.edad} años</div>}
                   </div>
                 ))
               ) : (

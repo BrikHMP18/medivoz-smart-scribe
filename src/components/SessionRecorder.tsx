@@ -137,19 +137,17 @@ export function SessionRecorder({
 
   return (
     <Card className={`p-4 md:p-6 relative overflow-hidden ${isMobile ? 'w-full' : ''} border-t-4 border-t-primary transition-all hover:shadow-md`}>
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-asclepia-400 to-asclepia-600 opacity-75"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary opacity-75"></div>
       
       <div className="flex flex-col items-center gap-4 md:gap-6">
         <div className="text-center">
-          <h3 className="text-xl md:text-2xl font-bold mb-2 flex items-center justify-center gap-2">
+          <h3 className="text-xl md:text-2xl font-bold mb-2 flex items-center justify-center gap-2 text-foreground">
             <Mic className="h-5 w-5 text-primary" />
-            <span className="bg-gradient-to-r from-asclepia-400 to-asclepia-600 text-transparent bg-clip-text">
-              Grabación de Sesión
-            </span>
+            <span>Grabación de Sesión</span>
           </h3>
           <p className="text-muted-foreground text-sm md:text-base">
             {sessionId ? (
-              <span className="animate-pulse inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+              <span className="animate-pulse inline-block bg-primary/10 text-primary px-2 py-1 rounded-full text-xs border border-primary/20">
                 Sesión activa: {sessionId}
               </span>
             ) : (

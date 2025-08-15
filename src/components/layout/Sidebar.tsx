@@ -154,8 +154,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
                 location.pathname === item.href
-                  ? "bg-medivoz-blue text-white dark:bg-medivoz-light dark:text-background"
-                  : "hover:bg-medivoz-blue/10 text-foreground hover:text-medivoz-blue dark:hover:text-medivoz-light"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/10 hover:text-sidebar-primary"
               )}
             >
               <item.icon className="h-5 w-5" />

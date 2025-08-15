@@ -23,11 +23,11 @@ export function Transcription({ transcription, patientId, sessionId }: Transcrip
   
   if (!transcription) {
     return (
-      <Card className="h-full flex items-center justify-center bg-muted/30 dark:bg-muted/10">
+      <Card className="h-full flex items-center justify-center bg-muted/30">
         <div className="text-center p-6 md:p-12">
-          <FileText className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 text-essalud-light opacity-50" />
-          <h3 className="text-lg font-medium text-muted-foreground">Sin transcripción</h3>
-          <p className="text-sm text-muted-foreground/70 mt-2 max-w-md mx-auto">
+          <FileText className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 text-muted-foreground/50" />
+          <h3 className="text-lg font-medium text-foreground">Sin transcripción</h3>
+          <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
             Inicia una grabación para generar la transcripción de la consulta médica.
           </p>
         </div>
@@ -37,9 +37,9 @@ export function Transcription({ transcription, patientId, sessionId }: Transcrip
 
   return (
     <>
-      <Card className="h-full flex flex-col shadow-sm dark:border-muted/20">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-[#3DB7E4]/10 dark:border-[#3DB7E4]/5">
-          <CardTitle className="text-lg md:text-xl text-essalud-blue dark:text-essalud-light">Transcripción</CardTitle>
+      <Card className="h-full flex flex-col shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border">
+          <CardTitle className="text-lg md:text-xl text-foreground">Transcripción</CardTitle>
           <Button 
             onClick={handleOpenModal}
             disabled={!sessionId || !patientId}
@@ -50,7 +50,7 @@ export function Transcription({ transcription, patientId, sessionId }: Transcrip
           </Button>
         </CardHeader>
         <CardContent className="overflow-auto flex-grow p-4">
-          <div className="space-y-4 whitespace-pre-line text-sm md:text-base dark:text-slate-100">
+          <div className="space-y-4 whitespace-pre-line text-sm md:text-base text-card-foreground">
             {transcription}
           </div>
         </CardContent>

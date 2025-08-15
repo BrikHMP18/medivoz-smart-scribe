@@ -59,7 +59,7 @@ export default function Session() {
       <div className="flex-1 overflow-auto pl-16 lg:pl-64">
         <div className="container mx-auto py-6 px-4 md:px-6">
           <header className="mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-asclepia-400 to-asclepia-600 text-transparent bg-clip-text">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
               Sesión de Consulta
             </h1>
             <p className="text-muted-foreground">
@@ -70,7 +70,7 @@ export default function Session() {
           <div className="mb-6">
             <Card className="overflow-hidden">
               <CardHeader className="pb-2 bg-muted/30">
-                <CardTitle className="flex items-center gap-2 text-lg">
+                <CardTitle className="flex items-center gap-2 text-lg text-card-foreground">
                   <User className="h-5 w-5 text-primary" />
                   Paciente para esta sesión
                 </CardTitle>
@@ -79,12 +79,12 @@ export default function Session() {
                 {selectedPatient ? (
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">{selectedPatient.nombre}</p>
+                      <p className="font-medium text-card-foreground">{selectedPatient.nombre}</p>
                       <p className="text-sm text-muted-foreground">DNI: {selectedPatient.dni}</p>
                     </div>
                     <button 
                       onClick={() => setSelectedPatient(null)}
-                      className="text-sm text-primary hover:underline"
+                      className="text-sm text-primary hover:text-primary/80 hover:underline transition-colors"
                     >
                       Cambiar paciente
                     </button>

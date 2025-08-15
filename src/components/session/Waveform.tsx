@@ -22,7 +22,7 @@ export function Waveform({
         className="h-10 flex items-center justify-center w-full" 
         style={{ height: `${height}px` }}
       >
-        <div className="bg-muted w-full h-[2px] dark:bg-muted/30"></div>
+        <div className="bg-muted w-full h-[2px]"></div>
       </div>
     );
   }
