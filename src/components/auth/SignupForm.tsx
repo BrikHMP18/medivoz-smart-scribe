@@ -21,10 +21,13 @@ export function SignupForm() {
 
     try {
       // Sign up with Supabase
+      const redirectUrl = `${window.location.origin}/dashboard`;
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: name,
             specialty: specialty,
@@ -33,14 +36,33 @@ export function SignupForm() {
       });
 
       if (error) {
-        toast.error(error.message);
+        // Handle specific signup errors
+        if (error.message.includes("User already registered")) {
+          toast.error("Este email ya está registrado. Intenta iniciar sesión.");
+        } else if (error.message.includes("Password should be")) {
+          toast.error("La contraseña debe tener al menos 6 caracteres.");
+        } else {
+          toast.error(error.message);
+        }
         console.error("Error during signup:", error);
         setIsLoading(false);
         return;
       }
 
-      toast.success("Registro exitoso");
-      navigate("/dashboard");
+      if (data.user) {
+        if (data.user.email_confirmed_at) {
+          // User is automatically logged in
+          toast.success("Registro exitoso. ¡Bienvenido!");
+          navigate("/dashboard");
+        } else {
+          // Email confirmation required
+          toast.success("Registro exitoso. Revisa tu email para confirmar tu cuenta.");
+          navigate("/login");
+        }
+      } else {
+        toast.error("Error en el registro. Intenta de nuevo.");
+        setIsLoading(false);
+      }
     } catch (err) {
       console.error("Unexpected error during signup:", err);
       toast.error("Error al registrarse. Por favor intente de nuevo.");

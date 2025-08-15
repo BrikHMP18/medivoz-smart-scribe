@@ -25,14 +25,26 @@ export function LoginForm() {
       });
 
       if (error) {
-        toast.error(error.message);
+        // Handle specific auth errors
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Credenciales inválidas. Verifica tu email y contraseña.");
+        } else if (error.message.includes("Email not confirmed")) {
+          toast.error("Por favor confirma tu email antes de iniciar sesión.");
+        } else {
+          toast.error(error.message);
+        }
         console.error("Error during login:", error);
         setIsLoading(false);
         return;
       }
 
-      toast.success("Inicio de sesión exitoso");
-      navigate("/dashboard");
+      if (data.user && data.session) {
+        toast.success("Inicio de sesión exitoso");
+        navigate("/dashboard");
+      } else {
+        toast.error("Error en la autenticación. Intenta de nuevo.");
+        setIsLoading(false);
+      }
     } catch (err) {
       console.error("Unexpected error during login:", err);
       toast.error("Error al iniciar sesión. Por favor intente de nuevo.");
