@@ -1,6 +1,6 @@
 # 🎤 Medivoz - Transcripción Inteligente para Consultas Médicas
 
-Medivoz es una aplicación web avanzada diseñada para transformar la documentación médica mediante transcripción inteligente de consultas y generación automática de fichas clínicas con inteligencia artificial.
+Medivoz es una aplicación web diseñada para transformar la documentación médica mediante transcripción inteligente de consultas y generación automática de fichas clínicas con inteligencia artificial. Pueden visitar la web en el siguiente link: https://medivoz-smart-scribe.lovable.app/
 
 ## 📋 Descripción del Proyecto
 
