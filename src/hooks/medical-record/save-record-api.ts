@@ -51,12 +51,18 @@ export const saveMedicalRecord = async (
       }
     } else {
       // Insert new record
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Usuario no autenticado");
+      }
+      
       console.log("Inserting new record with data:", {
         paciente_id: patientId,
         sesion_id: sessionId,
         motivo_consulta: formData.motivo_consulta,
         diagnostico_principal: formData.diagnostico_principal,
         plan_tratamiento: formData.plan_tratamiento,
+        doctor_id: user.id,
       });
       
       const { error } = await supabase
@@ -69,7 +75,8 @@ export const saveMedicalRecord = async (
           plan_tratamiento: formData.plan_tratamiento,
           notas_adicionales: formData.notas_adicionales || null,
           sintomas_principales: formData.sintomas_principales || null,
-          antecedentes_relevantes: formData.antecedentes_relevantes || null
+          antecedentes_relevantes: formData.antecedentes_relevantes || null,
+          doctor_id: user.id,
         });
       
       if (error) {

@@ -37,10 +37,18 @@ export function useSessionRecorder({
     setSessionId(randomId);
     
     // Create session in Supabase
-    supabase.from('sesiones').insert({
-      codigo_sesion: randomId,
-      paciente_id: patientId,
-    }).select('id, codigo_sesion, paciente_id').then(({ data, error }) => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        toast.error("Usuario no autenticado");
+        setSessionId("");
+        return;
+      }
+      
+      supabase.from('sesiones').insert({
+        codigo_sesion: randomId,
+        paciente_id: patientId,
+        doctor_id: user.id,
+      }).select('id, codigo_sesion, paciente_id').then(({ data, error }) => {
       if (error) {
         console.error("Error creating session:", error);
         toast.error("Error al crear la sesión");
@@ -57,6 +65,7 @@ export function useSessionRecorder({
           onSessionCreated(createdSession.id);
         }
       }
+      });
     });
     
     return randomId;
