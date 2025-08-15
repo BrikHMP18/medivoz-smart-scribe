@@ -20,8 +20,8 @@ export function SignupForm() {
     setIsLoading(true);
 
     try {
-      // Sign up with Supabase
-      const redirectUrl = `${window.location.origin}/dashboard`;
+      // Use the correct URL for email confirmation
+      const redirectUrl = window.location.origin;
       
       const { data, error } = await supabase.auth.signUp({
         email,
