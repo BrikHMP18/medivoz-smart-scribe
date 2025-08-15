@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Bienvenido a medivoz
 
 ## Project info
 
