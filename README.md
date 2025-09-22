@@ -28,6 +28,52 @@ Medivoz es una aplicación web que utiliza inteligencia artificial para transfor
 
 ---
 
+### **Arquitectura del Proyecto**
+
+medivoz/
+
+├── 📂 src/
+
+│ ├── 📂 components/ # Componentes reutilizables
+
+│ │ ├── 📂 ui/ # Sistema de diseño (shadcn/ui)
+
+│ │ ├── 📂 auth/ # Autenticación y registro
+
+│ │ ├── 📂 agents/ # Gestión de agentes de IA
+
+│ │ ├── 📂 patients/ # Módulo de pacientes
+
+│ │ ├── 📂 session/ # Grabación y transcripción
+
+│ │ ├── 📂 medical-record/ # Fichas médicas
+
+│ │ └── 📂 landing/ # Página de inicio
+
+│ ├── 📂 hooks/ # Custom hooks especializados
+
+│ ├── 📂 pages/ # Páginas principales de la app
+
+│ ├── 📂 contexts/ # Contextos globales de React
+
+│ ├── 📂 integrations/ # Integraciones externas
+
+│ ├── 📂 utils/ # Utilidades y helpers
+
+│ └── 📂 types/ # Definiciones de tipos
+
+├── 📂 supabase/
+
+│ ├── 📂 functions/ # Edge Functions serverless
+
+│ └── 📂 migrations/ # Migraciones de base de datos
+
+├── 📂 public/ # Archivos estáticos
+
+└── 📄 Archivos de configuración
+
+---
+
 ### **Instalación y Configuración**
 
 1.  Clona el repositorio: `git clone https://github.com/tu-usuario/medivoz.git`
