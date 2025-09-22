@@ -10,7 +10,7 @@ Medivoz es una aplicación web que utiliza inteligencia artificial para transfor
 
 ---
 
-### **Funcionalidades Clave**
+## Funcionalidades Clave
 
 - **Transcripción en tiempo real:** Utiliza IA para convertir la voz en texto al instante.
 - **Diferenciación de voces:** Distingue entre la voz del doctor y la del paciente.
@@ -20,7 +20,7 @@ Medivoz es una aplicación web que utiliza inteligencia artificial para transfor
 
 ---
 
-### **Stack Tecnológico**
+## Stack Tecnológico
 
 - **Frontend:** React 18, TypeScript, Tailwind CSS, shadcn/ui.
 - **Backend:** Supabase (BaaS), PostgreSQL.
@@ -28,68 +28,50 @@ Medivoz es una aplicación web que utiliza inteligencia artificial para transfor
 
 ---
 
-### **Arquitectura del Proyecto**
+## Arquitectura del Proyecto
 
+```
 medivoz/
-
 ├── 📂 src/
-
-│ ├── 📂 components/ # Componentes reutilizables
-
-│ │ ├── 📂 ui/ # Sistema de diseño (shadcn/ui)
-
-│ │ ├── 📂 auth/ # Autenticación y registro
-
-│ │ ├── 📂 agents/ # Gestión de agentes de IA
-
-│ │ ├── 📂 patients/ # Módulo de pacientes
-
-│ │ ├── 📂 session/ # Grabación y transcripción
-
-│ │ ├── 📂 medical-record/ # Fichas médicas
-
-│ │ └── 📂 landing/ # Página de inicio
-
-│ ├── 📂 hooks/ # Custom hooks especializados
-
-│ ├── 📂 pages/ # Páginas principales de la app
-
-│ ├── 📂 contexts/ # Contextos globales de React
-
-│ ├── 📂 integrations/ # Integraciones externas
-
-│ ├── 📂 utils/ # Utilidades y helpers
-
-│ └── 📂 types/ # Definiciones de tipos
-
+│   ├── 📂 components/          # Componentes reutilizables
+│   │   ├── 📂 ui/              # Sistema de diseño (shadcn/ui)
+│   │   ├── 📂 auth/            # Autenticación y registro
+│   │   ├── 📂 agents/          # Gestión de agentes de IA
+│   │   ├── 📂 patients/        # Módulo de pacientes
+│   │   ├── 📂 session/         # Grabación y transcripción
+│   │   ├── 📂 medical-record/  # Fichas médicas
+│   │   └── 📂 landing/         # Página de inicio
+│   ├── 📂 hooks/               # Custom hooks especializados
+│   ├── 📂 pages/               # Páginas principales de la app
+│   ├── 📂 contexts/            # Contextos globales de React
+│   ├── 📂 integrations/        # Integraciones externas
+│   ├── 📂 utils/               # Utilidades y helpers
+│   └── 📂 types/               # Definiciones de tipos
 ├── 📂 supabase/
-
-│ ├── 📂 functions/ # Edge Functions serverless
-
-│ └── 📂 migrations/ # Migraciones de base de datos
-
-├── 📂 public/ # Archivos estáticos
-
+│   ├── 📂 functions/           # Edge Functions serverless
+│   └── 📂 migrations/          # Migraciones de base de datos
+├── 📂 public/                  # Archivos estáticos
 └── 📄 Archivos de configuración
+```
 
 ---
 
-### **Instalación y Configuración**
+## Instalación y Configuración
 
-1.  Clona el repositorio: `git clone https://github.com/tu-usuario/medivoz.git`
-2.  Instala las dependencias: `npm install`
-3.  Configura las variables de entorno (`.env.local`) con tus credenciales de Supabase y OpenAI.
-4.  Inicia el servidor de desarrollo: `npm run dev`
+1. Clona el repositorio: `git clone https://github.com/tu-usuario/medivoz.git`
+2. Instala las dependencias: `npm install`
+3. Configura las variables de entorno (`.env.local`) con tus credenciales de Supabase y OpenAI.
+4. Inicia el servidor de desarrollo: `npm run dev`
 
 ---
 
-### **Seguridad y Privacidad**
+## Seguridad y Privacidad
 
 El proyecto incluye seguridad robusta con **Row Level Security** en la base de datos, autenticación obligatoria y el almacenamiento de claves API en Supabase Edge Functions para proteger la información médica.
 
 ---
 
-### **Licencia**
+## Licencia
 
 Este proyecto está bajo la Licencia **MIT**. Para más detalles, consulta el archivo [LICENSE](LICENSE).
 
