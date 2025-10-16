@@ -28,6 +28,7 @@ export function SessionRecorder({
   const {
     isRecording: isSessionRecording,
     sessionId,
+    dbSessionId,
     recordingTime,
     generateSessionId,
     handleStartRecording: startSessionRecording,
@@ -59,8 +60,8 @@ export function SessionRecorder({
       if (transcription) {
         setAudioTranscription(transcription);
         
-        // Update session with transcription
-        updateSessionWithTranscription(transcription);
+        // Update session with transcription using the database session ID
+        updateSessionWithTranscription(transcription, dbSessionId || undefined);
         
         // Call the parent callback
         onTranscriptionReady(transcription);

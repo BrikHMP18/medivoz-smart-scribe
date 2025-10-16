@@ -10,6 +10,17 @@ interface UseSessionRecorderProps {
   onSessionCreated?: (sessionId: string) => void;
 }
 
+interface UseSessionRecorderReturn {
+  isRecording: boolean;
+  sessionId: string;
+  recordingTime: number;
+  dbSessionId: string | null;
+  generateSessionId: () => string | null;
+  handleStartRecording: () => void;
+  handleStopRecording: () => Promise<void>;
+  updateSessionWithTranscription: (transcription: string, dbSessionId?: string) => Promise<void>;
+}
+
 interface SessionData {
   id: string;
   codigo_sesion: string;
@@ -21,9 +32,10 @@ export function useSessionRecorder({
   isPatientSelected,
   onTranscriptionReady,
   onSessionCreated
-}: UseSessionRecorderProps) {
+}: UseSessionRecorderProps): UseSessionRecorderReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [sessionId, setSessionId] = useState("");
+  const [dbSessionId, setDbSessionId] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [timerId, setTimerId] = useState<number | null>(null);
 
@@ -62,6 +74,7 @@ export function useSessionRecorder({
       if (onSessionCreated && data && data.length > 0) {
         const createdSession = data[0] as SessionData;
         if (createdSession && createdSession.id) {
+          setDbSessionId(createdSession.id);
           onSessionCreated(createdSession.id);
         }
       }
@@ -107,12 +120,24 @@ export function useSessionRecorder({
   };
 
   // Update session with transcription
-  const updateSessionWithTranscription = async (transcription: string) => {
-    if (sessionId && patientId) {
+  const updateSessionWithTranscription = async (transcription: string, dbSessionId?: string) => {
+    if (patientId) {
       try {
-        const { error } = await supabase.from('sesiones').update({
+        // Use the database session ID if provided, otherwise try to find by codigo_sesion
+        let query = supabase.from('sesiones').update({
           transcripcion: transcription,
-        }).eq('codigo_sesion', sessionId);
+        });
+        
+        if (dbSessionId) {
+          query = query.eq('id', dbSessionId);
+        } else if (sessionId) {
+          query = query.eq('codigo_sesion', sessionId);
+        } else {
+          console.error("No session identifier available");
+          return;
+        }
+        
+        const { error } = await query;
         
         if (error) {
           console.error("Error updating session with transcription:", error);
@@ -137,6 +162,7 @@ export function useSessionRecorder({
     isRecording,
     sessionId,
     recordingTime,
+    dbSessionId,
     generateSessionId,
     handleStartRecording,
     handleStopRecording,
