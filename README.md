@@ -6,6 +6,19 @@ Sistema de transcripción médica asistida por IA para generar historiales clín
 
 Aplicación web full‑stack que combina captura de audio, transcripción asistida por IA y generación de fichas clínicas estructuradas para reducir el tiempo dedicado a documentación médica.
 
+## Cómo funciona (mermaid)
+
+```mermaid
+graph TD;
+  A["Profesional medico"] --> B["Captura de audio"];
+  B --> C["Edge function transcribe audio"];
+  C --> D["Edge function auto fill medical record"];
+  D --> E["Supabase DB"];
+  E --> F["UI web"];
+  F --> G["Exportar PDF"];
+  F --> H["Metricas y sesiones"];
+```
+
 ## Características
 
 - **Grabación en tiempo real**: Captura de audio del encuentro médico desde el navegador.
