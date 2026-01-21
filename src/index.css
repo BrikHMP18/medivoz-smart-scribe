@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode - Optimized for accessibility and modern design */
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    /* Primary: Medivoz Blue #007AC9 - Improved contrast */
+    --primary: 204 100% 39%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Medivoz Light Blue #3DB7E4 */
+    --secondary: 199 73% 57%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted colors - Better contrast ratio */
+    --muted: 210 40% 96.5%;
+    --muted-foreground: 215.4 16.3% 40%;
+
+    /* Accent - Softer version of primary */
+    --accent: 204 100% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive - Better visibility */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 204 100% 39%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222.2 47.4% 11.2%;
+    --sidebar-primary: 204 100% 39%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 199 73% 57%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 204 100% 39%;
+  }
+
+  .dark {
+    /* Dark Mode - Modern, accessible dark theme */
+    --background: 222.2 47.4% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 47.4% 11.2%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 47.4% 11.2%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary: Lighter blue for better contrast in dark mode */
+    --primary: 199 73% 65%;
+    --primary-foreground: 222.2 47.4% 8%;
+
+    /* Secondary: Deeper blue for contrast */
+    --secondary: 204 100% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted - Better contrast in dark mode */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 70%;
+
+    /* Accent - Lighter for better visibility */
+    --accent: 199 73% 65%;
+    --accent-foreground: 222.2 47.4% 8%;
+
+    /* Destructive - More visible in dark mode */
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 199 73% 65%;
+
+    --sidebar-background: 222.2 47.4% 9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 199 73% 65%;
+    --sidebar-primary-foreground: 222.2 47.4% 8%;
+    --sidebar-accent: 204 100% 45%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 199 73% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  * {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Smooth theme transitions */
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Better focus visibility for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  
+  /* Improve scrollbar appearance */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text;
+  }
+  
+  .text-gradient-medivoz {
+    @apply bg-gradient-to-r from-medivoz-500 via-medivoz-400 to-medivoz-300 inline-block text-transparent bg-clip-text;
+  }
+  
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-xl border border-border/50;
+  }
+  
+  /* Smooth hover transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
