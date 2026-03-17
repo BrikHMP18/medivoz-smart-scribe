@@ -2,19 +2,21 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { processBase64Chunks } from "./base64-utils.ts";
-import { corsHeaders, createJsonResponse } from "./cors-utils.ts";
+import { getCorsHeaders, createJsonResponse } from "./cors-utils.ts";
 import { transcribeAudio } from "./openai-service.ts";
 
 serve(async (req) => {
+  const origin = req.headers.get("origin");
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: getCorsHeaders(origin) });
   }
 
   try {
     // Verify authentication
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return createJsonResponse({ error: "Missing authorization header" }, 401);
+      return createJsonResponse({ error: "Missing authorization header" }, origin, 401);
     }
 
     const supabase = createClient(
@@ -25,7 +27,7 @@ serve(async (req) => {
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      return createJsonResponse({ error: "Unauthorized" }, 401);
+      return createJsonResponse({ error: "Unauthorized" }, origin, 401);
     }
 
     const requestData = await req.json().catch(err => {
@@ -55,10 +57,10 @@ serve(async (req) => {
     return createJsonResponse({
       rawTranscription: result,
       formattedTranscription: result.text || ""
-    });
+    }, origin);
 
   } catch (error) {
     console.error("Error in transcribe-audio function:", error.message);
-    return createJsonResponse({ error: error.message }, 500);
+    return createJsonResponse({ error: "An internal error occurred" }, origin, 500);
   }
 });

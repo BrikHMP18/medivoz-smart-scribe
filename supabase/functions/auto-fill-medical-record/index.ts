@@ -55,8 +55,8 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } catch (error) {
-      console.error("Workflow execution error:", error.message);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("Workflow execution error:", errorMessage);
       if (errorMessage.includes("timed out")) {
         return new Response(
           JSON.stringify({ error: "Processing timed out. Try again with a shorter transcription." }),
@@ -64,15 +64,15 @@ serve(async (req) => {
         );
       }
       return new Response(
-        JSON.stringify({ error: errorMessage }),
+        JSON.stringify({ error: "An error occurred while processing the medical record" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
   } catch (error) {
-    console.error("Error processing request:", error.message);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error processing request:", errorMessage);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "An internal error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
