@@ -34,17 +34,28 @@ export default defineConfig(({ mode }) => ({
     sourcemap: mode === 'production' ? false : true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Split vendor chunks for better caching
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          'ui-vendor': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-toast',
-          ],
-          'query-vendor': ['@tanstack/react-query'],
+        manualChunks(id) {
+          // Split vendor chunks for better caching.
+          if (id.includes('/node_modules/react/') || id.includes('/node_modules/react-dom/') || id.includes('/node_modules/react-router-dom/')) {
+            return 'react-vendor';
+          }
+
+          if (id.includes('/node_modules/@supabase/supabase-js/')) {
+            return 'supabase-vendor';
+          }
+
+          if (
+            id.includes('/node_modules/@radix-ui/react-dialog/') ||
+            id.includes('/node_modules/@radix-ui/react-dropdown-menu/') ||
+            id.includes('/node_modules/@radix-ui/react-select/') ||
+            id.includes('/node_modules/@radix-ui/react-toast/')
+          ) {
+            return 'ui-vendor';
+          }
+
+          if (id.includes('/node_modules/@tanstack/react-query/')) {
+            return 'query-vendor';
+          }
         },
       },
     },
